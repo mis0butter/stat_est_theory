@@ -19,18 +19,19 @@ Ra = chol(R);
 p_as = rhoahist(2); 
 p_bs = rhobhist(2); 
 
-l_a = 4.1e5; 
-l_b = 4.4e5; 
+global la lb 
+la = 4.1e5; 
+lb = 4.4e5; 
 
-y_1s = 1/( 2*l_a - 2*l_b ) * ( p_bs^2 - p_as^2 - l_b^2 + l_a^2 ); 
-y_2s = sqrt( p_bs^2 - ( l_b - y_1s )^2 ); 
+y_1s = 1/( 2*la - 2*lb ) * ( p_bs^2 - p_as^2 - lb^2 + la^2 ); 
+y_2s = sqrt( p_bs^2 - ( lb - y_1s )^2 ); 
 
 % last measurements 
 p_af = rhoahist(end); 
 p_bf = rhobhist(end); 
 
-y_1f = 1/( 2*l_a - 2*l_b ) * ( p_bf^2 - p_af^2 - l_b^2 + l_a^2 ); 
-y_2f = sqrt( p_bf^2 - ( l_b - y_1f )^2 ); 
+y_1f = 1/( 2*la - 2*lb ) * ( p_bf^2 - p_af^2 - lb^2 + la^2 ); 
+y_2f = sqrt( p_bf^2 - ( lb - y_1f )^2 ); 
 
 % guessing x1 (y10) and x2 (v10) 
 % y_1s = (1)*y10 + (ts)*v10 
@@ -47,7 +48,26 @@ x = inv( [ 1 ts; 1 tf ] ) * ( [ y_2s; y_2f ] + 4.9 * [ ts^2; tf^2 ] );
 y_20 = x(1); 
 v_20 = x(2); 
 
-%% First guess 
+%% Jacobian H 
+
+x = sym('x', [4 1]); 
+syms la lb tj g 
+
+y1 = x(1) + x(2)*tj; 
+dy_1a = la - y1; 
+dy_1b = lb - y1; 
+dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
+
+ha = sqrt( dy_1a^2 + dy_2^2 ); 
+hb = sqrt( dy_1b^2 + dy_2^2 ); 
+
+% inputs: la, lb, tj, x1, x2, x3, x4 
+Hhist = matlabFunction( [ jacobian(ha, x); jacobian(hb, x) ] ); 
+
+
+H = Hhist_full(Hhist, x, thist); 
+
+%% First cost function 
 xg0_OG = [y_10; v_10; y_20; v_20]; 
 xg0 = xg0_0G; 
 
@@ -69,7 +89,7 @@ Jg = norm(z - h);
 % first a step 
 a = 1; 
 
-%% First guess + dx 
+%% First new cost function 
 xg = xg0 + a * dx'; 
 
 % Normalized NL at guess 
@@ -157,29 +177,39 @@ Pxx = inv(H' * H)
 
 function h = h_NL(x, t) 
 % Nonlinear measurement h 
+    
+global la lb 
 
-%     hrow = @(x, t) x(1) * cos( x(2) * t + x(3) ); 
-
-    % y1 = y10 + v10*t = x1 + x2*t 
-    % dy_1a = l_a - y1 
+    % Initialize h 
+    h = []; 
     
     for i = 1:length(t) 
-        
-        y1 = x(1) + x(2) * t(i); 
-        
-        
-    end 
 
-    h = [ hrow(x, t(1)) ]; 
-
-    for j = 2:11 
-        h = [ h ; hrow(x, t(j)) ]; 
+        % y1 = y10 + v10*t = x1 + x2*t         
+        y1 = x(1) + x(2)*t(i); 
+        dy_1a = la - y1; 
+        dy_1b = lb - y1; 
+        
+        % y2 = y20 + v20*t - 0.5 * 9.8 * t^2 
+        dy_2 = x(3) + x(4)*t(i) - 4.9*t(i)^2; 
+        
+        % Range measurements 
+        p_a = sqrt( dy_1a^2 + dy_2^2 ); 
+        p_b = sqrt( dy_1b^2 + dy_2^2 ); 
+        
+        % Build nonlinear h from guess 
+        h = [h; p_a; p_b]; 
+        
     end 
 
 end 
+  
+function H = Hhist_full(Hhist, x, t) 
+% Full jacobian of h 
 
-function H = Hhist(x, t) 
-% Jacobian of h 
+global la lb 
+
+    Hhist(la, lb, t(1), 1, 1, 1, 1); 
 
     Hrow = @(x, t) [ cos( x(2)*t +x(3) ) , ... 
                     -x(1)*sin( x(2)*t + x(3) )*t , ... 
@@ -195,5 +225,4 @@ end
 
 
   
-      
       
