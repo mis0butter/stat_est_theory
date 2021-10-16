@@ -48,6 +48,21 @@ x = inv( [ 1 ts; 1 tf ] ) * ( [ y_2s; y_2f ] + 4.9 * [ ts^2; tf^2 ] );
 y_20 = x(1); 
 v_20 = x(2); 
 
+%% Jacobian H 
+
+x = sym('x', [4 1]); 
+syms la lb tj g 
+
+y1 = x(1) + x(2)*tj; 
+dy_1a = la - y1; 
+dy_1b = lb - y1; 
+dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
+
+ha = sqrt( dy_1a^2 + dy_2^2 ); 
+hb = sqrt( dy_1b^2 + dy_2^2 ); 
+
+Hhist = matlabFunction( [ jacobian(ha, x); jacobian(hb, x) ] ); 
+
 %% First cost function 
 xg0_OG = [y_10; v_10; y_20; v_20]; 
 xg0 = xg0_0G; 
@@ -184,23 +199,6 @@ global la lb
     end 
 
 end 
-
-function H = Hhist(x, t) 
-% Jacobian of h 
-
-    Hrow = @(x, t) [ cos( x(2)*t +x(3) ) , ... 
-                    -x(1)*sin( x(2)*t + x(3) )*t , ... 
-                    -x(1) * sin( x(2)*t + x(3) ) ]; 
-                
-    H = [ Hrow(x, t(1)) ]; 
-
-    for j = 2:11 
-        H = [ H ; Hrow(x, t(j)) ]; 
-    end 
-    
-end 
-
-
   
       
       
