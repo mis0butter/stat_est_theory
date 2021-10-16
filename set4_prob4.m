@@ -68,19 +68,22 @@ xg0 = xg0_OG
 
 %% Jacobian H 
 
-x = sym('x', [4 1]); 
-syms la_sym lb_sym tj g 
+% x = sym('x', [4 1]); 
+% syms la_sym lb_sym tj g 
+% 
+% y1 = x(1) + x(2)*tj; 
+% dy_1a = la_sym - y1; 
+% dy_1b = lb_sym - y1; 
+% dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
+% 
+% ha = sqrt( dy_1a^2 + dy_2^2 ); 
+% hb = sqrt( dy_1b^2 + dy_2^2 ); 
+% 
+% % inputs: la, lb, tj, x1, x2, x3, x4 
+% Hhist_j = matlabFunction( [ jacobian(ha, x); jacobian(hb, x) ] ); 
 
-y1 = x(1) + x(2)*tj; 
-dy_1a = la_sym - y1; 
-dy_1b = lb_sym - y1; 
-dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
-
-ha = sqrt( dy_1a^2 + dy_2^2 ); 
-hb = sqrt( dy_1b^2 + dy_2^2 ); 
-
-% inputs: la, lb, tj, x1, x2, x3, x4 
-Hhist_j = matlabFunction( [ jacobian(ha, x); jacobian(hb, x) ] ); 
+% if no symbolic toolbox - here is Hhist_j copied from comand window 
+Hhist_j = @(la_sym,lb_sym,tj,x1,x2,x3,x4)reshape([(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(la_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(lb_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-la_sym+x1+tj.*x2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-lb_sym+x1+tj.*x2),(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1))],[2,4]); 
 
 %% First cost function 
 
