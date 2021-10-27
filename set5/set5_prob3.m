@@ -1,3 +1,5 @@
+%% problem set-up 
+
 % Implement a Kalman filter for a stochastic linear time invariant (SLTI) 
 % system in the standard form used in class (with Γ(k) =/= I). 
 
@@ -16,13 +18,13 @@
 % symbols by lines (type “help plot” in order to learn how to do this). 
 % Also, hand in numerical values for the terminal values of xˆ(50) and P(50).
 
-clear; clc; 
-% close all 
+clear; clc; close all 
 
 kf_example02a; 
-Gk = Gammak; 
 
 %% KALMAN FILTER 
+
+Gk = Gammak; 
 
 % initialize for k = 0 
 xhat = xhat0; 
@@ -61,8 +63,9 @@ for k = 0 : length(zhist)-1
 
 end 
 
-%% plot 
+%% results 
 
+% plot 
 ftitle = 'States and Covariances'; 
 figure('name', ftitle); 
     subplot(2,1,1) 
@@ -76,6 +79,10 @@ figure('name', ftitle);
         title('$\hat{x}$(2)', 'interpreter', 'latex'); 
         legend('$\hat{x}$', '$\sqrt{(P_{zz})}$', 'interpreter', 'latex'); 
     sgtitle(ftitle); 
+
+% print final values 
+xhat  
+P 
 
 
 
