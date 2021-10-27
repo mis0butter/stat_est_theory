@@ -1,5 +1,5 @@
 % Implement a Kalman filter for a stochastic linear time invariant (SLTI) 
-% system in the standard form used in class (with Γ(k) 6= I). 
+% system in the standard form used in class (with Γ(k) =/= I). 
 
 % The problem matrices and the measurement data, z(k) for k = 1, ..., 50, 
 % can be loaded into your Matlab workspace by running the Matlab script 
@@ -16,25 +16,49 @@
 % symbols by lines (type “help plot” in order to learn how to do this). 
 % Also, hand in numerical values for the terminal values of xˆ(50) and P(50).
 
-clear; clc 
+clear; clc; 
+% close all 
 
 kf_example02a; 
 
 %% KALMAN FILTER 
 
-% initialize 
-k = 0; 
+% initialize for k = 0 
 xhat = xhat0; 
-P = P0; 
+P    = P0; 
 
-% propagate state and covar 
-xbar = Fk * xhat; 
-Pbar = Fk * P * Fk' + Qk; 
+xbar_arr = []; 
+Pbar_arr = []; 
+xhat_arr = []; 
+P_arr    = []; 
 
-% update 
-v = zhist(k+1) - Hk * xbar;     % innovation 
-S = Hk * Pbar * Hk' + Rk;       % innovation covariance 
-W = Pbar * Hk' * inv(S);        % Kalman gain 
-xhat = xbar + W * v;            % a posteriori state est 
-P = Pbar - W * S * W';          % a posteriori covar est 
+for k = 0 : length(zhist)-1
+
+    % propagate state and covar 
+    xbar = Fk * xhat;               % a priori state est 
+    Pbar = Fk*P*Fk' + Gammak*Qk*Gammak';       % a posteriori covar est 
+
+    % update 
+    v = zhist(k+1) - Hk * xbar;     % innovation 
+    S = Hk * Pbar * Hk' + Rk;       % innovation covariance 
+    W = Pbar * Hk' * inv(S);        % Kalman gain 
+    xhat = xbar + W * v;            % a posteriori state est 
+    P = Pbar - W * S * W';          % a posteriori covar est 
+    
+    % next step 
+    k = k + 1; 
+    
+    % save ests 
+    xbar_arr = [xbar_arr; xbar']; 
+    Pbar_arr = [Pbar_arr; Pbar]; 
+    xhat_arr = [xhat_arr; xhat']; 
+    P_arr    = [P_arr; P]; 
+
+end 
+
+
+
+
+
+
 

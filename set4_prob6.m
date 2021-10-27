@@ -4,10 +4,12 @@ clear; clc
 z = 0; 
 
 % First guess 
-xg0_OG = 1.5; 
-xg0 = xg0_OG; 
+xg0_OG = 1.5 ; 
+xg0 = xg0_OG ; 
 
-%% First cost function and "new" cost function 
+a_flag = 0; 
+
+%% First cost function and step size-adjusted cost function 
 
 % First NL, jacobian, and cost fn at guess 
 [Jg, h, H, dx] = cost_fn(xg0, z); 
@@ -21,29 +23,43 @@ xg = xg0 + a * dx;
 % First new NL, jacobian, and cost fn at guess 
 [Jgnew, h, H, ~] = cost_fn(xg, z); 
 
-%% The while loop: Jgnew > Jg 
+%% The while loop
 
+i_dx = 0; 
+i_Jg = 0; 
+Jg_i = []; 
+xg0_i = []; 
+
+% Outer loop: norm(dx) > e
 while norm(dx) > 0.000001 
     
-    while Jgnew >= Jg 
-
-        % Next a 
-        a = a/2; 
+    if a_flag == 1
         
-        if a < eps 
-            break
+        % Inner loop: Jgnew >= Jg 
+        while Jgnew >= Jg 
+
+            % Next a 
+            a = a/2; 
+            if a < eps 
+                break
+            end 
+            
+            % Adjust step size and update cost fn 
+            xg = xg0 + a * dx; 
+            [Jgnew, h, H, ~] = cost_fn(xg, z); 
+            
+            % increase inner loop count 
+            i_Jg = i_Jg + 1; 
+
         end 
-        
-        [Jgnew, h, H, ~] = cost_fn(xg, z); 
-
     end 
-    
-    %% While loop: "New" first guess - saved from last iteration 
-        
+            
+    % Back to outer loop: norm(idx) > e 
     if a < eps 
-        break
+        break 
     end 
     
+    % Next guess point 
     xg0 = xg; 
     Jg = Jgnew; 
     
@@ -53,10 +69,15 @@ while norm(dx) > 0.000001
     % first a step 
     a = 1; 
 
-    %% While loop: "new" first guess + dx 
+    % Next step-size adjusted guess 
     xg = xg0 + a * dx; 
  
     [Jgnew, h, H, ~] = cost_fn(xg, z); 
+    
+    % Increase outer loop count and populate Jg, xg0 trajectory
+    i_dx = i_dx + 1; 
+    Jg_i = [Jg_i; Jg]; 
+    xg0_i = [xg0_i; xg0]; 
 
 end 
 
@@ -70,6 +91,18 @@ xg0
 
 % covariance 
 Pxx = inv(H' * H)
+
+x = [-6 : 0.1 : 6]; 
+for i = 1:length(x) 
+    Jg(i) = cost_fn( x(i), z); 
+end 
+
+ftitle = 'Cost function J'; 
+    figure('name', ftitle); 
+    plot(x, Jg, ':');
+    hold on; grid on; 
+    plot(xg0_i(1:5), Jg_i(1:5), 'r--'); 
+    legend('1', '2')
 
 %% subfunctions 
 

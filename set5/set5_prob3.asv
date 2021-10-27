@@ -20,17 +20,25 @@ clear; clc
 
 kf_example02a; 
 
+%% KALMAN FILTER 
+
 % initialize 
 k = 0; 
+xhat = xhat0; 
+P = P0; 
+
+for k = 0:length(zhist) 
 
 % propagate state and covar 
-xbar = Fk * xhat0; 
-Pbar = Fk * P0 * Fk' + Qk; 
+xbar = Fk * xhat;               % a priori state est 
+Pbar = Fk * P * Fk' + Qk;       % a posteriori covar est 
 
 % update 
 v = zhist(k+1) - Hk * xbar;     % innovation 
 S = Hk * Pbar * Hk' + Rk;       % innovation covariance 
-W = Pbar * H' * inv(S);         % Kalman gain 
+W = Pbar * Hk' * inv(S);        % Kalman gain 
 xhat = xbar + W * v;            % a posteriori state est 
 P = Pbar - W * S * W';          % a posteriori covar est 
+
+end 
 
