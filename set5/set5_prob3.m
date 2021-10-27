@@ -20,6 +20,7 @@ clear; clc;
 % close all 
 
 kf_example02a; 
+Gk = Gammak; 
 
 %% KALMAN FILTER 
 
@@ -27,28 +28,30 @@ kf_example02a;
 xhat = xhat0; 
 P    = P0; 
 
+% Initialize saved output arrays 
 xbar_arr = []; 
 Pbar_arr = []; 
 xhat_arr = []; 
 P_arr    = []; 
 
+% Propagate and filter through all measurements 
 for k = 0 : length(zhist)-1
 
     % propagate state and covar 
-    xbar = Fk * xhat;               % a priori state est 
-    Pbar = Fk*P*Fk' + Gammak*Qk*Gammak';       % a posteriori covar est 
+    xbar = Fk * xhat;                       % a priori state est 
+    Pbar = Fk * P * Fk' + Gk * Qk * Gk';    % a posteriori covar est 
 
     % update 
-    v = zhist(k+1) - Hk * xbar;     % innovation 
-    S = Hk * Pbar * Hk' + Rk;       % innovation covariance 
-    W = Pbar * Hk' * inv(S);        % Kalman gain 
-    xhat = xbar + W * v;            % a posteriori state est 
-    P = Pbar - W * S * W';          % a posteriori covar est 
+    v = zhist(k+1) - Hk * xbar;             % innovation 
+    S = Hk * Pbar * Hk' + Rk;               % innovation covariance 
+    W = Pbar * Hk' * inv(S);                % Kalman gain 
+    xhat = xbar + W * v;                    % a posteriori state est 
+    P = Pbar - W * S * W';                  % a posteriori covar est 
     
     % next step 
     k = k + 1; 
     
-    % save ests 
+    % save states and covariances 
     xbar_arr = [xbar_arr; xbar']; 
     Pbar_arr = [Pbar_arr; Pbar]; 
     xhat_arr = [xhat_arr; xhat']; 
