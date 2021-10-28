@@ -26,6 +26,35 @@ kf_example02a;
 
 Gk = Gammak; 
 
+[xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk ); 
+
+%% results 
+
+% plot 
+ftitle = 'States and Covariances'; 
+figure('name', ftitle); 
+    subplot(2,1,1) 
+        plot( xhat_arr(:,1), '.' ); hold on; grid on; 
+        plot( sqrt( Pxx_arr ), '.'); 
+        title('$\hat{x}$(1)', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$\sqrt{(P_{xx})}$', 'interpreter', 'latex'); 
+    subplot(2,1,2) 
+        plot( xhat_arr(:,2), '.' ); hold on; grid on; 
+        plot( sqrt( Pzz_arr ), '.' ); 
+        title('$\hat{x}$(2)', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$\sqrt{(P_{zz})}$', 'interpreter', 'latex'); 
+    sgtitle(ftitle); 
+
+% print final values 
+xhat_arr(end,:)
+P_cell{end} 
+
+%% subfunctions KALMAN FILTER 
+
+function [xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
+
 % initialize for k = 0 
 xhat = xhat0; 
 P    = P0; 
@@ -34,6 +63,7 @@ P    = P0;
 xbar_arr = []; 
 Pbar_arr = []; 
 xhat_arr = [xhat']; 
+P_cell   = {P}; 
 Pxx_arr  = [P(1,1)]; 
 Pzz_arr  = [P(2,2)]; 
 
@@ -58,31 +88,13 @@ for k = 0 : length(zhist)-1
     xbar_arr = [xbar_arr; xbar']; 
     Pbar_arr = [Pbar_arr; Pbar]; 
     xhat_arr = [xhat_arr; xhat']; 
+    P_cell   = {P_cell; P}; 
     Pxx_arr  = [Pxx_arr; P(1,1)]; 
     Pzz_arr  = [Pzz_arr; P(2,2)]; 
 
 end 
 
-%% results 
-
-% plot 
-ftitle = 'States and Covariances'; 
-figure('name', ftitle); 
-    subplot(2,1,1) 
-        plot( xhat_arr(:,1), '.' ); hold on; grid on; 
-        plot( sqrt( Pxx_arr ), '.'); 
-        title('$\hat{x}$(1)', 'interpreter', 'latex'); 
-        legend('$\hat{x}$', '$\sqrt{(P_{xx})}$', 'interpreter', 'latex'); 
-    subplot(2,1,2) 
-        plot( xhat_arr(:,2), '.' ); hold on; grid on; 
-        plot( sqrt( Pzz_arr ), '.' ); 
-        title('$\hat{x}$(2)', 'interpreter', 'latex'); 
-        legend('$\hat{x}$', '$\sqrt{(P_{zz})}$', 'interpreter', 'latex'); 
-    sgtitle(ftitle); 
-
-% print final values 
-xhat  
-P 
+end 
 
 
 

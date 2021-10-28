@@ -9,9 +9,9 @@
                0.08791146849849];                        % for all k
    Hk     = [  2.00000000000000,  0.30000000000000];     % for all k
 %
-   Qk     =   40.00000000000000;                         % for all k
-%  Qk     =    0.40000000000000;      alternate          % for all k
-%  Qk     =    0.00400000000000;      alternate          % for all k
+   Qk_a   =   40.00000000000000;                         % for all k
+   Qk_b   =    0.40000000000000;      % alternate        % for all k
+   Qk_c   =    0.00400000000000;      % alternate        % for all k
    Rk     =    0.00010000000000;                         % for all k
 %
    xhat0   = [  0.20000000000000;...
