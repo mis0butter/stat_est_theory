@@ -27,11 +27,13 @@ clear
 
 kf_example02a; clear thist; clear zhist; 
 
+xtilde10 = []; 
+xtilde35 = []; 
 xtilde = []; 
 
 for i = 1 : 10000 % run 50 or 10000 monte carlos 
 
-    kmax = 35; % zhist --> 10 or 35 
+    kmax = 50; % zhist --> 10 or 35 
     [xhist, zhist] = mcltisim(Fk, Gammak, Hk, Qk, Rk, xhat0, P0, kmax); 
 
     % Pass into kalman filter 
@@ -39,13 +41,24 @@ for i = 1 : 10000 % run 50 or 10000 monte carlos
         xhat0, P0, zhist, Fk, Gammak, Qk, Hk, Rk );
 
     % xtilde = truth - estimate 
+    xtilde10 = [xtilde10; xhist(10,:) - xhat(10,:)]; 
+    xtilde35 = [xtilde35; xhist(35,:) - xhat(35,:)]; 
     xtilde = [xtilde; xhist - xhat]; 
+    
+    if i == 50
+        disp('i = 50') 
+        mean(xtilde10) 
+        mean(xtilde35) 
+        cov(xhist(10,:) - xhat(10,:)); 
+    elseif i == 10000 
+        disp('i = 10000') 
+        mean(xtilde10) 
+        mean(xtilde35) 
+    end 
 
 end 
 
-kmax 
-i 
-mean(xtilde) 
+
 
 
 
@@ -60,7 +73,7 @@ function [xhist, zhist] = mcltisim(F, Gamma, H, Q, R, xbar0, P0, kmax)
 % Performs a truth-model Monte-Carlo simulation for the discrete-time
 % stochastic system model:
 %   x(k+1) = F*x(k) + Gamma*v(k)
-%   z(k) = H*x(k) + w(k)
+%   z(k) = H*x(k+1) + w(k)
 %
 % Where v(k) and w(k) are uncorrelated, zero-mean, white-noise Gaussian random
 % processes with covariances E[v(k)*v(k)’] = Q and E[w(k)*w(k)’] = R. The
@@ -130,7 +143,7 @@ for k = 1 : kmax
     w = Ra_w' * randn(Nz,1); 
 
     x(:,k+1) = F*x(:,k) + Gamma * v; 
-    z(:,k)   = H*x(:,k) + w; 
+    z(:,k)   = H*x(:,k+1) + w; 
 
 end 
 
