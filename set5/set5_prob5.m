@@ -59,11 +59,12 @@ err_nu_c_sum = sum(err_nu_c);
 
 N = 50; 
 Nx = 2; 
+Nz = 1; 
 
 % NEED STATISTICS TOOLBOX 
 a = .01; 
-r1 = chi2inv( a/2, N * Nx) / N; 
-r2 = chi2inv( 1 - a/2, N * Nx ) / N; 
+r1 = chi2inv( a/2, N * Nz) / N; 
+r2 = chi2inv( 1 - a/2, N * Nz ) / N; 
 
 % possibly use Nz? Otherwise Q is not within bounds 
 
@@ -72,11 +73,11 @@ r2 = chi2inv( 1 - a/2, N * Nx ) / N;
 % Are these differences significant compared to the computed state 
 % estimation error standard deviations for the best filter?
 
-x1_rms_ab = rms( xhat_a(:,1) - xhat_b(:,1) ); 
-x2_rms_ab = rms( xhat_a(:,2) - xhat_b(:,2) ); 
+x1_rms_ab = rms( xhat_a(11:end,1) - xhat_b(11:end,1) ); 
+x2_rms_ab = rms( xhat_a(11:end,2) - xhat_b(11:end,2) ); 
 
-x1_rms_bc = rms( xhat_b(:,1) - xhat_c(:,1) ); 
-x2_rms_bc = rms( xhat_b(:,2) - xhat_c(:,2) ); 
+x1_rms_bc = rms( xhat_b(11:end,1) - xhat_c(11:end,1) ); 
+x2_rms_bc = rms( xhat_b(11:end,2) - xhat_c(11:end,2) ); 
 
 %% subfunctions KALMAN FILTER 
 
