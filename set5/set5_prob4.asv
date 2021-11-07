@@ -28,6 +28,7 @@ figure('name', 'ftitle');
         bigger_ylim 
     xlabel('Time') 
 
+snapnow 
 disp('A posteriori covariance converges to steady-state covariance'); 
     
 %% Stability 
@@ -36,3 +37,14 @@ disp('Eigenvalues of [I - W_ss * H] * F ')
 eig( (eye(2) - W_ss * Hk) * Fk ) 
 
 disp('Eigenvalues have complex magnitudes less than 1; error transition matrix is stable'); 
+
+%% subfunctions 
+
+function bigger_ylim 
+
+    ylimits = [get(gca, 'ylim')]; 
+    yrange = ylimits(2) - ylimits(1); 
+    new_ylim = [ ylimits(1) - 0.15*yrange, ylimits(2) + 0.15*yrange ]; 
+    set(gca, 'ylim', new_ylim); 
+
+end 
