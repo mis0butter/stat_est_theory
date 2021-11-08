@@ -41,7 +41,7 @@ for i = 1 : 10000 % run 50 or 10000 monte carlos
         xhat0, P0, zhist, Fk, Gammak, Qk, Hk, Rk );
 
     % xtilde = truth - estimate 
-    xtilde10 = [xtilde10; xhist(10,:) - xhat(10,:)]; 
+    xtilde10 = [xtilde10; xhist(11,:) - xhat(11,:)]; 
     xtilde35 = [xtilde35; xhist(35,:) - xhat(35,:)]; 
     xtilde = [xtilde; xhist - xhat]; 
     
@@ -49,11 +49,14 @@ for i = 1 : 10000 % run 50 or 10000 monte carlos
         disp('i = 50') 
         mean(xtilde10) 
         mean(xtilde35) 
-        cov(xhist(10,:) - xhat(10,:)); 
+        cov(xtilde10(end));
+        cov(xtilde35(end)); 
     elseif i == 10000 
         disp('i = 10000') 
         mean(xtilde10) 
         mean(xtilde35) 
+        cov(xtilde10(end))
+        cov(xtilde35(end)) 
     end 
 
 end 

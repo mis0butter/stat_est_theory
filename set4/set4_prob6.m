@@ -92,6 +92,7 @@ xg0
 % covariance 
 Pxx = inv(H' * H)
 
+clear Jg
 x = [-6 : 0.1 : 6]; 
 for i = 1:length(x) 
     Jg(i) = cost_fn( x(i), z); 
@@ -101,8 +102,9 @@ ftitle = 'Cost function J';
     figure('name', ftitle); 
     plot(x, Jg, ':');
     hold on; grid on; 
-    plot(xg0_i(1:5), Jg_i(1:5), 'r--'); 
+    plot(xg0_i, Jg_i, 'r--'); 
     legend('1', '2')
+    xlim([-6 6])
 
 %% subfunctions 
 
@@ -116,7 +118,8 @@ end
 function H = H_NL(x) 
 % Full jacobian of h 
 
-    H = (sec(x)).^2; 
+%     H = (sec(x)).^2; 
+    H = 1 / (1 + x^2); 
     
 end 
 

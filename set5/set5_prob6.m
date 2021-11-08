@@ -22,6 +22,8 @@
 % to correctly define the various error and noise vectors by re-computing their covariances
 % based on your knowledge of how chol and randn work.
 
+rng(0) 
+
 clear
 % clc 
 
@@ -40,20 +42,23 @@ for i = 1 : 10000 % run 50 or 10000 monte carlos
     [xhat, Pxx, Pzz, P_cell] = kf( ... 
         xhat0, P0, zhist, Fk, Gammak, Qk, Hk, Rk );
 
-    % xtilde = truth - estimate 
-    xtilde10 = [xtilde10; xhist(10,:) - xhat(10,:)]; 
-    xtilde35 = [xtilde35; xhist(35,:) - xhat(35,:)]; 
+    % xtilde = truth - estimate (xhat0 in 1st element) 
+    xtilde10 = [xtilde10; xhist(11,:) - xhat(11,:)]; 
+    xtilde35 = [xtilde35; xhist(36,:) - xhat(36,:)]; 
     xtilde = [xtilde; xhist - xhat]; 
     
     if i == 50
         disp('i = 50') 
-        mean(xtilde10) 
-        mean(xtilde35) 
-        cov(xhist(10,:) - xhat(10,:)); 
+        sprintf('xtilde10 x1 mean = %g, x2 mean = %g', mean(xtilde10(:,1)), mean(xtilde10(:,2)) )
+        sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10(:,1)), cov(xtilde10(:,2)) )
+        sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35(:,1)), mean(xtilde35(:,2)) )
+        sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35(:,1)), cov(xtilde35(:,2)) )
     elseif i == 10000 
         disp('i = 10000') 
-        mean(xtilde10) 
-        mean(xtilde35) 
+        sprintf('xtilde10 x1 mean = %g, x2 mean = %g', mean(xtilde10(:,1)), mean(xtilde10(:,2)) )
+        sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10(:,1)), cov(xtilde10(:,2)) )
+        sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35(:,1)), mean(xtilde35(:,2)) )
+        sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35(:,1)), cov(xtilde35(:,2)) )
     end 
 
 end 
