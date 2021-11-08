@@ -31,19 +31,26 @@ Gk = Gammak;
 
 %% results 
 
+thist0 = [ 0; thist ]; 
+
 % plot 
 ftitle = 'States and Covariances'; 
 figure('name', ftitle); 
     subplot(2,1,1) 
-        plot( xhat_arr(:,1), '.' ); hold on; grid on; 
-        plot( sqrt( Pxx_arr ), '.'); 
+        plot( thist0, xhat_arr(:,1), '.' ); hold on; grid on; 
+        plot( thist0, xhat_arr(:,1) + sqrt( Pxx_arr ), 'r--'); 
+        plot( thist0, xhat_arr(:,1) - sqrt( Pxx_arr ), 'r--'); 
         title('$\hat{x}$(1)', 'interpreter', 'latex'); 
-        legend('$\hat{x}$', '$\sqrt{(P_{xx})}$', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$ \hat{x} \pm \sigma_{xx}$', 'interpreter', 'latex', 'location', 'best'); 
+        ylabel('state units'); 
     subplot(2,1,2) 
-        plot( xhat_arr(:,2), '.' ); hold on; grid on; 
-        plot( sqrt( Pzz_arr ), '.' ); 
+        plot( thist0, xhat_arr(:,2), '.' ); hold on; grid on; 
+        plot( thist0, xhat_arr(:,2) + sqrt( Pzz_arr ), 'r--'); 
+        plot( thist0, xhat_arr(:,2) - sqrt( Pzz_arr ), 'r--'); 
         title('$\hat{x}$(2)', 'interpreter', 'latex'); 
-        legend('$\hat{x}$', '$\sqrt{(P_{zz})}$', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$ \hat{x} \pm \sigma_{zz}$', 'interpreter', 'latex', 'location', 'best'); 
+        ylabel('state units'); 
+    xlabel('time'); 
     sgtitle(ftitle); 
 
 % print final values 
@@ -95,6 +102,7 @@ for k = 0 : length(zhist)-1
 end 
 
 end 
+
 
 
 
