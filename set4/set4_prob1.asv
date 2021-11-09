@@ -1,0 +1,34 @@
+clear; clc
+
+J_fn = @(x) ... 
+    [ 1+x(2),   1+x(1)      ; 
+      2*x(1),   2-2*x(2)    ];
+
+fn = @(x) ... 
+    [ x(1) + x(2) + x(1)*x(2) + 5   ; 
+      x(1)^2 + 2*x(2) - x(2)^2 - 2  ]; 
+
+% first guess 
+
+for i = -10 : 10 
+    for j = -10 : 10 
+        xg = [i; j]; 
+        fprintf('initial guess f norm') 
+        norm(fn(xg))
+
+        k = 0; 
+        % iterate until convergence (or divergence) 
+        while norm(fn(xg)) > 0.01 && norm(fn(xg)) < 100
+            
+            k = k + 1; 
+            
+            fprintf('\n iter %d \n', k); 
+            fprintf('xg = \n'); 
+            xg = xg - inv(J_fn(xg)) * fn(xg); 
+            fprintf('f norm = '); 
+            disp((norm(fn(xg))))
+            
+            
+        end 
+    end
+end

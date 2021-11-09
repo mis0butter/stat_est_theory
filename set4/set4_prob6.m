@@ -7,7 +7,7 @@ z = 0;
 xg0_OG = 1.5 ; 
 xg0 = xg0_OG ; 
 
-a_flag = 1; 
+a_flag = 0; 
 
 %% First cost function and step size-adjusted cost function 
 
