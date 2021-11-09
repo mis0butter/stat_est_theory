@@ -1,0 +1,328 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>set4_prob1</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-09"><meta name="DC.source" content="set4_prob1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">set 4, prob 1</a></li><li><a href="#2">initial conditions</a></li><li><a href="#3">subfunctions</a></li></ul></div><h2 id="1">set 4, prob 1</h2><pre class="codeinput">clear; clc
+
+<span class="comment">% nonlinear equations f1 and f2</span>
+fn = @(x) <span class="keyword">...</span>
+    [ x(1) + x(2) + x(1)*x(2) + 5   ;
+      x(1)^2 + 2*x(2) - x(2)^2 - 2  ];
+
+<span class="comment">% jacobian of f1 and f2</span>
+J_fn = @(x) <span class="keyword">...</span>
+    [ 1+x(2),   1+x(1)      ;
+      2*x(1),   2-2*x(2)    ];
+</pre><h2 id="2">initial conditions</h2><pre class="codeinput"><span class="comment">% first guess</span>
+xg = [4; -4];
+fprintf(<span class="string">'\n\n FIRST GUESS: xg = %g, %g \n'</span>, xg(1), xg(2));
+fprintf(<span class="string">'initial guess f norm = %g \n'</span>, norm(fn(xg)))
+
+iter_6(xg, J_fn, fn)
+
+<span class="comment">% second guess</span>
+xg = [6; 0];
+fprintf(<span class="string">'\n\n SECOND GUESS: xg = %g, %g \n'</span>, xg(1), xg(2));
+fprintf(<span class="string">'initial guess f norm = %g \n'</span>, norm(fn(xg)))
+
+iter_6(xg, J_fn, fn)
+
+<span class="comment">% third guess</span>
+xg = [-5; 5];
+fprintf(<span class="string">'\n\n THIRD GUESS: xg = %g, %g \n'</span>, xg(1), xg(2));
+fprintf(<span class="string">'initial guess f norm = %g \n'</span>, norm(fn(xg)))
+
+iter_6(xg, J_fn, fn)
+</pre><pre class="codeoutput">
+
+ FIRST GUESS: xg = 4, -4 
+initial guess f norm = 14.8661 
+</pre><h2 id="3">subfunctions</h2><pre class="codeinput"><span class="comment">% first 6 iterates</span>
+
+<span class="keyword">function</span> iter_6(xg, J_fn, fn)
+    <span class="keyword">for</span> i = 1:6
+
+        fprintf(<span class="string">'\n ITER %d \n\n'</span>, i);
+        fprintf(<span class="string">'xg = \n'</span>);
+        xg = xg - inv(J_fn(xg)) * fn(xg);
+        disp(xg);
+        fprintf(<span class="string">'f norm = %g \n'</span>, norm(fn(xg)));
+
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ ITER 1 
+
+xg = 
+    3.1429
+   -2.3143
+
+f norm = 2.55478 
+
+ ITER 2 
+
+xg = 
+    3.1184
+   -1.9733
+
+f norm = 0.115997 
+
+ ITER 3 
+
+xg = 
+    3.1320
+   -1.9680
+
+f norm = 0.000171996 
+
+ ITER 4 
+
+xg = 
+    3.1320
+   -1.9681
+
+f norm = 3.32383e-10 
+
+ ITER 5 
+
+xg = 
+    3.1320
+   -1.9681
+
+f norm = 1.83103e-15 
+
+ ITER 6 
+
+xg = 
+    3.1320
+   -1.9681
+
+f norm = 9.93014e-16 
+
+
+ SECOND GUESS: xg = 6, 0 
+initial guess f norm = 35.7351 
+
+ ITER 1 
+
+xg = 
+    3.3659
+   -1.1951
+
+f norm = 6.34628 
+
+ ITER 2 
+
+xg = 
+    3.0274
+   -1.9313
+
+f norm = 0.494772 
+
+ ITER 3 
+
+xg = 
+    3.1340
+   -1.9685
+
+f norm = 0.010744 
+
+ ITER 4 
+
+xg = 
+    3.1320
+   -1.9681
+
+f norm = 4.08227e-06 
+
+ ITER 5 
+
+xg = 
+    3.1320
+   -1.9681
+
+f norm = 4.90765e-13 
+
+ ITER 6 
+
+xg = 
+    3.1320
+   -1.9681
+
+f norm = 4.44089e-16 
+
+
+ THIRD GUESS: xg = -5, 5 
+initial guess f norm = 21.5407 
+
+ ITER 1 
+
+xg = 
+   -2.8182
+    3.2727
+
+f norm = 4.16648 
+
+ ITER 2 
+
+xg = 
+   -2.1319
+    2.8127
+
+f norm = 0.408541 
+
+ ITER 3 
+
+xg = 
+   -2.0548
+    2.7935
+
+f norm = 0.00577135 
+
+ ITER 4 
+
+xg = 
+   -2.0542
+    2.7944
+
+f norm = 6.13463e-07 
+
+ ITER 5 
+
+xg = 
+   -2.0542
+    2.7944
+
+f norm = 1.63048e-14 
+
+ ITER 6 
+
+xg = 
+   -2.0542
+    2.7944
+
+f norm = 8.88178e-16 
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% set 4, prob 1 
+
+clear; clc
+
+% nonlinear equations f1 and f2  
+fn = @(x) ... 
+    [ x(1) + x(2) + x(1)*x(2) + 5   ; 
+      x(1)^2 + 2*x(2) - x(2)^2 - 2  ]; 
+
+% jacobian of f1 and f2 
+J_fn = @(x) ... 
+    [ 1+x(2),   1+x(1)      ; 
+      2*x(1),   2-2*x(2)    ];
+
+  
+%% initial conditions 
+
+% first guess 
+xg = [4; -4]; 
+fprintf('\n\n FIRST GUESS: xg = %g, %g \n', xg(1), xg(2)); 
+fprintf('initial guess f norm = %g \n', norm(fn(xg))) 
+
+iter_6(xg, J_fn, fn)
+
+% second guess 
+xg = [6; 0]; 
+fprintf('\n\n SECOND GUESS: xg = %g, %g \n', xg(1), xg(2)); 
+fprintf('initial guess f norm = %g \n', norm(fn(xg))) 
+
+iter_6(xg, J_fn, fn)
+
+% third guess 
+xg = [-5; 5]; 
+fprintf('\n\n THIRD GUESS: xg = %g, %g \n', xg(1), xg(2)); 
+fprintf('initial guess f norm = %g \n', norm(fn(xg))) 
+
+iter_6(xg, J_fn, fn)
+
+%% subfunctions 
+
+% first 6 iterates 
+
+function iter_6(xg, J_fn, fn)
+    for i = 1:6 
+
+        fprintf('\n ITER %d \n\n', i); 
+        fprintf('xg = \n'); 
+        xg = xg - inv(J_fn(xg)) * fn(xg); 
+        disp(xg); 
+        fprintf('f norm = %g \n', norm(fn(xg))); 
+
+    end 
+end 
+
+
+##### SOURCE END #####
+--></body></html>

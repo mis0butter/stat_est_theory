@@ -1,0 +1,368 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>set4_prob1_exam2</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-09"><meta name="DC.source" content="set4_prob1_exam2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Problem Set 4, Number 1</a></li><li><a href="#2">Exam 2 version</a></li><li><a href="#3">unique converged values</a></li><li><a href="#4">plot</a></li><li><a href="#5">Convergence points</a></li></ul></div><h2 id="1">Problem Set 4, Number 1</h2><pre class="codeinput"><span class="comment">% set4_prob1</span>
+</pre><h2 id="2">Exam 2 version</h2><pre class="codeinput">clear; clc; close <span class="string">all</span>
+
+J_fn = @(x) <span class="keyword">...</span>
+    [ 1+x(2),   1+x(1)      ;
+      2*x(1),   2-2*x(2)    ];
+
+fn = @(x) <span class="keyword">...</span>
+    [ x(1) + x(2) + x(1)*x(2) + 5   ;
+      x(1)^2 + 2*x(2) - x(2)^2 - 2  ];
+
+<span class="comment">% initialize</span>
+xg_arr = [];
+f_arr = [];
+
+<span class="keyword">for</span> i = -10 : 10
+    <span class="keyword">for</span> j = -10 : 10
+
+        xg = [i; j];
+
+        k = 0;
+        <span class="comment">% first 6 iterates</span>
+        <span class="keyword">while</span> norm(fn(xg)) &gt; 0.00000001
+
+            k = k + 1;
+            xg = xg - inv(J_fn(xg)) * fn(xg);
+
+        <span class="keyword">end</span>
+
+        xg_arr = [xg_arr; i, j, xg(1), xg(2)];
+        f = fn(xg);
+        f_arr  = [f_arr; i, j, f(1), f(2)];
+
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Warning: Matrix is singular to
+working precision. 
+Warning: Matrix is singular to
+working precision. 
+Warning: Matrix is singular to
+working precision. 
+Warning: Matrix is singular to
+working precision. 
+Warning: Matrix is singular to
+working precision. 
+Warning: Matrix is close to
+singular or badly scaled. Results
+may be inaccurate. RCOND =
+1.110223e-16. 
+</pre><h2 id="3">unique converged values</h2><pre class="codeinput">tol   = 1e-5;
+xg_u  = rmmissing(xg_arr);
+xg_u(:,3) = round(xg_u(:,3), 5);
+xg_u(:,4) = round(xg_u(:,4), 5);
+
+<span class="comment">% unique x1</span>
+row_u = unique(xg_u(:,3));
+
+<span class="keyword">for</span> j = 1:length(row_u)
+    <span class="keyword">for</span> i = 1:length(xg_u)
+        <span class="keyword">if</span> xg_u(i,3) == row_u(j)
+            xg_u(i,5) = j;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% first unique points</span>
+temp = xg_u(:,3) == row_u(1);
+idx  = find(temp, 1, <span class="string">'first'</span>);
+u1   = xg_u(idx, 3:4);
+
+<span class="comment">% second unique points</span>
+temp = xg_u(:,3) == row_u(2);
+idx  = find(temp, 1, <span class="string">'first'</span>);
+u2   = xg_u(idx, 3:4);
+</pre><h2 id="4">plot</h2><pre class="codeinput">ftitle = <span class="string">'Initial Guesses and Converged Solutions'</span>;
+figure(<span class="string">'name'</span>, ftitle, <span class="string">'position'</span>, [100 100 500 500])
+
+    <span class="comment">% plot unique values</span>
+    plot(u1(1), u1(2), <span class="string">'bp'</span>, <span class="string">'linewidth'</span>, 2); grid <span class="string">on</span>; hold <span class="string">on</span>;
+    plot(u2(1), u2(2), <span class="string">'rd'</span>, <span class="string">'linewidth'</span>, 2);
+
+    <span class="comment">% plot initial guesses</span>
+    <span class="keyword">for</span> i = 1:length(xg_u)
+
+        <span class="keyword">if</span> xg_u(i, 5) == 1
+            plot(xg_u(i,1), xg_u(i,2), <span class="string">'bp'</span>);
+        <span class="keyword">elseif</span> xg_u(i, 5) == 2
+            plot(xg_u(i,1), xg_u(i,2), <span class="string">'rd'</span>);
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+
+    legend(sprintf(<span class="string">'x_{sol1} = (%g, %g)'</span>, u1(1), u1(2)), <span class="keyword">...</span>
+        sprintf(<span class="string">'x_{sol2} = (%g, %g)'</span>, u2(1), u2(2)), <span class="keyword">...</span>
+        <span class="string">'location'</span>, <span class="string">'southoutside'</span>, <span class="string">'orientation'</span>, <span class="string">'horizontal'</span>)
+
+    xlim([-10 10])
+    ylim([-10 10])
+    bigger_ylim
+    bigger_xlim
+    ylabel(<span class="string">'x2'</span>);
+    xlabel(<span class="string">'x1'</span>);
+
+    title(ftitle);
+</pre><img vspace="5" hspace="5" src="set4_prob1_exam2_01.png" alt=""> <h2 id="5">Convergence points</h2><p>There are 2 convergence points (labelled in the legend). The plot shows that initial guesses that lie closer to either solution will converge towards that respective solution. There is a zone in between the convergence points where Newton's method fails to converge; at those points, the calculated Jacobian is singular, and thus further computations to find a solution fail.</p><pre class="codeinput"><span class="comment">% The figure below shows how the nonlinear equations intersect with each</span>
+<span class="comment">% other and the 0-plane.</span>
+
+x = [-10:1:10];
+
+[X1,X2] = meshgrid(x);
+F1 = X1 + X2 + X1.*X2 + 5;
+F2 = X1.^2 + 2*X2 - X2.^2 - 2;
+
+<span class="comment">% sanity check</span>
+<span class="keyword">for</span> i = 1:length(x)
+    <span class="keyword">for</span> j = 1:length(x)
+        temp = fn([x(i),x(j)]);
+        F1_test(i,j) = temp(1);
+        F2_test(i,j) = temp(2);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+ftitle = <span class="string">'Convergence of Nonlinear Equations'</span>;
+figure(<span class="string">'name'</span>, ftitle, <span class="string">'position'</span>, [100 100 800 400])
+    surf(X1,X2,F1, <span class="string">'FaceColor'</span>,<span class="string">'g'</span>, <span class="string">'FaceAlpha'</span>,0.5, <span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+    hold <span class="string">on</span>; grid <span class="string">on</span>;
+    surf(X1,X2,F2, <span class="string">'FaceColor'</span>,<span class="string">'b'</span>, <span class="string">'FaceAlpha'</span>,0.5, <span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+    surf(X1,X2,zeros(size(F2)), <span class="string">'FaceColor'</span>,<span class="string">'r'</span>, <span class="string">'FaceAlpha'</span>,0.2, <span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+
+    plot3(u1(1), u1(2), 0, <span class="string">'bp'</span>, <span class="string">'linewidth'</span>, 3)
+    plot3(u2(1), u2(2), 0, <span class="string">'rd'</span>, <span class="string">'linewidth'</span>, 3)
+
+    xlabel(<span class="string">'x1'</span>);
+    ylabel(<span class="string">'x2'</span>);
+    zlabel(<span class="string">'f'</span>);
+
+    legend(<span class="string">'f_1 = x_1 + x_2 + x_1x_2 + 5'</span>, <span class="string">'f_2 = x_1^2 + 2x_2 - 2x^2 - 2'</span>, <span class="string">'0-plane'</span>, <span class="keyword">...</span>
+        sprintf(<span class="string">'x_{sol1}'</span>, u1(1), u1(2)), <span class="keyword">...</span>
+        sprintf(<span class="string">'x_{sol2}'</span>, u2(1), u2(2)), <span class="keyword">...</span>
+    <span class="string">'location'</span>, <span class="string">'eastoutside'</span>);
+
+    title(ftitle);
+</pre><img vspace="5" hspace="5" src="set4_prob1_exam2_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Problem Set 4, Number 1 
+
+% set4_prob1 
+
+%% Exam 2 version 
+
+clear; clc; close all 
+
+J_fn = @(x) ... 
+    [ 1+x(2),   1+x(1)      ; 
+      2*x(1),   2-2*x(2)    ];
+
+fn = @(x) ... 
+    [ x(1) + x(2) + x(1)*x(2) + 5   ; 
+      x(1)^2 + 2*x(2) - x(2)^2 - 2  ]; 
+
+% initialize 
+xg_arr = []; 
+f_arr = []; 
+
+for i = -10 : 10  
+    for j = -10 : 10 
+        
+        xg = [i; j]; 
+        
+        k = 0; 
+        % first 6 iterates 
+        while norm(fn(xg)) > 0.00000001 
+
+            k = k + 1; 
+            xg = xg - inv(J_fn(xg)) * fn(xg); 
+
+        end 
+
+        xg_arr = [xg_arr; i, j, xg(1), xg(2)];
+        f = fn(xg); 
+        f_arr  = [f_arr; i, j, f(1), f(2)]; 
+        
+    end
+end
+
+%% unique converged values 
+
+tol   = 1e-5; 
+xg_u  = rmmissing(xg_arr); 
+xg_u(:,3) = round(xg_u(:,3), 5);
+xg_u(:,4) = round(xg_u(:,4), 5); 
+
+% unique x1 
+row_u = unique(xg_u(:,3)); 
+
+for j = 1:length(row_u) 
+    for i = 1:length(xg_u) 
+        if xg_u(i,3) == row_u(j)
+            xg_u(i,5) = j; 
+        end
+    end 
+end 
+
+% first unique points 
+temp = xg_u(:,3) == row_u(1); 
+idx  = find(temp, 1, 'first'); 
+u1   = xg_u(idx, 3:4); 
+
+% second unique points 
+temp = xg_u(:,3) == row_u(2); 
+idx  = find(temp, 1, 'first'); 
+u2   = xg_u(idx, 3:4); 
+
+%% plot 
+
+ftitle = 'Initial Guesses and Converged Solutions'; 
+figure('name', ftitle, 'position', [100 100 500 500])
+    
+    % plot unique values 
+    plot(u1(1), u1(2), 'bp', 'linewidth', 2); grid on; hold on; 
+    plot(u2(1), u2(2), 'rd', 'linewidth', 2); 
+    
+    % plot initial guesses 
+    for i = 1:length(xg_u)
+        
+        if xg_u(i, 5) == 1
+            plot(xg_u(i,1), xg_u(i,2), 'bp'); 
+        elseif xg_u(i, 5) == 2 
+            plot(xg_u(i,1), xg_u(i,2), 'rd'); 
+        end 
+        
+    end 
+    
+    legend(sprintf('x_{sol1} = (%g, %g)', u1(1), u1(2)), ... 
+        sprintf('x_{sol2} = (%g, %g)', u2(1), u2(2)), ... 
+        'location', 'southoutside', 'orientation', 'horizontal')
+    
+    xlim([-10 10])
+    ylim([-10 10]) 
+    bigger_ylim
+    bigger_xlim 
+    ylabel('x2'); 
+    xlabel('x1'); 
+    
+    title(ftitle); 
+    
+%% Convergence points 
+% There are 2 convergence points (labelled in the legend). The plot
+% shows that initial guesses that lie closer to either solution will
+% converge towards that respective solution. There is a zone in between the 
+% convergence points where Newton's method fails to converge; at those
+% points, the calculated Jacobian is singular, and thus further
+% computations to find a solution fail. 
+
+% The figure below shows how the nonlinear equations intersect with each 
+% other and the 0-plane. 
+
+x = [-10:1:10]; 
+
+[X1,X2] = meshgrid(x);
+F1 = X1 + X2 + X1.*X2 + 5;
+F2 = X1.^2 + 2*X2 - X2.^2 - 2; 
+
+% sanity check 
+for i = 1:length(x)
+    for j = 1:length(x)
+        temp = fn([x(i),x(j)]); 
+        F1_test(i,j) = temp(1); 
+        F2_test(i,j) = temp(2); 
+    end 
+end 
+
+ftitle = 'Convergence of Nonlinear Equations'; 
+figure('name', ftitle, 'position', [100 100 800 400])
+    surf(X1,X2,F1, 'FaceColor','g', 'FaceAlpha',0.5, 'EdgeColor','none'); 
+    hold on; grid on; 
+    surf(X1,X2,F2, 'FaceColor','b', 'FaceAlpha',0.5, 'EdgeColor','none'); 
+    surf(X1,X2,zeros(size(F2)), 'FaceColor','r', 'FaceAlpha',0.2, 'EdgeColor','none'); 
+
+    plot3(u1(1), u1(2), 0, 'bp', 'linewidth', 3)
+    plot3(u2(1), u2(2), 0, 'rd', 'linewidth', 3)
+    
+    xlabel('x1'); 
+    ylabel('x2'); 
+    zlabel('f'); 
+
+    legend('f_1 = x_1 + x_2 + x_1x_2 + 5', 'f_2 = x_1^2 + 2x_2 - 2x^2 - 2', '0-plane', ... 
+        sprintf('x_{sol1}', u1(1), u1(2)), ... 
+        sprintf('x_{sol2}', u2(1), u2(2)), ...    
+    'location', 'eastoutside'); 
+
+    title(ftitle); 
+    
+    
+    
+
+
+##### SOURCE END #####
+--></body></html>

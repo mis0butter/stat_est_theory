@@ -1,34 +1,54 @@
+%% set 4, prob 1 
+
 clear; clc
 
-J_fn = @(x) ... 
-    [ 1+x(2),   1+x(1)      ; 
-      2*x(1),   2-2*x(2)    ];
-
+% nonline
 fn = @(x) ... 
     [ x(1) + x(2) + x(1)*x(2) + 5   ; 
       x(1)^2 + 2*x(2) - x(2)^2 - 2  ]; 
 
+% jacobian of f 
+J_fn = @(x) ... 
+    [ 1+x(2),   1+x(1)      ; 
+      2*x(1),   2-2*x(2)    ];
+
+  
+%% initial conditions 
+
 % first guess 
+xg = [4; -4]; 
+fprintf('\n\n FIRST GUESS: xg = %g, %g \n', xg(1), xg(2)); 
+fprintf('initial guess f norm = %g \n', norm(fn(xg))) 
 
-for i = -10 : 10 
-    for j = -10 : 10 
-        xg = [i; j]; 
-        fprintf('initial guess f norm') 
-        norm(fn(xg))
+iter_6(xg, J_fn, fn)
 
-        k = 0; 
-        % iterate until convergence (or divergence) 
-        while norm(fn(xg)) > 0.01 && norm(fn(xg)) < 100
-            
-            k = k + 1; 
-            
-            fprintf('\n iter %d \n', k); 
-            fprintf('xg = \n'); 
-            xg = xg - inv(J_fn(xg)) * fn(xg); 
-            fprintf('f norm = '); 
-            disp((norm(fn(xg))))
-            
-            
-        end 
-    end
-end
+% second guess 
+xg = [6; 0]; 
+fprintf('\n\n SECOND GUESS: xg = %g, %g \n', xg(1), xg(2)); 
+fprintf('initial guess f norm = %g \n', norm(fn(xg))) 
+
+iter_6(xg, J_fn, fn)
+
+% third guess 
+xg = [-5; 5]; 
+fprintf('\n\n THIRD GUESS: xg = %g, %g \n', xg(1), xg(2)); 
+fprintf('initial guess f norm = %g \n', norm(fn(xg))) 
+
+iter_6(xg, J_fn, fn)
+
+%% subfunctions 
+
+% first 6 iterates 
+
+function iter_6(xg, J_fn, fn)
+    for i = 1:6 
+
+        fprintf('\n ITER %d \n\n', i); 
+        fprintf('xg = \n'); 
+        xg = xg - inv(J_fn(xg)) * fn(xg); 
+        disp(xg); 
+        fprintf('f norm = %g \n', norm(fn(xg))); 
+
+    end 
+end 
+
