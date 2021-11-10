@@ -17,6 +17,8 @@ a_flag = 0;
 a_flag = 1; 
 [xg0_a1, Jg_a1] = GN(a_flag, xg0, z); 
 
+%% cost function plot 
+
 % original initial guess 
 xg0_OG 
 
@@ -33,7 +35,19 @@ for i = 1:length(x)
     Jg(i) = cost_fn( x(i), z); 
 end 
 
-%% cost function plot 
+ftitle = 'Cost function '; 
+    figure('name', ftitle); 
+    plot(x, Jg, ':');
+    hold on; grid on; 
+    plot(xg0_a0(1:5), Jg_a0(1:5), 'r'); 
+    plot(xg0_a1, Jg_a1, 'b'); 
+    legend('Cost fn', 'no step adj', 'step adj', 'location', 'best')
+    xlim([-6 6])
+    xlabel('x'); 
+    ylabel('Jg'); 
+    title(ftitle); 
+    
+%% 
 % The cost trajectory without step size adjustment begins to diverge 
 % immediately. The cost function (norm of the difference between the 
 % measurement, z, and the measurement model, h(x) = atan(x)) asymptotically 
@@ -44,18 +58,6 @@ end
 % adjustment more nearly optimally, one can take the derivative of the cost 
 % function with respect to a (the step size adjustment variable) and solve 
 % for a. 
-
-ftitle = 'Cost function '; 
-    figure('name', ftitle)
-    plot(x, Jg, ':');
-    hold on; grid on; 
-    plot(xg0_a0(1:5), Jg_a0(1:5), 'r'); 
-    plot(xg0_a1, Jg_a1, 'b'); 
-    legend('Cost fn', 'no step adj', 'step adj', 'location', 'best')
-    xlim([-6 6])
-    xlabel('x'); 
-    ylabel('Jg'); 
-    title(ftitle); 
 
 %% subfunctions 
 
