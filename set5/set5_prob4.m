@@ -7,7 +7,6 @@ sys = ss(Fk, [ Gammak ], Hk, 0, -1);
 
 % update 
 S = Hk * Pbar_ss * Hk' + Rk;               % innovation covariance 
-W = Pbar_ss * Hk' * inv(S);                % Kalman gain 
 P_ss = Pbar_ss - W_ss * S * W_ss';         % a posteriori covar est 
 
 %% plot 
@@ -17,14 +16,14 @@ figure('name', 'ftitle');
     subplot(2,1,1) 
         plot( thist0, Pxx_arr); hold on; grid on; 
         yline(P_ss(1,1), 'r--'); 
-        legend( 'P_{xx}', 'P_{ss}' ); 
-        title('P_{xx} vs P_{ss}') 
+        legend( 'P_{11}', 'P_{ss}' ); 
+        title('P_{11} vs P_{ss}') 
         bigger_ylim 
     subplot(2,1,2) 
         plot( thist0, Pzz_arr); hold on; grid on; 
         yline(P_ss(2,2), 'r--'); 
-        legend( 'P_{zz}', 'P_{ss}' ); 
-        title('P_{zz} vs P_{ss}')
+        legend( 'P_{22}', 'P_{ss}' ); 
+        title('P_{22} vs P_{ss}')
         bigger_ylim 
     xlabel('Time') 
 

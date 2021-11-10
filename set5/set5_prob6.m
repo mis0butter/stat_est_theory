@@ -25,7 +25,7 @@
 clear
 % clc 
 
-kf_example02a; clear thist; clear zhist; 
+kf_example02a; clear zhist; 
 
 xtilde10 = []; 
 xtilde35 = []; 
@@ -61,10 +61,20 @@ for i = 1 : 10000 % run 50 or 10000 monte carlos
 
 end 
 
+xtilde10_cumsum = cumsum(xtilde10); 
+xtilde35_cumsum = cumsum(xtilde35); 
+for i = 1:length(xtilde10) 
+    xtilde10_cummean(i) = xtilde10_cumsum(i) / i; 
+    xtilde35_cummean(i) = xtilde35_cumsum(i) / i; 
+end 
 
 
+%% plot 
 
-
+figure() 
+    plot(xtilde10_cummean); hold on; grid on; 
+    plot(xtilde35_cummean, '--'); 
+    legend('xtilde10', 'xtilde35'); 
 
 
 %% subfunctions 

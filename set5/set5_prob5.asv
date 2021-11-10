@@ -20,18 +20,18 @@ Gk = Gammak;
 %% KALMAN FILTER 
 
 % Qk_a 
-[xhat_a, P11_a, P22_a, P_a, xbar_a, Pbar_a, nu_a, S_a] = kf( ... 
+[xhat_a, Pxx_a, Pzz_a, P_a, xbar_a, Pbar_a, nu_a, S_a] = kf( ... 
     xhat0, P0, zhist, Fk, Gk, Qk_a, Hk, Rk ); 
 e_a = xbar_a - xhat_a; 
 e_a_mean = mean(e_a); 
 
 % Qk_b 
-[xhat_b, P11_b, P22_b, P_b, xbar_b, Pbar_b, nu_b, S_b] = kf( ... 
+[xhat_b, Pxx_b, Pzz_b, P_b, xbar_b, Pbar_b, nu_b, S_b] = kf( ... 
     xhat0, P0, zhist, Fk, Gk, Qk_b, Hk, Rk ); 
 
 
 % Qk_c 
-[xhat_c, P11_c, P22_c, P_c, xbar_c, Pbar_c, nu_c, S_c] = kf( ... 
+[xhat_c, Pxx_c, Pzz_c, P_c, xbar_c, Pbar_c, nu_c, S_c] = kf( ... 
     xhat0, P0, zhist, Fk, Gk, Qk_c, Hk, Rk ); 
 
 %% Decide which is the best value in the following way: Calculate err(ν(k)) 
@@ -73,7 +73,6 @@ figure
         yline(r1, 'g-.'); 
         yline(r2, 'g-.');     
         bigger_ylim 
-        title('First Qk'); 
         legend('$\epsilon_{\nu}$', '$\bar{\epsilon_{\nu}}$', 'r1', 'r2', 'interpreter', 'latex')
     subplot(3,1,2) 
         plot( thist, err_nu_b, 'r'); 
@@ -81,15 +80,12 @@ figure
         yline(r1, 'g-.'); 
         yline(r2, 'g-.'); 
         bigger_ylim 
-        title('Second Qk'); 
     subplot(3,1,3) 
         plot( thist, err_nu_c, 'k'); 
         yline(err_nu_c_mean, 'k'); 
         yline(r1, 'g--'); 
         yline(r2, 'g--'); 
-        title('Third Qk') 
         bigger_ylim 
-    xlabel('Time') 
         
 if err_nu_a_mean > r1 && err_nu_a_mean < r2
     sprintf('Qk = %g is reasonable', Qk_a)
@@ -115,6 +111,8 @@ end
 
 %% Compute the RMS value of the difference time history 
 % for each state vector element. Do the averaging over the last 40 points. 
+% Are these differences significant compared to the computed state 
+% estimation error standard deviations for the best filter?
 
 x1_rms_ab = rms( xhat_a(11:end,1) - xhat_b(11:end,1) ); 
 x2_rms_ab = rms( xhat_a(11:end,2) - xhat_b(11:end,2) ); 
@@ -122,15 +120,6 @@ x2_rms_ab = rms( xhat_a(11:end,2) - xhat_b(11:end,2) );
 x1_rms_bc = rms( xhat_b(11:end,1) - xhat_c(11:end,1) ); 
 x2_rms_bc = rms( xhat_b(11:end,2) - xhat_c(11:end,2) ); 
 
-% Are these differences significant compared to the computed state 
-% estimation error standard deviations for the best filter?
-x1_rms_ab / P11_b(end) 
-x2_rms_ab / P22_b(end) 
-
-x1_rms_bc / P11_b(end) 
-x2_rms_bc / P22_b(end) 
-
-disp('The second filter is the best filter. The first filter is closer to the second filter than the third filter is to the second filter'); 
 
 
 %% subfunctions KALMAN FILTER 

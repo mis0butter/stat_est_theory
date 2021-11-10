@@ -17,8 +17,8 @@ figure('name', 'ftitle');
     subplot(2,1,1) 
         plot( thist0, Pxx_arr); hold on; grid on; 
         yline(P_ss(1,1), 'r--'); 
-        legend( 'P_{xx}', 'P_{ss}' ); 
-        title('P_{xx} vs P_{ss}') 
+        legend( 'P_{11}', 'P_{ss}' ); 
+        title('P_{11} vs P_{ss}') 
         bigger_ylim 
     subplot(2,1,2) 
         plot( thist0, Pzz_arr); hold on; grid on; 
@@ -28,7 +28,6 @@ figure('name', 'ftitle');
         bigger_ylim 
     xlabel('Time') 
 
-snapnow 
 disp('A posteriori covariance converges to steady-state covariance'); 
     
 %% Stability 
@@ -37,14 +36,3 @@ disp('Eigenvalues of [I - W_ss * H] * F ')
 eig( (eye(2) - W_ss * Hk) * Fk ) 
 
 disp('Eigenvalues have complex magnitudes less than 1; error transition matrix is stable'); 
-
-%% subfunctions 
-
-function bigger_ylim 
-
-    ylimits = [get(gca, 'ylim')]; 
-    yrange = ylimits(2) - ylimits(1); 
-    new_ylim = [ ylimits(1) - 0.15*yrange, ylimits(2) + 0.15*yrange ]; 
-    set(gca, 'ylim', new_ylim); 
-
-end 

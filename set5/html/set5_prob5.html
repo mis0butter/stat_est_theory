@@ -1,0 +1,458 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>set5_prob5</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-07"><meta name="DC.source" content="set5_prob5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">KALMAN FILTER</a></li><li><a href="#3">Decide which is the best value in the following way: Calculate err(&#957;(k))</a></li><li><a href="#4">Compute the RMS value of the difference time history</a></li><li><a href="#5">subfunctions KALMAN FILTER</a></li></ul></div><pre class="codeinput"><span class="comment">% Repeat Problem 3, except use the problem matrices and measurement data</span>
+<span class="comment">% that are defined by the Matlab script kf example02b.m. Notice that the R</span>
+<span class="comment">% and Q values are different for this problem and that there is a different</span>
+<span class="comment">% measurement time history.</span>
+
+<span class="comment">% Run your Kalman filter two additional times using the two alternate Q</span>
+<span class="comment">% values that are mentioned in the comments in the file kf example02b.m.</span>
+<span class="comment">% It is uncertain which is the correct Q value.</span>
+
+clear; clc;
+close <span class="string">all</span>;
+
+kf_example02b
+
+<span class="comment">% Qk_a = Qk</span>
+<span class="comment">% Qk_b = first alternate Qk</span>
+<span class="comment">% Qk_c = second alternate Qk</span>
+Gk = Gammak;
+</pre><h2 id="2">KALMAN FILTER</h2><pre class="codeinput"><span class="comment">% Qk_a</span>
+[xhat_a, P11_a, P22_a, P_a, xbar_a, Pbar_a, nu_a, S_a] = kf( <span class="keyword">...</span>
+    xhat0, P0, zhist, Fk, Gk, Qk_a, Hk, Rk );
+e_a = xbar_a - xhat_a;
+e_a_mean = mean(e_a);
+
+<span class="comment">% Qk_b</span>
+[xhat_b, P11_b, P22_b, P_b, xbar_b, Pbar_b, nu_b, S_b] = kf( <span class="keyword">...</span>
+    xhat0, P0, zhist, Fk, Gk, Qk_b, Hk, Rk );
+
+
+<span class="comment">% Qk_c</span>
+[xhat_c, P11_c, P22_c, P_c, xbar_c, Pbar_c, nu_c, S_c] = kf( <span class="keyword">...</span>
+    xhat0, P0, zhist, Fk, Gk, Qk_c, Hk, Rk );
+</pre><h2 id="3">Decide which is the best value in the following way: Calculate err(&#957;(k))</h2><p>for k = 1, 2, ..., 50 for each of your runs. Compute the average of these 50 values. This average times 50, i.e., {err_&#957;(1) + err_&#957;(2) + ... + err_&#957;(50)}, will be a sample of chi-square distribution of degree 50 if the filter model is correct. Develop upper and lower limits between which the average {err_&#957;(1) + err_&#957;(2) + ... + err_&#957;(50)}/50 must lie 99% of the time if the Kalman filter model is correct, and test your averages for each of the three candidate Q values. Which is the most reasonable? Look at the state estimate differences between the best filter and the other two filters.</p><pre class="codeinput"><span class="comment">% err_nu_k = 1/2 * [ nu_k ]' * inv(S_k) * nu_k</span>
+<span class="keyword">for</span> i = 1:length(nu_a)
+
+    err_nu_a(i) = nu_a(i) * inv(S_a(i)) * nu_a(i);
+    err_nu_b(i) = nu_b(i) * inv(S_b(i)) * nu_b(i);
+    err_nu_c(i) = nu_c(i) * inv(S_c(i)) * nu_c(i);
+
+<span class="keyword">end</span>
+err_nu_a_mean = mean(err_nu_a);
+err_nu_b_mean = mean(err_nu_b);
+err_nu_c_mean = mean(err_nu_c);
+
+N = 50;
+Nx = 2;
+Nz = 1;
+
+<span class="comment">% NEED STATISTICS TOOLBOX</span>
+a = .01;
+r1 = chi2inv( a/2, N * Nz) / N;
+r2 = chi2inv( 1 - a/2, N * Nz ) / N;
+
+figure
+    subplot(3,1,1)
+        plot( thist, err_nu_a, <span class="string">'b'</span> ); hold <span class="string">on</span>; grid <span class="string">on</span>;
+        yline(err_nu_a_mean, <span class="string">'b--'</span>);
+        yline(r1, <span class="string">'g-.'</span>);
+        yline(r2, <span class="string">'g-.'</span>);
+        bigger_ylim
+        title(<span class="string">'First Qk'</span>);
+        legend(<span class="string">'$\epsilon_{\nu}$'</span>, <span class="string">'$\bar{\epsilon_{\nu}}$'</span>, <span class="string">'r1'</span>, <span class="string">'r2'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>)
+    subplot(3,1,2)
+        plot( thist, err_nu_b, <span class="string">'r'</span>);
+        yline(err_nu_b_mean, <span class="string">'r--'</span>);
+        yline(r1, <span class="string">'g-.'</span>);
+        yline(r2, <span class="string">'g-.'</span>);
+        bigger_ylim
+        title(<span class="string">'Second Qk'</span>);
+    subplot(3,1,3)
+        plot( thist, err_nu_c, <span class="string">'k'</span>);
+        yline(err_nu_c_mean, <span class="string">'k'</span>);
+        yline(r1, <span class="string">'g--'</span>);
+        yline(r2, <span class="string">'g--'</span>);
+        title(<span class="string">'Third Qk'</span>)
+        bigger_ylim
+    xlabel(<span class="string">'Time'</span>)
+
+<span class="keyword">if</span> err_nu_a_mean &gt; r1 &amp;&amp; err_nu_a_mean &lt; r2
+    sprintf(<span class="string">'Qk = %g is reasonable'</span>, Qk_a)
+<span class="keyword">else</span>
+    sprintf(<span class="string">'Qk = %g is NOT reasonable'</span>, Qk_a)
+<span class="keyword">end</span>
+
+
+<span class="keyword">if</span> err_nu_b_mean &gt; r1 &amp;&amp; err_nu_b_mean &lt; r2
+    sprintf(<span class="string">'Qk = %g is reasonable'</span>, Qk_b)
+<span class="keyword">else</span>
+    sprintf(<span class="string">'Qk = %g is NOT reasonable'</span>, Qk_b)
+<span class="keyword">end</span>
+
+
+<span class="keyword">if</span> err_nu_c_mean &gt; r1 &amp;&amp; err_nu_c_mean &lt; r2
+    sprintf(<span class="string">'Qk = %g is reasonable'</span>, Qk_c)
+<span class="keyword">else</span>
+    sprintf(<span class="string">'Qk = %g is NOT reasonable'</span>, Qk_c)
+<span class="keyword">end</span>
+
+<span class="comment">% possibly use Nz? Otherwise Q is not within bounds</span>
+</pre><pre class="codeoutput">
+ans =
+
+    'Qk = 40 is NOT reasonable'
+
+
+ans =
+
+    'Qk = 0.4 is reasonable'
+
+
+ans =
+
+    'Qk = 0.004 is NOT reasonable'
+
+</pre><img vspace="5" hspace="5" src="set5_prob5_01.png" alt=""> <h2 id="4">Compute the RMS value of the difference time history</h2><p>for each state vector element. Do the averaging over the last 40 points.</p><pre class="codeinput">x1_rms_ab = rms( xhat_a(11:end,1) - xhat_b(11:end,1) );
+x2_rms_ab = rms( xhat_a(11:end,2) - xhat_b(11:end,2) );
+
+x1_rms_bc = rms( xhat_b(11:end,1) - xhat_c(11:end,1) );
+x2_rms_bc = rms( xhat_b(11:end,2) - xhat_c(11:end,2) );
+
+<span class="comment">% Are these differences significant compared to the computed state</span>
+<span class="comment">% estimation error standard deviations for the best filter?</span>
+x1_rms_ab / P11_b(end)
+x2_rms_ab / P22_b(end)
+
+x1_rms_bc / P11_b(end)
+x2_rms_bc / P22_b(end)
+
+disp(<span class="string">'The second filter is the best filter. The first filter is closer to the second filter than the third filter is to the second filter'</span>);
+</pre><pre class="codeoutput">
+ans =
+
+          68.0758727260931
+
+
+ans =
+
+          15.8780431653489
+
+
+ans =
+
+          1211.25919352871
+
+
+ans =
+
+          86.8008602066569
+
+The second filter is the best filter. The first filter is closer to the second filter than the third filter is to the second filter
+</pre><h2 id="5">subfunctions KALMAN FILTER</h2><pre class="codeinput"><span class="keyword">function</span> [xhat_arr, Pxx_arr, Pzz_arr, P_cell, xbar_arr, Pbar_cell, nu_arr, S_arr] <span class="keyword">...</span>
+    = kf( xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
+
+<span class="comment">% initialize for k = 0</span>
+xhat = xhat0;
+P    = P0;
+
+<span class="comment">% Initialize saved output arrays</span>
+xbar_arr  = [xhat'];
+Pbar_cell = {P};
+xhat_arr  = [xhat'];
+P_cell    = {P};
+Pxx_arr   = [P(1,1)];
+Pzz_arr   = [P(2,2)];
+nu_arr    = [];
+S_arr     = [];
+
+<span class="comment">% Propagate and filter through all measurements</span>
+<span class="keyword">for</span> k = 0 : length(zhist)-1
+
+    <span class="comment">% propagate state and covar</span>
+    xbar = Fk * xhat;                       <span class="comment">% a priori state est</span>
+    Pbar = Fk * P * Fk' + Gk * Qk * Gk';    <span class="comment">% a priori covar est</span>
+
+    <span class="comment">% update</span>
+    nu = zhist(k+1) - Hk * xbar;             <span class="comment">% innovation</span>
+    S  = Hk * Pbar * Hk' + Rk;               <span class="comment">% innovation covariance</span>
+    W  = Pbar * Hk' * inv(S);                <span class="comment">% Kalman gain</span>
+    xhat = xbar + W * nu;                    <span class="comment">% a posteriori state est</span>
+    P  = Pbar - W * S * W';                  <span class="comment">% a posteriori covar est</span>
+
+    <span class="comment">% next step</span>
+    k = k + 1;
+
+    <span class="comment">% save states and covariances</span>
+    xbar_arr  = [xbar_arr; xbar'];
+    Pbar_cell = {Pbar_cell; Pbar};
+    xhat_arr  = [xhat_arr; xhat'];
+    P_cell    = {P_cell; P};
+    Pxx_arr   = [Pxx_arr; P(1,1)];
+    Pzz_arr   = [Pzz_arr; P(2,2)];
+    nu_arr    = [nu_arr; nu];
+    S_arr     = [S_arr; S];
+
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Repeat Problem 3, except use the problem matrices and measurement data 
+% that are defined by the Matlab script kf example02b.m. Notice that the R 
+% and Q values are different for this problem and that there is a different 
+% measurement time history. 
+
+% Run your Kalman filter two additional times using the two alternate Q 
+% values that are mentioned in the comments in the file kf example02b.m. 
+% It is uncertain which is the correct Q value.
+
+clear; clc; 
+close all;  
+
+kf_example02b
+
+% Qk_a = Qk 
+% Qk_b = first alternate Qk  
+% Qk_c = second alternate Qk 
+Gk = Gammak; 
+
+%% KALMAN FILTER 
+
+% Qk_a 
+[xhat_a, P11_a, P22_a, P_a, xbar_a, Pbar_a, nu_a, S_a] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk_a, Hk, Rk ); 
+e_a = xbar_a - xhat_a; 
+e_a_mean = mean(e_a); 
+
+% Qk_b 
+[xhat_b, P11_b, P22_b, P_b, xbar_b, Pbar_b, nu_b, S_b] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk_b, Hk, Rk ); 
+
+
+% Qk_c 
+[xhat_c, P11_c, P22_c, P_c, xbar_c, Pbar_c, nu_c, S_c] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk_c, Hk, Rk ); 
+
+%% Decide which is the best value in the following way: Calculate err(ν(k)) 
+% for k = 1, 2, ..., 50 for each of your runs. Compute the average of these 
+% 50 values. This average times 50, i.e., {err_ν(1) + err_ν(2) + ... + 
+% err_ν(50)}, will be a sample of chi-square distribution of degree 50 if 
+% the filter model is correct. Develop upper and lower limits between which 
+% the average {err_ν(1) + err_ν(2) + ... + err_ν(50)}/50 must lie 99% of 
+% the time if the Kalman filter model is correct, and test your averages 
+% for each of the three candidate Q values. Which is the most reasonable? 
+% Look at the state estimate differences between the best filter and the
+% other two filters. 
+
+% err_nu_k = 1/2 * [ nu_k ]' * inv(S_k) * nu_k 
+for i = 1:length(nu_a) 
+    
+    err_nu_a(i) = nu_a(i) * inv(S_a(i)) * nu_a(i); 
+    err_nu_b(i) = nu_b(i) * inv(S_b(i)) * nu_b(i); 
+    err_nu_c(i) = nu_c(i) * inv(S_c(i)) * nu_c(i); 
+    
+end 
+err_nu_a_mean = mean(err_nu_a); 
+err_nu_b_mean = mean(err_nu_b); 
+err_nu_c_mean = mean(err_nu_c); 
+
+N = 50; 
+Nx = 2; 
+Nz = 1; 
+
+% NEED STATISTICS TOOLBOX 
+a = .01; 
+r1 = chi2inv( a/2, N * Nz) / N; 
+r2 = chi2inv( 1 - a/2, N * Nz ) / N; 
+
+figure
+    subplot(3,1,1) 
+        plot( thist, err_nu_a, 'b' ); hold on; grid on; 
+        yline(err_nu_a_mean, 'bREPLACE_WITH_DASH_DASH'); 
+        yline(r1, 'g-.'); 
+        yline(r2, 'g-.');     
+        bigger_ylim 
+        title('First Qk'); 
+        legend('$\epsilon_{\nu}$', '$\bar{\epsilon_{\nu}}$', 'r1', 'r2', 'interpreter', 'latex')
+    subplot(3,1,2) 
+        plot( thist, err_nu_b, 'r'); 
+        yline(err_nu_b_mean, 'rREPLACE_WITH_DASH_DASH'); 
+        yline(r1, 'g-.'); 
+        yline(r2, 'g-.'); 
+        bigger_ylim 
+        title('Second Qk'); 
+    subplot(3,1,3) 
+        plot( thist, err_nu_c, 'k'); 
+        yline(err_nu_c_mean, 'k'); 
+        yline(r1, 'gREPLACE_WITH_DASH_DASH'); 
+        yline(r2, 'gREPLACE_WITH_DASH_DASH'); 
+        title('Third Qk') 
+        bigger_ylim 
+    xlabel('Time') 
+        
+if err_nu_a_mean > r1 && err_nu_a_mean < r2
+    sprintf('Qk = %g is reasonable', Qk_a)
+else
+    sprintf('Qk = %g is NOT reasonable', Qk_a)
+end 
+
+        
+if err_nu_b_mean > r1 && err_nu_b_mean < r2
+    sprintf('Qk = %g is reasonable', Qk_b)
+else
+    sprintf('Qk = %g is NOT reasonable', Qk_b)
+end 
+
+        
+if err_nu_c_mean > r1 && err_nu_c_mean < r2
+    sprintf('Qk = %g is reasonable', Qk_c)
+else
+    sprintf('Qk = %g is NOT reasonable', Qk_c)
+end 
+
+% possibly use Nz? Otherwise Q is not within bounds 
+
+%% Compute the RMS value of the difference time history 
+% for each state vector element. Do the averaging over the last 40 points. 
+
+x1_rms_ab = rms( xhat_a(11:end,1) - xhat_b(11:end,1) ); 
+x2_rms_ab = rms( xhat_a(11:end,2) - xhat_b(11:end,2) ); 
+
+x1_rms_bc = rms( xhat_b(11:end,1) - xhat_c(11:end,1) ); 
+x2_rms_bc = rms( xhat_b(11:end,2) - xhat_c(11:end,2) ); 
+
+% Are these differences significant compared to the computed state 
+% estimation error standard deviations for the best filter?
+x1_rms_ab / P11_b(end) 
+x2_rms_ab / P22_b(end) 
+
+x1_rms_bc / P11_b(end) 
+x2_rms_bc / P22_b(end) 
+
+disp('The second filter is the best filter. The first filter is closer to the second filter than the third filter is to the second filter'); 
+
+
+%% subfunctions KALMAN FILTER 
+
+function [xhat_arr, Pxx_arr, Pzz_arr, P_cell, xbar_arr, Pbar_cell, nu_arr, S_arr] ... 
+    = kf( xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
+
+% initialize for k = 0 
+xhat = xhat0; 
+P    = P0; 
+
+% Initialize saved output arrays 
+xbar_arr  = [xhat']; 
+Pbar_cell = {P}; 
+xhat_arr  = [xhat']; 
+P_cell    = {P}; 
+Pxx_arr   = [P(1,1)]; 
+Pzz_arr   = [P(2,2)]; 
+nu_arr    = []; 
+S_arr     = []; 
+
+% Propagate and filter through all measurements 
+for k = 0 : length(zhist)-1
+
+    % propagate state and covar 
+    xbar = Fk * xhat;                       % a priori state est 
+    Pbar = Fk * P * Fk' + Gk * Qk * Gk';    % a priori covar est 
+
+    % update 
+    nu = zhist(k+1) - Hk * xbar;             % innovation 
+    S  = Hk * Pbar * Hk' + Rk;               % innovation covariance 
+    W  = Pbar * Hk' * inv(S);                % Kalman gain 
+    xhat = xbar + W * nu;                    % a posteriori state est 
+    P  = Pbar - W * S * W';                  % a posteriori covar est 
+    
+    % next step 
+    k = k + 1; 
+    
+    % save states and covariances 
+    xbar_arr  = [xbar_arr; xbar']; 
+    Pbar_cell = {Pbar_cell; Pbar}; 
+    xhat_arr  = [xhat_arr; xhat']; 
+    P_cell    = {P_cell; P}; 
+    Pxx_arr   = [Pxx_arr; P(1,1)]; 
+    Pzz_arr   = [Pzz_arr; P(2,2)]; 
+    nu_arr    = [nu_arr; nu]; 
+    S_arr     = [S_arr; S]; 
+
+end 
+
+end 
+
+
+
+
+##### SOURCE END #####
+--></body></html>
