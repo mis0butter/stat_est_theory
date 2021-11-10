@@ -6,8 +6,8 @@ clear; clc
 load radarmeasdata_missile_new.mat
 
 global la lb 
-la = 4.1e5; 
-lb = 4.4e5; 
+la = 3.5e5; 
+lb = 4.0e5; 
 
 o_pa = 10; 
 o_pb = 30; 
@@ -32,8 +32,8 @@ end
 
 xg0_arr = []; 
 % First guess 
-for i = 1:3
-    for f = 25:28 
+for i = 1:5
+    for f = 23:28 
         sprintf('i = %d, f = %d', i, f)
         xg0 = find_xg0(rhoahist, rhobhist, thist, i, f); 
         xg0_arr = [xg0_arr; xg0']; 
@@ -47,19 +47,17 @@ figure
         grid on; hold on; 
         yline(0, 'r') 
         xlabel('y1'); ylabel('y2'); 
+        bigger_ylim; bigger_xlim 
     subplot(2,1,2) 
         plot(xg0_arr(:,3), xg0_arr(:,4), '.'); 
         grid on; hold on; 
         xlabel('v1'); ylabel('v2'); 
+        bigger_ylim; bigger_xlim 
         
-%%
+%% this one looks good 
 
-xg0_OG = find_xg0(rhoahist, rhobhist, thist, 2, 27); 
+xg0_OG = find_xg0(rhoahist, rhobhist, thist, 3, 25) 
 xg0 = xg0_OG; 
-
-%% testing initial conditions 
-
-
 
 %% Jacobian H 
 

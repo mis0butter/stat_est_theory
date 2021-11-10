@@ -1,0 +1,337 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>set5_prob3_exam2</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-09"><meta name="DC.source" content="set5_prob3_exam2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">problem set-up</a></li><li><a href="#2">KALMAN FILTER</a></li><li><a href="#3">results</a></li><li><a href="#4">subfunctions KALMAN FILTER</a></li></ul></div><h2 id="1">problem set-up</h2><pre class="codeinput"><span class="comment">% Implement a Kalman filter for a stochastic linear time invariant (SLTI)</span>
+<span class="comment">% system in the standard form used in class (with &#915;(k) =/= I).</span>
+
+<span class="comment">% The problem matrices and the measurement data, z(k) for k = 1, ..., 50,</span>
+<span class="comment">% can be loaded into your Matlab workspace by running the Matlab script</span>
+<span class="comment">% kf_example02a.m.</span>
+
+<span class="comment">% Hand in plots of the two elements of x&#710;(k) vs. time and of the predicted</span>
+<span class="comment">% standard deviations of x&#710;(k) vs. time, i.e., of sqrt([P(k)_11]) and</span>
+<span class="comment">% sqrt([P(k)_22]).</span>
+
+<span class="comment">% Plot each element of x&#710;(k) and its corresponding standard deviation</span>
+<span class="comment">% together on the same graph.</span>
+
+<span class="comment">% Use symbols on the plot at each of the 51 points and do not connect the</span>
+<span class="comment">% symbols by lines (type &#8220;help plot&#8221; in order to learn how to do this).</span>
+<span class="comment">% Also, hand in numerical values for the terminal values of x&#710;(50) and P(50).</span>
+
+clear; clc; close <span class="string">all</span>
+
+kf_example02a;
+
+<span class="comment">% Exam 2</span>
+Qk = 10;
+Rk = 0.025;
+</pre><h2 id="2">KALMAN FILTER</h2><pre class="codeinput">Gk = Gammak;
+
+[xhat_arr, P11_arr, P22_arr, P_cell, xbar_arr, Pbar_cell, nu_arr, S_arr] = kf( <span class="keyword">...</span>
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk );
+
+<span class="keyword">for</span> i = 1:length(nu_arr)
+    e_v(:,i) = nu_arr(i)' * S_arr(i) * nu_arr(i);
+<span class="keyword">end</span>
+</pre><h2 id="3">results</h2><pre class="codeinput">thist0 = [ 0; thist ];
+
+<span class="comment">% plot</span>
+ftitle = <span class="string">'States and Covariances'</span>;
+figure(<span class="string">'name'</span>, ftitle);
+    subplot(2,1,1)
+        plot( thist0, xhat_arr(:,1), <span class="string">'.'</span> ); hold <span class="string">on</span>; grid <span class="string">on</span>;
+        plot( thist0, xhat_arr(:,1) + sqrt( P11_arr ), <span class="string">'r--'</span>);
+        plot( thist0, xhat_arr(:,1) - sqrt( P11_arr ), <span class="string">'r--'</span>);
+        title(<span class="string">'$\hat{x}$(1)'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
+        legend(<span class="string">'$\hat{x}$'</span>, <span class="string">'$ \hat{x} \pm \sigma_{11}$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>, <span class="string">'location'</span>, <span class="string">'best'</span>);
+        ylabel(<span class="string">'state units'</span>);
+        bigger_ylim
+    subplot(2,1,2)
+        plot( thist0, xhat_arr(:,2), <span class="string">'.'</span> ); hold <span class="string">on</span>; grid <span class="string">on</span>;
+        plot( thist0, xhat_arr(:,2) + sqrt( P22_arr ), <span class="string">'r--'</span>);
+        plot( thist0, xhat_arr(:,2) - sqrt( P22_arr ), <span class="string">'r--'</span>);
+        title(<span class="string">'$\hat{x}$(2)'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
+        legend(<span class="string">'$\hat{x}$'</span>, <span class="string">'$ \hat{x} \pm \sigma_{22}$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>, <span class="string">'location'</span>, <span class="string">'best'</span>);
+        ylabel(<span class="string">'state units'</span>);
+        bigger_ylim
+    xlabel(<span class="string">'time'</span>);
+    sgtitle(ftitle);
+
+ftitle = <span class="string">'e_v(k)'</span>;
+figure(<span class="string">'name'</span>, ftitle);
+    plot(e_v);
+    bigger_ylim
+    ylabel(<span class="string">'\epsilon_v(k)'</span>)
+    xlabel(<span class="string">'k'</span>);
+    title(<span class="string">'\epsilon_v(k) as function of k'</span>)
+
+<span class="comment">% print final values</span>
+disp(<span class="string">'xhat(50) ='</span>)
+disp(xhat_arr(end,:))
+
+disp(<span class="string">'P(50) ='</span>)
+disp(P_cell{end})
+</pre><pre class="codeoutput">xhat(50) =
+        0.0403586781964148        -0.455082764849298
+
+P(50) =
+       0.00117513862430904      0.000693974312791607
+       0.00069397431279162        0.0777933474981554
+
+</pre><img vspace="5" hspace="5" src="set5_prob3_exam2_01.png" alt=""> <img vspace="5" hspace="5" src="set5_prob3_exam2_02.png" alt=""> <h2 id="4">subfunctions KALMAN FILTER</h2><pre class="codeinput"><span class="keyword">function</span> [xhat_arr, Pxx_arr, Pzz_arr, P_cell, xbar_arr, Pbar_cell, nu_arr, S_arr] <span class="keyword">...</span>
+    = kf( xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
+
+<span class="comment">% initialize for k = 0</span>
+xhat = xhat0;
+P    = P0;
+
+<span class="comment">% Initialize saved output arrays</span>
+xbar_arr  = [xhat'];
+Pbar_cell = {P};
+xhat_arr  = [xhat'];
+P_cell    = {P};
+Pxx_arr   = [P(1,1)];
+Pzz_arr   = [P(2,2)];
+nu_arr    = [];
+S_arr     = [];
+
+<span class="comment">% Propagate and filter through all measurements</span>
+<span class="keyword">for</span> k = 0 : length(zhist)-1
+
+    <span class="comment">% propagate state and covar</span>
+    xbar = Fk * xhat;                       <span class="comment">% a priori state est</span>
+    Pbar = Fk * P * Fk' + Gk * Qk * Gk';    <span class="comment">% a priori covar est</span>
+
+    <span class="comment">% update</span>
+    nu = zhist(k+1) - Hk * xbar;             <span class="comment">% innovation</span>
+    S  = Hk * Pbar * Hk' + Rk;               <span class="comment">% innovation covariance</span>
+    W  = Pbar * Hk' * inv(S);                <span class="comment">% Kalman gain</span>
+    xhat = xbar + W * nu;                    <span class="comment">% a posteriori state est</span>
+    P  = Pbar - W * S * W';                  <span class="comment">% a posteriori covar est</span>
+
+    <span class="comment">% next step</span>
+    k = k + 1;
+
+    <span class="comment">% save states and covariances</span>
+    xbar_arr  = [xbar_arr; xbar'];
+    Pbar_cell = {Pbar_cell; Pbar};
+    xhat_arr  = [xhat_arr; xhat'];
+    P_cell    = {P_cell; P};
+    Pxx_arr   = [Pxx_arr; P(1,1)];
+    Pzz_arr   = [Pzz_arr; P(2,2)];
+    nu_arr    = [nu_arr; nu];
+    S_arr     = [S_arr; S];
+
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% problem set-up 
+
+% Implement a Kalman filter for a stochastic linear time invariant (SLTI) 
+% system in the standard form used in class (with Γ(k) =/= I). 
+
+% The problem matrices and the measurement data, z(k) for k = 1, ..., 50, 
+% can be loaded into your Matlab workspace by running the Matlab script 
+% kf_example02a.m. 
+
+% Hand in plots of the two elements of xˆ(k) vs. time and of the predicted 
+% standard deviations of xˆ(k) vs. time, i.e., of sqrt([P(k)_11]) and 
+% sqrt([P(k)_22]).
+
+% Plot each element of xˆ(k) and its corresponding standard deviation 
+% together on the same graph. 
+
+% Use symbols on the plot at each of the 51 points and do not connect the 
+% symbols by lines (type “help plot” in order to learn how to do this). 
+% Also, hand in numerical values for the terminal values of xˆ(50) and P(50).
+
+clear; clc; close all 
+
+kf_example02a; 
+
+% Exam 2 
+Qk = 10; 
+Rk = 0.025; 
+
+%% KALMAN FILTER 
+
+Gk = Gammak; 
+
+[xhat_arr, P11_arr, P22_arr, P_cell, xbar_arr, Pbar_cell, nu_arr, S_arr] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk ); 
+
+for i = 1:length(nu_arr) 
+    e_v(:,i) = nu_arr(i)' * S_arr(i) * nu_arr(i); 
+end 
+
+%% results 
+
+thist0 = [ 0; thist ]; 
+
+% plot 
+ftitle = 'States and Covariances'; 
+figure('name', ftitle); 
+    subplot(2,1,1) 
+        plot( thist0, xhat_arr(:,1), '.' ); hold on; grid on; 
+        plot( thist0, xhat_arr(:,1) + sqrt( P11_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        plot( thist0, xhat_arr(:,1) - sqrt( P11_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        title('$\hat{x}$(1)', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$ \hat{x} \pm \sigma_{11}$', 'interpreter', 'latex', 'location', 'best'); 
+        ylabel('state units'); 
+        bigger_ylim 
+    subplot(2,1,2) 
+        plot( thist0, xhat_arr(:,2), '.' ); hold on; grid on; 
+        plot( thist0, xhat_arr(:,2) + sqrt( P22_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        plot( thist0, xhat_arr(:,2) - sqrt( P22_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        title('$\hat{x}$(2)', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$ \hat{x} \pm \sigma_{22}$', 'interpreter', 'latex', 'location', 'best'); 
+        ylabel('state units'); 
+        bigger_ylim 
+    xlabel('time'); 
+    sgtitle(ftitle); 
+    
+ftitle = 'e_v(k)'; 
+figure('name', ftitle); 
+    plot(e_v); 
+    bigger_ylim 
+    ylabel('\epsilon_v(k)')
+    xlabel('k'); 
+    title('\epsilon_v(k) as function of k')
+
+% print final values 
+disp('xhat(50) =')
+disp(xhat_arr(end,:))
+
+disp('P(50) =')
+disp(P_cell{end})
+
+%% subfunctions KALMAN FILTER 
+
+function [xhat_arr, Pxx_arr, Pzz_arr, P_cell, xbar_arr, Pbar_cell, nu_arr, S_arr] ... 
+    = kf( xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
+
+% initialize for k = 0 
+xhat = xhat0; 
+P    = P0; 
+
+% Initialize saved output arrays 
+xbar_arr  = [xhat']; 
+Pbar_cell = {P}; 
+xhat_arr  = [xhat']; 
+P_cell    = {P}; 
+Pxx_arr   = [P(1,1)]; 
+Pzz_arr   = [P(2,2)]; 
+nu_arr    = []; 
+S_arr     = []; 
+
+% Propagate and filter through all measurements 
+for k = 0 : length(zhist)-1
+
+    % propagate state and covar 
+    xbar = Fk * xhat;                       % a priori state est 
+    Pbar = Fk * P * Fk' + Gk * Qk * Gk';    % a priori covar est 
+
+    % update 
+    nu = zhist(k+1) - Hk * xbar;             % innovation 
+    S  = Hk * Pbar * Hk' + Rk;               % innovation covariance 
+    W  = Pbar * Hk' * inv(S);                % Kalman gain 
+    xhat = xbar + W * nu;                    % a posteriori state est 
+    P  = Pbar - W * S * W';                  % a posteriori covar est 
+    
+    % next step 
+    k = k + 1; 
+    
+    % save states and covariances 
+    xbar_arr  = [xbar_arr; xbar']; 
+    Pbar_cell = {Pbar_cell; Pbar}; 
+    xhat_arr  = [xhat_arr; xhat']; 
+    P_cell    = {P_cell; P}; 
+    Pxx_arr   = [Pxx_arr; P(1,1)]; 
+    Pzz_arr   = [Pzz_arr; P(2,2)]; 
+    nu_arr    = [nu_arr; nu]; 
+    S_arr     = [S_arr; S]; 
+
+end 
+
+end 
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
