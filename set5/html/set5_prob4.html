@@ -6,8 +6,8 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>set5_prob4</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-07"><meta name="DC.source" content="set5_prob4.m"><style type="text/css">
-html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+      --><title>set5_prob4</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-08"><meta name="DC.source" content="set5_prob4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
 html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
@@ -68,16 +68,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">set 5 prob 4</a></li><li><a href="#3">plot</a></li><li><a href="#4">Stability</a></li></ul></div><pre class="codeinput">set5_prob3
-</pre><pre class="codeoutput">
-ans =
+</pre><pre class="codeoutput">xhat(50) =
+    0.0404   -0.4551
 
-        0.0403586781659245        -0.455082764365291
-
-
-ans =
-
-      0.000470055449723615      0.000277589725116646
-      0.000277589725116646        0.0311173389992622
+P(50) =
+    0.0005    0.0003
+    0.0003    0.0311
 
 </pre><img vspace="5" hspace="5" src="set5_prob4_01.png" alt=""> <h2 id="2">set 5 prob 4</h2><pre class="codeinput">sys = ss(Fk, [ Gammak ], Hk, 0, -1);
 [km, L, Pbar_ss, W_ss] = kalman(sys, Qk, Rk);
@@ -86,37 +82,38 @@ ans =
 S = Hk * Pbar_ss * Hk' + Rk;               <span class="comment">% innovation covariance</span>
 W = Pbar_ss * Hk' * inv(S);                <span class="comment">% Kalman gain</span>
 P_ss = Pbar_ss - W_ss * S * W_ss';         <span class="comment">% a posteriori covar est</span>
+
+disp(<span class="string">'W steady state = '</span>)
+disp(W)
+
+disp(<span class="string">'A posteriori covariance steady state = '</span>)
+disp(P_ss)
+</pre><pre class="codeoutput error">Undefined function 'ss' for input arguments of type 'double'.
+
+Error in set5_prob4 (line 5)
+sys = ss(Fk, [ Gammak ], Hk, 0, -1); 
 </pre><h2 id="3">plot</h2><pre class="codeinput">ftitle = <span class="string">'Covariances Comparison'</span>;
 figure(<span class="string">'name'</span>, <span class="string">'ftitle'</span>);
     subplot(2,1,1)
         plot( thist0, Pxx_arr); hold <span class="string">on</span>; grid <span class="string">on</span>;
         yline(P_ss(1,1), <span class="string">'r--'</span>);
-        legend( <span class="string">'P_{xx}'</span>, <span class="string">'P_{ss}'</span> );
-        title(<span class="string">'P_{xx} vs P_{ss}'</span>)
+        legend( <span class="string">'P_{11}'</span>, <span class="string">'P_{ss}'</span> );
+        title(<span class="string">'P_{11} vs P_{ss}'</span>)
         bigger_ylim
     subplot(2,1,2)
         plot( thist0, Pzz_arr); hold <span class="string">on</span>; grid <span class="string">on</span>;
         yline(P_ss(2,2), <span class="string">'r--'</span>);
-        legend( <span class="string">'P_{zz}'</span>, <span class="string">'P_{ss}'</span> );
-        title(<span class="string">'P_{zz} vs P_{ss}'</span>)
+        legend( <span class="string">'P_{22}'</span>, <span class="string">'P_{ss}'</span> );
+        title(<span class="string">'P_{22} vs P_{ss}'</span>)
         bigger_ylim
     xlabel(<span class="string">'Time'</span>)
 
 disp(<span class="string">'A posteriori covariance converges to steady-state covariance'</span>);
-</pre><pre class="codeoutput">A posteriori covariance converges to steady-state covariance
-</pre><img vspace="5" hspace="5" src="set5_prob4_02.png" alt=""> <h2 id="4">Stability</h2><pre class="codeinput">disp(<span class="string">'Eigenvalues of [I - W_ss * H] * F '</span>)
-eig( (eye(2) - W_ss * Hk) * Fk )
+</pre><h2 id="4">Stability</h2><pre class="codeinput">disp(<span class="string">'Eigenvalues of [I - W_ss * H] * F '</span>)
+disp( eig( (eye(2) - W_ss * Hk) * Fk ) )
 
 disp(<span class="string">'Eigenvalues have complex magnitudes less than 1; error transition matrix is stable'</span>);
-</pre><pre class="codeoutput">Eigenvalues of [I - W_ss * H] * F 
-
-ans =
-
-          0.539455278950325 +     0.385642772290998i
-          0.539455278950325 -     0.385642772290998i
-
-Eigenvalues have complex magnitudes less than 1; error transition matrix is stable
-</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 set5_prob3 
 
@@ -130,6 +127,12 @@ S = Hk * Pbar_ss * Hk' + Rk;               % innovation covariance
 W = Pbar_ss * Hk' * inv(S);                % Kalman gain 
 P_ss = Pbar_ss - W_ss * S * W_ss';         % a posteriori covar est 
 
+disp('W steady state = ')
+disp(W)
+
+disp('A posteriori covariance steady state = ')
+disp(P_ss)
+
 %% plot 
 
 ftitle = 'Covariances Comparison'; 
@@ -137,14 +140,14 @@ figure('name', 'ftitle');
     subplot(2,1,1) 
         plot( thist0, Pxx_arr); hold on; grid on; 
         yline(P_ss(1,1), 'rREPLACE_WITH_DASH_DASH'); 
-        legend( 'P_{xx}', 'P_{ss}' ); 
-        title('P_{xx} vs P_{ss}') 
+        legend( 'P_{11}', 'P_{ss}' ); 
+        title('P_{11} vs P_{ss}') 
         bigger_ylim 
     subplot(2,1,2) 
         plot( thist0, Pzz_arr); hold on; grid on; 
         yline(P_ss(2,2), 'rREPLACE_WITH_DASH_DASH'); 
-        legend( 'P_{zz}', 'P_{ss}' ); 
-        title('P_{zz} vs P_{ss}')
+        legend( 'P_{22}', 'P_{ss}' ); 
+        title('P_{22} vs P_{ss}')
         bigger_ylim 
     xlabel('Time') 
 
@@ -153,7 +156,7 @@ disp('A posteriori covariance converges to steady-state covariance');
 %% Stability 
         
 disp('Eigenvalues of [I - W_ss * H] * F ')
-eig( (eye(2) - W_ss * Hk) * Fk ) 
+disp( eig( (eye(2) - W_ss * Hk) * Fk ) )
 
 disp('Eigenvalues have complex magnitudes less than 1; error transition matrix is stable'); 
 

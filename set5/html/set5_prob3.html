@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>set5_prob3</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-10-26"><meta name="DC.source" content="set5_prob3.m"><style type="text/css">
+      --><title>set5_prob3</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-08"><meta name="DC.source" content="set5_prob3.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,7 +67,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">KALMAN FILTER</a></li><li><a href="#3">results</a></li></ul></div><pre class="codeinput"><span class="comment">% Implement a Kalman filter for a stochastic linear time invariant (SLTI)</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">problem set-up</a></li><li><a href="#2">KALMAN FILTER</a></li><li><a href="#3">results</a></li><li><a href="#4">subfunctions KALMAN FILTER</a></li></ul></div><h2 id="1">problem set-up</h2><pre class="codeinput"><span class="comment">% Implement a Kalman filter for a stochastic linear time invariant (SLTI)</span>
 <span class="comment">% system in the standard form used in class (with &#915;(k) =/= I).</span>
 
 <span class="comment">% The problem matrices and the measurement data, z(k) for k = 1, ..., 50,</span>
@@ -85,12 +85,52 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <span class="comment">% symbols by lines (type &#8220;help plot&#8221; in order to learn how to do this).</span>
 <span class="comment">% Also, hand in numerical values for the terminal values of x&#710;(50) and P(50).</span>
 
-clear; clc;
-<span class="comment">% close all</span>
+clear; clc; close <span class="string">all</span>
 
 kf_example02a;
-Gk = Gammak;
-</pre><h2 id="2">KALMAN FILTER</h2><pre class="codeinput"><span class="comment">% initialize for k = 0</span>
+</pre><h2 id="2">KALMAN FILTER</h2><pre class="codeinput">Gk = Gammak;
+
+[xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( <span class="keyword">...</span>
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk );
+</pre><h2 id="3">results</h2><pre class="codeinput">thist0 = [ 0; thist ];
+
+<span class="comment">% plot</span>
+ftitle = <span class="string">'States and Covariances'</span>;
+figure(<span class="string">'name'</span>, ftitle);
+    subplot(2,1,1)
+        plot( thist0, xhat_arr(:,1), <span class="string">'.'</span> ); hold <span class="string">on</span>; grid <span class="string">on</span>;
+        plot( thist0, xhat_arr(:,1) + sqrt( Pxx_arr ), <span class="string">'r--'</span>);
+        plot( thist0, xhat_arr(:,1) - sqrt( Pxx_arr ), <span class="string">'r--'</span>);
+        title(<span class="string">'$\hat{x}$(1)'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
+        legend(<span class="string">'$\hat{x}$'</span>, <span class="string">'$ \hat{x} \pm \sigma_{xx}$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>, <span class="string">'location'</span>, <span class="string">'best'</span>);
+        ylabel(<span class="string">'state units'</span>);
+    subplot(2,1,2)
+        plot( thist0, xhat_arr(:,2), <span class="string">'.'</span> ); hold <span class="string">on</span>; grid <span class="string">on</span>;
+        plot( thist0, xhat_arr(:,2) + sqrt( Pzz_arr ), <span class="string">'r--'</span>);
+        plot( thist0, xhat_arr(:,2) - sqrt( Pzz_arr ), <span class="string">'r--'</span>);
+        title(<span class="string">'$\hat{x}$(2)'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
+        legend(<span class="string">'$\hat{x}$'</span>, <span class="string">'$ \hat{x} \pm \sigma_{zz}$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>, <span class="string">'location'</span>, <span class="string">'best'</span>);
+        ylabel(<span class="string">'state units'</span>);
+    xlabel(<span class="string">'time'</span>);
+    sgtitle(ftitle);
+
+<span class="comment">% print final values</span>
+disp(<span class="string">'xhat(50) ='</span>)
+disp(xhat_arr(end,:))
+
+disp(<span class="string">'P(50) ='</span>)
+disp(P_cell{end})
+</pre><pre class="codeoutput">xhat(50) =
+     0.040359     -0.45508
+
+P(50) =
+   0.00047006   0.00027759
+   0.00027759     0.031117
+
+</pre><img vspace="5" hspace="5" src="set5_prob3_01.png" alt=""> <h2 id="4">subfunctions KALMAN FILTER</h2><pre class="codeinput"><span class="keyword">function</span> [xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( <span class="keyword">...</span>
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
+
+<span class="comment">% initialize for k = 0</span>
 xhat = xhat0;
 P    = P0;
 
@@ -98,6 +138,7 @@ P    = P0;
 xbar_arr = [];
 Pbar_arr = [];
 xhat_arr = [xhat'];
+P_cell   = {P};
 Pxx_arr  = [P(1,1)];
 Pzz_arr  = [P(2,2)];
 
@@ -122,42 +163,17 @@ Pzz_arr  = [P(2,2)];
     xbar_arr = [xbar_arr; xbar'];
     Pbar_arr = [Pbar_arr; Pbar];
     xhat_arr = [xhat_arr; xhat'];
+    P_cell   = {P_cell; P};
     Pxx_arr  = [Pxx_arr; P(1,1)];
     Pzz_arr  = [Pzz_arr; P(2,2)];
 
 <span class="keyword">end</span>
-</pre><h2 id="3">results</h2><pre class="codeinput"><span class="comment">% plot</span>
-ftitle = <span class="string">'States and Covariances'</span>;
-figure(<span class="string">'name'</span>, ftitle);
-    subplot(2,1,1)
-        plot( xhat_arr(:,1), <span class="string">'.'</span> ); hold <span class="string">on</span>; grid <span class="string">on</span>;
-        plot( sqrt( Pxx_arr ), <span class="string">'.'</span>);
-        title(<span class="string">'$\hat{x}$(1)'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
-        legend(<span class="string">'$\hat{x}$'</span>, <span class="string">'$\sqrt{(P_{xx})}$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
-    subplot(2,1,2)
-        plot( xhat_arr(:,2), <span class="string">'.'</span> ); hold <span class="string">on</span>; grid <span class="string">on</span>;
-        plot( sqrt( Pzz_arr ), <span class="string">'.'</span> );
-        title(<span class="string">'$\hat{x}$(2)'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
-        legend(<span class="string">'$\hat{x}$'</span>, <span class="string">'$\sqrt{(P_{zz})}$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
-    sgtitle(ftitle);
 
-<span class="comment">% print final values</span>
-xhat
-P
-</pre><pre class="codeoutput">
-xhat =
-
-     0.040359
-     -0.45508
-
-
-P =
-
-   0.00047006   0.00027759
-   0.00027759     0.031117
-
-</pre><img vspace="5" hspace="5" src="set5_prob3_01.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
+%% problem set-up 
+
 % Implement a Kalman filter for a stochastic linear time invariant (SLTI) 
 % system in the standard form used in class (with Γ(k) =/= I). 
 
@@ -176,13 +192,52 @@ P =
 % symbols by lines (type “help plot” in order to learn how to do this). 
 % Also, hand in numerical values for the terminal values of xˆ(50) and P(50).
 
-clear; clc; 
-% close all 
+clear; clc; close all 
 
 kf_example02a; 
-Gk = Gammak; 
 
 %% KALMAN FILTER 
+
+Gk = Gammak; 
+
+[xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk ); 
+
+%% results 
+
+thist0 = [ 0; thist ]; 
+
+% plot 
+ftitle = 'States and Covariances'; 
+figure('name', ftitle); 
+    subplot(2,1,1) 
+        plot( thist0, xhat_arr(:,1), '.' ); hold on; grid on; 
+        plot( thist0, xhat_arr(:,1) + sqrt( Pxx_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        plot( thist0, xhat_arr(:,1) - sqrt( Pxx_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        title('$\hat{x}$(1)', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$ \hat{x} \pm \sigma_{xx}$', 'interpreter', 'latex', 'location', 'best'); 
+        ylabel('state units'); 
+    subplot(2,1,2) 
+        plot( thist0, xhat_arr(:,2), '.' ); hold on; grid on; 
+        plot( thist0, xhat_arr(:,2) + sqrt( Pzz_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        plot( thist0, xhat_arr(:,2) - sqrt( Pzz_arr ), 'rREPLACE_WITH_DASH_DASH'); 
+        title('$\hat{x}$(2)', 'interpreter', 'latex'); 
+        legend('$\hat{x}$', '$ \hat{x} \pm \sigma_{zz}$', 'interpreter', 'latex', 'location', 'best'); 
+        ylabel('state units'); 
+    xlabel('time'); 
+    sgtitle(ftitle); 
+
+% print final values 
+disp('xhat(50) =')
+disp(xhat_arr(end,:))
+
+disp('P(50) =')
+disp(P_cell{end})
+
+%% subfunctions KALMAN FILTER 
+
+function [xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
+    xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
 
 % initialize for k = 0 
 xhat = xhat0; 
@@ -192,6 +247,7 @@ P    = P0;
 xbar_arr = []; 
 Pbar_arr = []; 
 xhat_arr = [xhat']; 
+P_cell   = {P}; 
 Pxx_arr  = [P(1,1)]; 
 Pzz_arr  = [P(2,2)]; 
 
@@ -216,31 +272,14 @@ for k = 0 : length(zhist)-1
     xbar_arr = [xbar_arr; xbar']; 
     Pbar_arr = [Pbar_arr; Pbar]; 
     xhat_arr = [xhat_arr; xhat']; 
+    P_cell   = {P_cell; P}; 
     Pxx_arr  = [Pxx_arr; P(1,1)]; 
     Pzz_arr  = [Pzz_arr; P(2,2)]; 
 
 end 
 
-%% results 
+end 
 
-% plot 
-ftitle = 'States and Covariances'; 
-figure('name', ftitle); 
-    subplot(2,1,1) 
-        plot( xhat_arr(:,1), '.' ); hold on; grid on; 
-        plot( sqrt( Pxx_arr ), '.'); 
-        title('$\hat{x}$(1)', 'interpreter', 'latex'); 
-        legend('$\hat{x}$', '$\sqrt{(P_{xx})}$', 'interpreter', 'latex'); 
-    subplot(2,1,2) 
-        plot( xhat_arr(:,2), '.' ); hold on; grid on; 
-        plot( sqrt( Pzz_arr ), '.' ); 
-        title('$\hat{x}$(2)', 'interpreter', 'latex'); 
-        legend('$\hat{x}$', '$\sqrt{(P_{zz})}$', 'interpreter', 'latex'); 
-    sgtitle(ftitle); 
-
-% print final values 
-xhat  
-P 
 
 
 

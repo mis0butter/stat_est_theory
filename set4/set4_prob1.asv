@@ -2,12 +2,12 @@
 
 clear; clc
 
-% nonlinear equations f1 and f2  
+% nonline
 fn = @(x) ... 
     [ x(1) + x(2) + x(1)*x(2) + 5   ; 
       x(1)^2 + 2*x(2) - x(2)^2 - 2  ]; 
 
-% jacobian of f1 and f2 
+% jacobian of f 
 J_fn = @(x) ... 
     [ 1+x(2),   1+x(1)      ; 
       2*x(1),   2-2*x(2)    ];

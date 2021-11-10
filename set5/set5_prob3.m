@@ -54,8 +54,11 @@ figure('name', ftitle);
     sgtitle(ftitle); 
 
 % print final values 
-xhat_arr(end,:)
-P_cell{end} 
+disp('xhat(50) =')
+disp(xhat_arr(end,:))
+
+disp('P(50) =')
+disp(P_cell{end})
 
 %% subfunctions KALMAN FILTER 
 
