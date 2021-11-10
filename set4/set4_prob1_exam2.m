@@ -101,15 +101,13 @@ figure('name', ftitle, 'position', [100 100 500 500])
     title(ftitle); 
     
 %% Convergence points 
-% There are 2 convergence points (labelled in the legend). The plot
+% There are 2 convergence points (labelled in the legend). The plot above
 % shows that initial guesses that lie closer to either solution will
 % converge towards that respective solution. There is a zone in between the 
 % convergence points where Newton's method fails to converge; at those
 % points, the calculated Jacobian is singular, and thus further
-% computations to find a solution fail. 
-
-% The figure below shows how the nonlinear equations intersect with each 
-% other and the 0-plane. 
+% computations to find a solution fail. The figure below shows how the 
+% nonlinear equations intersect with each other and the 0-plane. 
 
 x = [-10:1:10]; 
 

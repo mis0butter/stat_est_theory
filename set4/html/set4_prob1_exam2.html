@@ -102,20 +102,13 @@ f_arr = [];
 
     <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><pre class="codeoutput">Warning: Matrix is singular to
-working precision. 
-Warning: Matrix is singular to
-working precision. 
-Warning: Matrix is singular to
-working precision. 
-Warning: Matrix is singular to
-working precision. 
-Warning: Matrix is singular to
-working precision. 
-Warning: Matrix is close to
-singular or badly scaled. Results
-may be inaccurate. RCOND =
-1.110223e-16. 
+</pre><pre class="codeoutput">Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+Warning: Matrix is close to singular or badly scaled. Results may be
+inaccurate. RCOND =  1.110223e-16. 
 </pre><h2 id="3">unique converged values</h2><pre class="codeinput">tol   = 1e-5;
 xg_u  = rmmissing(xg_arr);
 xg_u(:,3) = round(xg_u(:,3), 5);
@@ -171,10 +164,7 @@ figure(<span class="string">'name'</span>, ftitle, <span class="string">'positio
     xlabel(<span class="string">'x1'</span>);
 
     title(ftitle);
-</pre><img vspace="5" hspace="5" src="set4_prob1_exam2_01.png" alt=""> <h2 id="5">Convergence points</h2><p>There are 2 convergence points (labelled in the legend). The plot shows that initial guesses that lie closer to either solution will converge towards that respective solution. There is a zone in between the convergence points where Newton's method fails to converge; at those points, the calculated Jacobian is singular, and thus further computations to find a solution fail.</p><pre class="codeinput"><span class="comment">% The figure below shows how the nonlinear equations intersect with each</span>
-<span class="comment">% other and the 0-plane.</span>
-
-x = [-10:1:10];
+</pre><img vspace="5" hspace="5" src="set4_prob1_exam2_01.png" alt=""> <h2 id="5">Convergence points</h2><p>There are 2 convergence points (labelled in the legend). The plot above shows that initial guesses that lie closer to either solution will converge towards that respective solution. There is a zone in between the convergence points where Newton's method fails to converge; at those points, the calculated Jacobian is singular, and thus further computations to find a solution fail. The figure below shows how the nonlinear equations intersect with each other and the 0-plane.</p><pre class="codeinput">x = [-10:1:10];
 
 [X1,X2] = meshgrid(x);
 F1 = X1 + X2 + X1.*X2 + 5;
@@ -314,15 +304,13 @@ figure('name', ftitle, 'position', [100 100 500 500])
     title(ftitle); 
     
 %% Convergence points 
-% There are 2 convergence points (labelled in the legend). The plot
+% There are 2 convergence points (labelled in the legend). The plot above
 % shows that initial guesses that lie closer to either solution will
 % converge towards that respective solution. There is a zone in between the 
 % convergence points where Newton's method fails to converge; at those
 % points, the calculated Jacobian is singular, and thus further
-% computations to find a solution fail. 
-
-% The figure below shows how the nonlinear equations intersect with each 
-% other and the 0-plane. 
+% computations to find a solution fail. The figure below shows how the 
+% nonlinear equations intersect with each other and the 0-plane. 
 
 x = [-10:1:10]; 
 
