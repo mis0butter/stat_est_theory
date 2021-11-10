@@ -52,15 +52,74 @@ xg0 = xg0_OG;
 
 %% Gauss-Newton method 
 
+% Just rho measurements 
+disp('Part b: Using just rho data from both radars: ')
+meas_data = 'rho'; 
+[Ra, zhist] = build_Ra_z(meas_data, thist, sigma_rhoa, sigma_rhob, sigma_thetaa, sigma_thetab); 
+[xg0_soln_rho, Pxx_rho] = GN(xg0_OG, thist, zhist, Ra, meas_data) 
+
 % rho AND theta measurements 
+disp('Part c: Using both rho and theta data from both radars: ')
 meas_data = 'both'; 
-[Ra, zhist] = chol_factorize(meas_data, thist, sigma_rhoa, sigma_rhob, sigma_thetaa, sigma_thetab); 
-[xg0_sol, Pxx] = GN(xg0_OG, thist, zhist, Ra, meas_data) 
+[Ra, zhist] = build_Ra_z(meas_data, thist, sigma_rhoa, sigma_rhob, sigma_thetaa, sigma_thetab); 
+[xg0_soln_both, Pxx_both] = GN(xg0_OG, thist, zhist, Ra, meas_data) 
+
+% Compare just rho vs. rho and theta 
+disp('The bearing data made the error covariance slightly smaller (slightly improved) for the Gauss-Newton approximated solution. ') 
+disp('Norm of error covariance using just range data: ')
+disp(norm(Pxx_rho)) 
+disp('Norm of error covariance using range and bearing data: ')
+disp(norm(Pxx_both))
+disp('Worth noting is the difference between the range-only and the range-and-bearing solution is: ')
+disp(xg0_soln_both - xg0_soln_rho) 
+disp('The largest difference, 1.62 meters, is not extremely large but can make a difference especially when trying to predict the dynamics of the missile.') 
+
+disp(' ')
 
 % just theta_a measurements 
+disp('Part d: Using just theta from radar A: ') 
 meas_data = 'theta_a'; 
-[Ra, zhist] = chol_factorize(meas_data, thist, sigma_rhoa, sigma_rhob, sigma_thetaa, sigma_thetab); 
-[xg0_sol, Pxx] = GN(xg0_sol, thist, zhist, Ra, meas_data) 
+[Ra, zhist] = build_Ra_z(meas_data, thist, sigma_rhoa, sigma_rhob, sigma_thetaa, sigma_thetab); 
+[xg0_soln_theta_a, Pxx_theta_a] = GN(xg0_soln_both, thist, zhist, Ra, meas_data) 
+
+% Jacobian H 
+x = sym('x', [4 1]); 
+syms la_sym lb_sym tj g 
+
+y1 = x(1) + x(2)*tj; 
+dy_1a = la_sym - y1; 
+dy_1b = lb_sym - y1; 
+dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
+
+h_rhoa   = sqrt( dy_1a^2 + dy_2^2 ); 
+h_rhob   = sqrt( dy_1b^2 + dy_2^2 ); 
+h_thetaa = atan2( dy_2, dy_1a ); 
+h_thetab = atan2( dy_2, dy_1b ); 
+
+Hhist_j = matlabFunction( [ jacobian(h_thetaa, x) ] );         
+
+H = []; 
+for j = 1:length(thist)
+    H = [ H; Hhist_j(la, thist(j), xg0_soln_both(1), xg0_soln_both(2), xg0_soln_both(3), xg0_soln_both(4)) ]; 
+end 
+disp('Bearing-only jacobian (H) using "best" estimate from part c:')
+H
+fprintf('The rank of H from bearing-only from radar A data = %d \n', rank(H))
+disp('Technically according to Matlab output, H is full rank which implies that the initial position and velocity estimate are observable.')
+disp('However, the elements of H that were derived with respect to position are nearly 0. You can get velocity but not position from bearing (angle) measurements.')
+disp('If the position differential elements of H were to go to 0, then the rank of H would be 2.') 
+disp(' ')
+
+% theta_a estimation error covariance 
+disp('Part e: bearing-only estimate error covariance')
+disp('The estimation of the solution using just theta from radar A is useless.')
+disp('The diagonal elements of the estimation error covariance are much larger than the diagonal elements of the measurement covariance.')
+disp('See the ratios of the diagonal elements below: ')
+Pxx_theta_a(1,1) / sigma_rhoa^2
+Pxx_theta_a(2,2) / sigma_thetaa^2
+Pxx_theta_a(3,3) / sigma_rhob^2
+Pxx_theta_a(4,4) / sigma_thetab^2
+
 
 %% subfunctions 
 
@@ -131,6 +190,7 @@ function H = Hhist(x, thist, Hhist_j, meas_data)
 end 
 
 function [Jg, h, H, dx] = cost_fn(xg, thist, zhist, Ra, Hhist_j, meas_data)
+% Cost function 
 
     % Normalized NL at guess 
     h = inv(Ra') * h_NL(xg, thist, meas_data); 
@@ -150,57 +210,55 @@ function [Jg, h, H, dx] = cost_fn(xg, thist, zhist, Ra, Hhist_j, meas_data)
 end 
 
 function xg0_OG = find_xg0(rhoahist, rhobhist, thist, i, f)
+% Initial condition guessing (crude) using just range data 
 
-clear x 
+    % "initial" measurements 
+    p_ai = rhoahist(i); 
+    p_bi = rhobhist(i); 
 
-% "initial" measurements 
-% i = 3; 
-p_ai = rhoahist(i); 
-p_bi = rhobhist(i); 
+    global la lb 
 
-global la lb 
+    y_1i = 1/( 2*lb - 2*la ) * ( p_ai^2 - la^2 - p_bi^2 + lb^2); 
+    y_2i = sqrt( p_ai^2 - ( la - y_1i )^2 ); 
 
-y_1i = 1/( 2*lb - 2*la ) * ( p_ai^2 - la^2 - p_bi^2 + lb^2); 
-y_2i = sqrt( p_ai^2 - ( la - y_1i )^2 ); 
+    % last measurements 
+    p_af = rhoahist(f); 
+    p_bf = rhobhist(f); 
 
-% last measurements 
-% f = 26; 
-p_af = rhoahist(f); 
-p_bf = rhobhist(f); 
+    y_1f = 1/( 2*lb - 2*la ) * ( p_af^2 - la^2 - p_bf^2 + lb^2 ); 
+    y_2f = sqrt( p_af^2 - ( la - y_1f )^2 ); 
 
-y_1f = 1/( 2*lb - 2*la ) * ( p_af^2 - la^2 - p_bf^2 + lb^2 ); 
-y_2f = sqrt( p_af^2 - ( la - y_1f )^2 ); 
+    % guessing x1 (y10) and x2 (v10) 
+    % y_1s = (1)*y10 + (ts)*v10 
+    % y_1f = (1)*y10 + (tf)*v10 
+    ti = thist(i); tf = thist(f); 
+    x = pinv( [ 1 ti; 1 tf ] ) * [y_1i; y_1f]; 
+    y_10 = x(1); 
+    v_10 = x(2); 
 
-% guessing x1 (y10) and x2 (v10) 
-% y_1s = (1)*y10 + (ts)*v10 
-% y_1f = (1)*y10 + (tf)*v10 
-ti = thist(i); tf = thist(f); 
-x = pinv( [ 1 ti; 1 tf ] ) * [y_1i; y_1f]; 
-y_10 = x(1); 
-v_10 = x(2); 
+    % guessing x3 (y20) and x4 (v20) 
+    % y_2s = (1)*y20 + (ts)*v20 - 4.9ts^2
+    % y_2f = (1)*y20 + (tf)*v20 - 4.9tf^2
+    x = pinv( [ 1 ti; 1 tf ] ) * ( [ y_2i; y_2f ] + 4.9 * [ ti^2; tf^2 ] ); 
+    y_20 = x(1); 
+    v_20 = x(2); 
 
-% guessing x3 (y20) and x4 (v20) 
-% y_2s = (1)*y20 + (ts)*v20 - 4.9ts^2
-% y_2f = (1)*y20 + (tf)*v20 - 4.9tf^2
-x = pinv( [ 1 ti; 1 tf ] ) * ( [ y_2i; y_2f ] + 4.9 * [ ti^2; tf^2 ] ); 
-y_20 = x(1); 
-v_20 = x(2); 
+    % SANITY CHECK linear algebra 
+    t = [ 0; -0.5 * 9.8 * ti^2; 0; -0.5 * 9.8 * tf^2 ]; 
+    y = [y_1i; y_2i; y_1f; y_2f]; 
+    A = [1, ti, 0, 0; 
+         0, 0, 1, ti; 
+         1, tf, 0, 0; 
+         0, 0, 1, tf ]; 
+    x = pinv( A ) * (y - t); 
 
-% SANITY CHECK linear algebra 
-t = [ 0; -0.5 * 9.8 * ti^2; 0; -0.5 * 9.8 * tf^2 ]; 
-y = [y_1i; y_2i; y_1f; y_2f]; 
-A = [1, ti, 0, 0; 
-     0, 0, 1, ti; 
-     1, tf, 0, 0; 
-     0, 0, 1, tf ]; 
-x = pinv( A ) * (y - t); 
-
-% First guess 
-xg0_OG = [y_10; v_10; y_20; v_20]; 
+    % First guess 
+    xg0_OG = [y_10; v_10; y_20; v_20]; 
 
 end 
 
-function [Ra, zhist] = chol_factorize(meas_data, thist, sigma_rhoa, sigma_rhob, sigma_thetaa, sigma_thetab)
+function [Ra, zhist] = build_Ra_z(meas_data, thist, sigma_rhoa, sigma_rhob, sigma_thetaa, sigma_thetab)
+% Build Ra and measurement vector for Gauss-Newton method 
 
     global rhoahist thetaahist rhobhist thetabhist 
 
@@ -264,8 +322,8 @@ function [Ra, zhist] = chol_factorize(meas_data, thist, sigma_rhoa, sigma_rhob, 
 
 end 
 
-% GAUSS-NEWTON METHOD 
 function [xg0_sol, Pxx] = GN(xg0_OG, thist, zhist, Ra, meas_data) 
+% GAUSS-NEWTON METHOD 
 
     xg0 = xg0_OG; 
 
@@ -298,9 +356,6 @@ function [xg0_sol, Pxx] = GN(xg0_OG, thist, zhist, Ra, meas_data)
             Hhist_j = matlabFunction( [ jacobian(h_rhoa, x); jacobian(h_thetaa, x); jacobian(h_rhob, x); jacobian(h_thetab, x) ] ); 
 
     end 
-
-    % if no symbolic toolbox - here is Hhist_j copied from comand window 
-    % Hhist_j = @(la_sym,lb_sym,tj,x1,x2,x3,x4)reshape([(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(la_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(lb_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-la_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-lb_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2)],[4,4]); 
 
     %% First cost function 
 
@@ -357,20 +412,11 @@ function [xg0_sol, Pxx] = GN(xg0_OG, thist, zhist, Ra, meas_data)
 
     end 
 
+    % Gauss-Newton approximated solution 
     xg0_sol = xg0; 
 
-%     %% output 
-% 
-%     % original initial guess 
-%     xg0_OG 
-% 
-%     % solution to initial guess 
-%     xg0_sol
-% 
     % covariance 
     Pxx = inv(H' * H); 
-% 
-%     norm(Pxx) 
 
 end 
   
