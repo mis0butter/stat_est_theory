@@ -1,0 +1,640 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>set4_prob4_rhoandtheta_exam2</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-10"><meta name="DC.source" content="set4_prob4_rhoandtheta_exam2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">set 4, prob 4 (Exam 2 version)</a></li><li><a href="#2">Initial condition guessing</a></li><li><a href="#3">this one looks good</a></li><li><a href="#4">Jacobian H</a></li><li><a href="#5">First cost function</a></li><li><a href="#6">The while loop: Jgnew &gt; Jg</a></li><li><a href="#8">While loop: "New" first guess - saved from last iteration</a></li><li><a href="#10">output</a></li><li><a href="#11">subfunctions</a></li></ul></div><h2 id="1">set 4, prob 4 (Exam 2 version)</h2><pre class="codeinput">clear; clc
+
+<span class="comment">% loads rhoahist, rhobhist, and thist</span>
+<span class="comment">% load radarmeasdata_missle.mat</span>
+load <span class="string">radarmeasdata_missile_new.mat</span>
+
+<span class="keyword">global</span> la lb
+la = 3.5e5;
+lb = 4.0e5;
+
+sigma_rhoa = 10;
+sigma_rhob = 30;
+sigma_thetaa = 0.01;
+sigma_thetab = 0.03;
+
+R_aj = zeros(4);
+R_aj(1,1) = sigma_rhoa^2;
+R_aj(2,2) = sigma_thetaa^2;
+R_aj(3,3) = sigma_rhob^2;
+R_aj(4,4) = sigma_thetab^2;
+
+<span class="comment">% Build full R matrix</span>
+R = zeros(length(thist));
+<span class="keyword">for</span> j = 1:length(thist)
+    R(4*j-3 : 4*j, 4*j-3 : 4*j) = R_aj;
+<span class="keyword">end</span>
+
+Ra = chol(R);
+
+<span class="comment">% build full zhist</span>
+zhist = [];
+<span class="keyword">for</span> j = 1:length(thist)
+    zhist = [ zhist; rhoahist(j); thetaahist(j); rhobhist(j); thetabhist(j) ];
+<span class="keyword">end</span>
+</pre><h2 id="2">Initial condition guessing</h2><pre class="codeinput">xg0_arr = [];
+<span class="comment">% First guess</span>
+<span class="keyword">for</span> i = 1:5
+    <span class="keyword">for</span> f = 23:28
+        xg0 = find_xg0(rhoahist, rhobhist, thist, i, f);
+        xg0_arr = [xg0_arr; xg0'];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+y = [xg0_arr(:,1), xg0_arr(:,3)];
+ftitle = <span class="string">'IC guessing: first 5 and last 5 range meas'</span>;
+figure(<span class="string">'name'</span>, ftitle);
+    subplot(2,1,1)
+        plot(y(:,1), y(:,2),<span class="string">'.'</span>)
+        grid <span class="string">on</span>; hold <span class="string">on</span>;
+        yline(0, <span class="string">'r'</span>)
+        xlabel(<span class="string">'y1'</span>); ylabel(<span class="string">'y2'</span>);
+        bigger_ylim; bigger_xlim
+        title(<span class="string">'Position'</span>);
+    subplot(2,1,2)
+        plot(xg0_arr(:,3), xg0_arr(:,4), <span class="string">'.'</span>);
+        grid <span class="string">on</span>; hold <span class="string">on</span>;
+        xlabel(<span class="string">'v1'</span>); ylabel(<span class="string">'v2'</span>);
+        bigger_ylim; bigger_xlim
+        title(<span class="string">'Velocity'</span>);
+    sgtitle(ftitle);
+</pre><pre class="codeoutput">Warning: Imaginary parts of complex X and/or Y arguments ignored. 
+Warning: Imaginary parts of complex X and/or Y arguments ignored. 
+</pre><img vspace="5" hspace="5" src="set4_prob4_rhoandtheta_exam2_01.png" alt=""> <h2 id="3">this one looks good</h2><pre class="codeinput">xg0_OG = find_xg0(rhoahist, rhobhist, thist, 3, 25);
+xg0 = xg0_OG;
+</pre><h2 id="4">Jacobian H</h2><pre class="codeinput">x = sym(<span class="string">'x'</span>, [4 1]);
+syms <span class="string">la_sym</span> <span class="string">lb_sym</span> <span class="string">tj</span> <span class="string">g</span>
+
+y1 = x(1) + x(2)*tj;
+dy_1a = la_sym - y1;
+dy_1b = lb_sym - y1;
+dy_2 = x(3) + tj * x(4) - 4.9*tj^2;
+
+h_rhoa   = sqrt( dy_1a^2 + dy_2^2 );
+h_rhob   = sqrt( dy_1b^2 + dy_2^2 );
+h_thetaa = atan2( dy_2, dy_1a );
+h_thetab = atan2( dy_2, dy_1b );
+
+<span class="comment">% inputs: la, lb, tj, x1, x2, x3, x4</span>
+Hhist_j = matlabFunction( [ jacobian(h_rhoa, x); jacobian(h_thetaa, x); jacobian(h_rhob, x); jacobian(h_thetab, x) ] );
+
+<span class="comment">% if no symbolic toolbox - here is Hhist_j copied from comand window</span>
+<span class="comment">% Hhist_j = @(la_sym,lb_sym,tj,x1,x2,x3,x4)reshape([(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(la_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(lb_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-la_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-lb_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2)],[4,4]);</span>
+</pre><h2 id="5">First cost function</h2><pre class="codeinput">[Jg, h, H, dx] = cost_fn(xg0, thist, zhist, Ra);
+
+<span class="comment">% first a step</span>
+a = 1;
+
+<span class="comment">% First step-size adjusted cost function</span>
+xg = xg0 + a * dx;
+[Jgnew, h, H, ~] = cost_fn(xg, thist, zhist, Ra);
+
+<span class="comment">% Gauss-Newton dx</span>
+<span class="comment">% dx = inv((H' * H)) * H' * (z - h);</span>
+</pre><h2 id="6">The while loop: Jgnew &gt; Jg</h2><pre class="codeinput">Jg_i = [];
+<span class="keyword">while</span> norm(dx) &gt; 1e-10
+</pre><pre class="codeinput">    <span class="keyword">while</span> Jgnew &gt;= Jg
+
+        <span class="comment">% Next a</span>
+        a = a/2;
+        <span class="keyword">if</span> a &lt; 0.001
+            <span class="keyword">break</span>; <span class="keyword">end</span>
+
+        <span class="comment">% Step size-adjusted guess and cost fn</span>
+        xg = xg0 + a * dx;
+        [Jgnew, h, H, ~] = cost_fn(xg, thist, zhist, Ra);
+
+    <span class="keyword">end</span>
+</pre><h2 id="8">While loop: "New" first guess - saved from last iteration</h2><pre class="codeinput"><span class="comment">%     if a &lt; eps</span>
+<span class="comment">%         break; end</span>
+
+    xg0 = xg;
+    Jg  = Jgnew;
+
+    <span class="comment">% Gauss-Newton dx (H, z, and h saved from last iteration)</span>
+    z  = inv(Ra') * zhist;
+    dx = inv((H' * H)) * H' * (z - h);
+
+    <span class="comment">% first a step</span>
+    a = 1;
+
+    <span class="comment">% "new" step-size adjusted guess</span>
+    xg = xg0 + a * dx;
+    [Jgnew, h, H, ~] = cost_fn(xg, thist, zhist, Ra);
+
+    Jg_i = [Jg_i; Jg];
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+xg0_sol = xg0;
+</pre><h2 id="10">output</h2><pre class="codeinput"><span class="comment">% original initial guess</span>
+xg0_OG
+
+<span class="comment">% Gauss-Newton approximated solution</span>
+xg0_sol
+
+<span class="comment">% covariance</span>
+Pxx = inv(H' * H)
+</pre><pre class="codeoutput">
+xg0_OG =
+
+          2019.29620390645
+           899.18143927834
+          2349.46128871635
+          1597.49910053977
+
+
+xg0_sol =
+
+          2009.37317814594
+          899.930080622059
+          2250.33006742259
+          1598.79191840316
+
+
+Pxx =
+
+  Columns 1 through 3
+
+          31.8997213721099         -0.30908532089346          64.0179446060091
+         -0.30908532089346        0.0211683191056676          2.16647104432631
+          64.0179446060091          2.16647104432631          721.526969961695
+        -0.520479035921301        0.0173132374010027        0.0216977157580697
+
+  Column 4
+
+        -0.520479035921301
+        0.0173132374010027
+        0.0216977157580697
+        0.0211932737104806
+
+</pre><h2 id="11">subfunctions</h2><pre class="codeinput"><span class="keyword">function</span> h = h_NL(x, t)
+<span class="comment">% Nonlinear measurement h</span>
+
+<span class="keyword">global</span> la lb
+
+    <span class="comment">% Initialize h</span>
+    h = [];
+
+    <span class="keyword">for</span> i = 1:length(t)
+
+        <span class="comment">% y1 = y10 + v10*t = x1 + x2*t</span>
+        y1 = x(1) + x(2)*t(i);
+        dy_1a = la - y1;
+        dy_1b = lb - y1;
+
+        <span class="comment">% y2 = y20 + v20*t - 0.5 * 9.8 * t^2</span>
+        dy_2 = x(3) + x(4)*t(i) - 4.9*t(i)^2;
+
+        h_rhoa   = sqrt( dy_1a^2 + dy_2^2 );
+        h_rhob   = sqrt( dy_1b^2 + dy_2^2 );
+        h_thetaa = atan2( dy_2, dy_1a );
+        h_thetab = atan2( dy_2, dy_1b );
+
+        <span class="comment">% Build nonlinear h from guess</span>
+        h = [h; h_rhoa; h_thetaa; h_rhob; h_thetab];
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> H = Hhist(x, thist)
+<span class="comment">% Full jacobian of h</span>
+
+    <span class="keyword">global</span> la lb
+
+    <span class="comment">% Copied from symbolic toolbox output</span>
+    Hhist_j = @(la_sym,lb_sym,tj,x1,x2,x3,x4)reshape([(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(la_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(lb_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-la_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-lb_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2)],[4,4]);
+
+    H = [];
+    <span class="keyword">for</span> j = 1:length(thist)
+
+        H = [ H; Hhist_j(la, lb, thist(j), x(1), x(2), x(3), x(4)) ];
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [Jg, h, H, dx] = cost_fn(xg, thist, zhist, Ra)
+
+    <span class="comment">% Normalized NL at guess</span>
+    h = inv(Ra') * h_NL(xg, thist);
+
+    <span class="comment">% Normalized jacobian at guess</span>
+    H = inv(Ra') * Hhist(xg, thist);
+
+    <span class="comment">% Normalized measurement</span>
+    z = inv(Ra') * zhist;
+
+    <span class="comment">% Gauss-Newton dx</span>
+    dx = inv((H' * H)) * H' * (z - h);
+
+    <span class="comment">% Cost function</span>
+    Jg = norm(z - h);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> xg0_OG = find_xg0(rhoahist, rhobhist, thist, i, f)
+
+clear <span class="string">x</span>
+
+<span class="comment">% "initial" measurements</span>
+<span class="comment">% i = 3;</span>
+p_ai = rhoahist(i);
+p_bi = rhobhist(i);
+
+<span class="keyword">global</span> la lb
+
+y_1i = 1/( 2*lb - 2*la ) * ( p_ai^2 - la^2 - p_bi^2 + lb^2);
+y_2i = sqrt( p_ai^2 - ( la - y_1i )^2 );
+
+<span class="comment">% last measurements</span>
+<span class="comment">% f = 26;</span>
+p_af = rhoahist(f);
+p_bf = rhobhist(f);
+
+y_1f = 1/( 2*lb - 2*la ) * ( p_af^2 - la^2 - p_bf^2 + lb^2 );
+y_2f = sqrt( p_af^2 - ( la - y_1f )^2 );
+
+<span class="comment">% guessing x1 (y10) and x2 (v10)</span>
+<span class="comment">% y_1s = (1)*y10 + (ts)*v10</span>
+<span class="comment">% y_1f = (1)*y10 + (tf)*v10</span>
+ti = thist(i); tf = thist(f);
+x = pinv( [ 1 ti; 1 tf ] ) * [y_1i; y_1f];
+y_10 = x(1);
+v_10 = x(2);
+
+<span class="comment">% guessing x3 (y20) and x4 (v20)</span>
+<span class="comment">% y_2s = (1)*y20 + (ts)*v20 - 4.9ts^2</span>
+<span class="comment">% y_2f = (1)*y20 + (tf)*v20 - 4.9tf^2</span>
+x = pinv( [ 1 ti; 1 tf ] ) * ( [ y_2i; y_2f ] + 4.9 * [ ti^2; tf^2 ] );
+y_20 = x(1);
+v_20 = x(2);
+
+<span class="comment">% SANITY CHECK linear algebra</span>
+t = [ 0; -0.5 * 9.8 * ti^2; 0; -0.5 * 9.8 * tf^2 ];
+y = [y_1i; y_2i; y_1f; y_2f];
+A = [1, ti, 0, 0;
+     0, 0, 1, ti;
+     1, tf, 0, 0;
+     0, 0, 1, tf ];
+x = pinv( A ) * (y - t);
+
+<span class="comment">% First guess</span>
+xg0_OG = [y_10; v_10; y_20; v_20];
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% set 4, prob 4 (Exam 2 version) 
+clear; clc 
+
+% loads rhoahist, rhobhist, and thist 
+% load radarmeasdata_missle.mat
+load radarmeasdata_missile_new.mat
+
+global la lb 
+la = 3.5e5; 
+lb = 4.0e5; 
+
+sigma_rhoa = 10; 
+sigma_rhob = 30; 
+sigma_thetaa = 0.01; 
+sigma_thetab = 0.03; 
+
+R_aj = zeros(4); 
+R_aj(1,1) = sigma_rhoa^2; 
+R_aj(2,2) = sigma_thetaa^2; 
+R_aj(3,3) = sigma_rhob^2; 
+R_aj(4,4) = sigma_thetab^2; 
+
+% Build full R matrix 
+R = zeros(length(thist)); 
+for j = 1:length(thist)
+    R(4*j-3 : 4*j, 4*j-3 : 4*j) = R_aj; 
+end 
+
+Ra = chol(R); 
+
+% build full zhist 
+zhist = []; 
+for j = 1:length(thist) 
+    zhist = [ zhist; rhoahist(j); thetaahist(j); rhobhist(j); thetabhist(j) ]; 
+end 
+
+%% Initial condition guessing 
+
+xg0_arr = []; 
+% First guess 
+for i = 1:5
+    for f = 23:28 
+        xg0 = find_xg0(rhoahist, rhobhist, thist, i, f); 
+        xg0_arr = [xg0_arr; xg0']; 
+    end
+end
+
+y = [xg0_arr(:,1), xg0_arr(:,3)]; 
+ftitle = 'IC guessing: first 5 and last 5 range meas'; 
+figure('name', ftitle); 
+    subplot(2,1,1) 
+        plot(y(:,1), y(:,2),'.')
+        grid on; hold on; 
+        yline(0, 'r') 
+        xlabel('y1'); ylabel('y2'); 
+        bigger_ylim; bigger_xlim 
+        title('Position'); 
+    subplot(2,1,2) 
+        plot(xg0_arr(:,3), xg0_arr(:,4), '.'); 
+        grid on; hold on; 
+        xlabel('v1'); ylabel('v2'); 
+        bigger_ylim; bigger_xlim 
+        title('Velocity'); 
+    sgtitle(ftitle); 
+        
+%% this one looks good 
+
+xg0_OG = find_xg0(rhoahist, rhobhist, thist, 3, 25); 
+xg0 = xg0_OG; 
+
+%% Jacobian H 
+
+x = sym('x', [4 1]); 
+syms la_sym lb_sym tj g 
+
+y1 = x(1) + x(2)*tj; 
+dy_1a = la_sym - y1; 
+dy_1b = lb_sym - y1; 
+dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
+
+h_rhoa   = sqrt( dy_1a^2 + dy_2^2 ); 
+h_rhob   = sqrt( dy_1b^2 + dy_2^2 ); 
+h_thetaa = atan2( dy_2, dy_1a ); 
+h_thetab = atan2( dy_2, dy_1b ); 
+
+% inputs: la, lb, tj, x1, x2, x3, x4 
+Hhist_j = matlabFunction( [ jacobian(h_rhoa, x); jacobian(h_thetaa, x); jacobian(h_rhob, x); jacobian(h_thetab, x) ] ); 
+
+% if no symbolic toolbox - here is Hhist_j copied from comand window 
+% Hhist_j = @(la_sym,lb_sym,tj,x1,x2,x3,x4)reshape([(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(la_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(lb_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-la_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-lb_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2)],[4,4]); 
+
+%% First cost function 
+
+[Jg, h, H, dx] = cost_fn(xg0, thist, zhist, Ra); 
+
+% first a step 
+a = 1; 
+
+% First step-size adjusted cost function 
+xg = xg0 + a * dx; 
+[Jgnew, h, H, ~] = cost_fn(xg, thist, zhist, Ra); 
+
+% Gauss-Newton dx 
+% dx = inv((H' * H)) * H' * (z - h); 
+
+%% The while loop: Jgnew > Jg 
+
+Jg_i = []; 
+while norm(dx) > 1e-10
+    
+    while Jgnew >= Jg 
+
+        % Next a 
+        a = a/2; 
+        if a < 0.001
+            break; end 
+
+        % Step size-adjusted guess and cost fn 
+        xg = xg0 + a * dx; 
+        [Jgnew, h, H, ~] = cost_fn(xg, thist, zhist, Ra); 
+
+    end 
+    
+    %% While loop: "New" first guess - saved from last iteration 
+        
+%     if a < eps
+%         break; end 
+    
+    xg0 = xg; 
+    Jg  = Jgnew; 
+    
+    % Gauss-Newton dx (H, z, and h saved from last iteration) 
+    z  = inv(Ra') * zhist; 
+    dx = inv((H' * H)) * H' * (z - h); 
+
+    % first a step 
+    a = 1; 
+
+    % "new" step-size adjusted guess 
+    xg = xg0 + a * dx; 
+    [Jgnew, h, H, ~] = cost_fn(xg, thist, zhist, Ra); 
+    
+    Jg_i = [Jg_i; Jg]; 
+
+end 
+
+xg0_sol = xg0; 
+
+%% output 
+
+% original initial guess 
+xg0_OG 
+
+% Gauss-Newton approximated solution 
+xg0_sol
+
+% covariance 
+Pxx = inv(H' * H)
+
+%% subfunctions 
+
+function h = h_NL(x, t) 
+% Nonlinear measurement h 
+    
+global la lb 
+
+    % Initialize h 
+    h = []; 
+    
+    for i = 1:length(t) 
+
+        % y1 = y10 + v10*t = x1 + x2*t         
+        y1 = x(1) + x(2)*t(i); 
+        dy_1a = la - y1; 
+        dy_1b = lb - y1; 
+        
+        % y2 = y20 + v20*t - 0.5 * 9.8 * t^2 
+        dy_2 = x(3) + x(4)*t(i) - 4.9*t(i)^2; 
+
+        h_rhoa   = sqrt( dy_1a^2 + dy_2^2 ); 
+        h_rhob   = sqrt( dy_1b^2 + dy_2^2 ); 
+        h_thetaa = atan2( dy_2, dy_1a ); 
+        h_thetab = atan2( dy_2, dy_1b ); 
+
+        % Build nonlinear h from guess 
+        h = [h; h_rhoa; h_thetaa; h_rhob; h_thetab]; 
+        
+    end 
+
+end 
+  
+function H = Hhist(x, thist) 
+% Full jacobian of h 
+
+    global la lb 
+
+    % Copied from symbolic toolbox output 
+    Hhist_j = @(la_sym,lb_sym,tj,x1,x2,x3,x4)reshape([(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(la_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(lb_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,-(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-la_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-lb_sym+x1+tj.*x2),((imag(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))-real(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,-(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(la_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(la_sym)+imag(x1)-real(x3)).^2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),-((real(tj)./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1))+imag(tj).*(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).*1.0./(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2).*(imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2)./((imag(tj.^2).*(-4.9e+1./1.0e+1)+imag(tj.*x4)+real(tj.*x2)-real(lb_sym)+imag(x3)+real(x1)).^2+(real(tj.^2).*(4.9e+1./1.0e+1)+imag(tj.*x2)-real(tj.*x4)-imag(lb_sym)+imag(x1)-real(x3)).^2)],[4,4]); 
+
+    H = []; 
+    for j = 1:length(thist)
+
+        H = [ H; Hhist_j(la, lb, thist(j), x(1), x(2), x(3), x(4)) ]; 
+
+    end 
+    
+end 
+
+function [Jg, h, H, dx] = cost_fn(xg, thist, zhist, Ra)
+
+    % Normalized NL at guess 
+    h = inv(Ra') * h_NL(xg, thist); 
+
+    % Normalized jacobian at guess 
+    H = inv(Ra') * Hhist(xg, thist); 
+
+    % Normalized measurement 
+    z = inv(Ra') * zhist; 
+
+    % Gauss-Newton dx 
+    dx = inv((H' * H)) * H' * (z - h); 
+
+    % Cost function 
+    Jg = norm(z - h); 
+
+end 
+
+function xg0_OG = find_xg0(rhoahist, rhobhist, thist, i, f)
+
+clear x 
+
+% "initial" measurements 
+% i = 3; 
+p_ai = rhoahist(i); 
+p_bi = rhobhist(i); 
+
+global la lb 
+
+y_1i = 1/( 2*lb - 2*la ) * ( p_ai^2 - la^2 - p_bi^2 + lb^2); 
+y_2i = sqrt( p_ai^2 - ( la - y_1i )^2 ); 
+
+% last measurements 
+% f = 26; 
+p_af = rhoahist(f); 
+p_bf = rhobhist(f); 
+
+y_1f = 1/( 2*lb - 2*la ) * ( p_af^2 - la^2 - p_bf^2 + lb^2 ); 
+y_2f = sqrt( p_af^2 - ( la - y_1f )^2 ); 
+
+% guessing x1 (y10) and x2 (v10) 
+% y_1s = (1)*y10 + (ts)*v10 
+% y_1f = (1)*y10 + (tf)*v10 
+ti = thist(i); tf = thist(f); 
+x = pinv( [ 1 ti; 1 tf ] ) * [y_1i; y_1f]; 
+y_10 = x(1); 
+v_10 = x(2); 
+
+% guessing x3 (y20) and x4 (v20) 
+% y_2s = (1)*y20 + (ts)*v20 - 4.9ts^2
+% y_2f = (1)*y20 + (tf)*v20 - 4.9tf^2
+x = pinv( [ 1 ti; 1 tf ] ) * ( [ y_2i; y_2f ] + 4.9 * [ ti^2; tf^2 ] ); 
+y_20 = x(1); 
+v_20 = x(2); 
+
+% SANITY CHECK linear algebra 
+t = [ 0; -0.5 * 9.8 * ti^2; 0; -0.5 * 9.8 * tf^2 ]; 
+y = [y_1i; y_2i; y_1f; y_2f]; 
+A = [1, ti, 0, 0; 
+     0, 0, 1, ti; 
+     1, tf, 0, 0; 
+     0, 0, 1, tf ]; 
+x = pinv( A ) * (y - t); 
+
+% First guess 
+xg0_OG = [y_10; v_10; y_20; v_20]; 
+
+end 
+
+
+  
+      
+
+##### SOURCE END #####
+--></body></html>

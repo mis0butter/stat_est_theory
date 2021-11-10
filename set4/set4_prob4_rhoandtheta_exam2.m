@@ -1,4 +1,4 @@
-%% set 4, prob 4 
+%% set 4, prob 4 (Exam 2 version) 
 clear; clc 
 
 % loads rhoahist, rhobhist, and thist 
@@ -40,29 +40,32 @@ xg0_arr = [];
 % First guess 
 for i = 1:5
     for f = 23:28 
-        sprintf('i = %d, f = %d', i, f)
         xg0 = find_xg0(rhoahist, rhobhist, thist, i, f); 
         xg0_arr = [xg0_arr; xg0']; 
     end
 end
 
 y = [xg0_arr(:,1), xg0_arr(:,3)]; 
-figure
+ftitle = 'IC guessing: first 5 and last 5 range meas'; 
+figure('name', ftitle); 
     subplot(2,1,1) 
         plot(y(:,1), y(:,2),'.')
         grid on; hold on; 
         yline(0, 'r') 
         xlabel('y1'); ylabel('y2'); 
         bigger_ylim; bigger_xlim 
+        title('Position'); 
     subplot(2,1,2) 
         plot(xg0_arr(:,3), xg0_arr(:,4), '.'); 
         grid on; hold on; 
         xlabel('v1'); ylabel('v2'); 
         bigger_ylim; bigger_xlim 
+        title('Velocity'); 
+    sgtitle(ftitle); 
         
 %% this one looks good 
 
-xg0_OG = find_xg0(rhoahist, rhobhist, thist, 3, 25) 
+xg0_OG = find_xg0(rhoahist, rhobhist, thist, 3, 25); 
 xg0 = xg0_OG; 
 
 %% Jacobian H 
@@ -103,7 +106,7 @@ xg = xg0 + a * dx;
 %% The while loop: Jgnew > Jg 
 
 Jg_i = []; 
-while norm(dx) > 0.0000001 
+while norm(dx) > 1e-10
     
     while Jgnew >= Jg 
 
@@ -148,7 +151,7 @@ xg0_sol = xg0;
 % original initial guess 
 xg0_OG 
 
-% solution to initial guess 
+% Gauss-Newton approximated solution 
 xg0_sol
 
 % covariance 

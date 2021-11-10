@@ -27,32 +27,6 @@ zhist = [];
 for j = 1:length(thist) 
     zhist = [ zhist; thetaahist(j) ]; 
 end 
-
-%% Initial condition guessing 
-
-xg0_arr = []; 
-% First guess 
-for i = 1:5
-    for f = 23:28 
-        sprintf('i = %d, f = %d', i, f)
-        xg0 = find_xg0(rhoahist, rhobhist, thist, i, f); 
-        xg0_arr = [xg0_arr; xg0']; 
-    end
-end
-
-y = [xg0_arr(:,1), xg0_arr(:,3)]; 
-figure
-    subplot(2,1,1) 
-        plot(y(:,1), y(:,2),'.')
-        grid on; hold on; 
-        yline(0, 'r') 
-        xlabel('y1'); ylabel('y2'); 
-        bigger_ylim; bigger_xlim 
-    subplot(2,1,2) 
-        plot(xg0_arr(:,3), xg0_arr(:,4), '.'); 
-        grid on; hold on; 
-        xlabel('v1'); ylabel('v2'); 
-        bigger_ylim; bigger_xlim 
         
 %% best initial estimate from rhoandtheta
 
@@ -98,7 +72,7 @@ xg = xg0 + a * dx;
 %% The while loop: Jgnew > Jg 
 
 Jg_i = []; 
-while norm(dx) > 0.0000001 
+while norm(dx) > 1e-10
     
     while Jgnew >= Jg 
 
@@ -143,7 +117,7 @@ xg0_sol = xg0;
 % original initial guess 
 xg0_OG 
 
-% solution to initial guess 
+% Gauss-Newton approximated solution 
 xg0_sol
 
 % covariance 

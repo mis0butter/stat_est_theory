@@ -9,10 +9,10 @@ global la lb
 la = 3.5e5; 
 lb = 4.0e5; 
 
-o_pa = 10; 
-o_pb = 30; 
+sigma_rhoa = 10; 
+sigma_rhob = 30; 
 
-R_j = [o_pa^2 0; 0 o_pb^2]; 
+R_j = [sigma_rhoa^2 0; 0 sigma_rhob^2]; 
 
 % Build full R matrix 
 R = zeros(length(thist)); 
@@ -41,7 +41,8 @@ for i = 1:5
 end
 
 y = [xg0_arr(:,1), xg0_arr(:,3)]; 
-figure
+ftitle = 'IC guessing: first 5 and last 5 range meas'; 
+figure('name', ftitle); 
     subplot(2,1,1) 
         plot(y(:,1), y(:,2),'.')
         grid on; hold on; 
@@ -53,27 +54,28 @@ figure
         grid on; hold on; 
         xlabel('v1'); ylabel('v2'); 
         bigger_ylim; bigger_xlim 
+    title(ftitle); 
         
 %% this one looks good 
 
-xg0_OG = find_xg0(rhoahist, rhobhist, thist, 3, 25) 
+xg0_OG = find_xg0(rhoahist, rhobhist, thist, 3, 25); 
 xg0 = xg0_OG; 
 
 %% Jacobian H 
 
-% x = sym('x', [4 1]); 
-% syms la_sym lb_sym tj g 
-% 
-% y1 = x(1) + x(2)*tj; 
-% dy_1a = la_sym - y1; 
-% dy_1b = lb_sym - y1; 
-% dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
-% 
-% ha = sqrt( dy_1a^2 + dy_2^2 ); 
-% hb = sqrt( dy_1b^2 + dy_2^2 ); 
-% 
-% % inputs: la, lb, tj, x1, x2, x3, x4 
-% Hhist_j = matlabFunction( [ jacobian(ha, x); jacobian(hb, x) ] ); 
+x = sym('x', [4 1]); 
+syms la_sym lb_sym tj g 
+
+y1 = x(1) + x(2)*tj; 
+dy_1a = la_sym - y1; 
+dy_1b = lb_sym - y1; 
+dy_2 = x(3) + tj * x(4) - 4.9*tj^2; 
+
+ha = sqrt( dy_1a^2 + dy_2^2 ); 
+hb = sqrt( dy_1b^2 + dy_2^2 ); 
+
+% inputs: la, lb, tj, x1, x2, x3, x4 
+Hhist_j = matlabFunction( [ jacobian(ha, x); jacobian(hb, x) ] ); 
 
 % if no symbolic toolbox - here is Hhist_j copied from comand window 
 % Hhist_j = @(la_sym,lb_sym,tj,x1,x2,x3,x4)reshape([(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(la_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(lb_sym.*-2.0+x1.*2.0+tj.*x2.*2.0))./2.0,tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-la_sym+x1+tj.*x2),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(-lb_sym+x1+tj.*x2),(1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,(1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3.*2.0+tj.*x4.*2.0-tj.^2.*(4.9e+1./5.0)))./2.0,tj.*1.0./sqrt((-la_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)),tj.*1.0./sqrt((-lb_sym+x1+tj.*x2).^2+(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1)).^2).*(x3+tj.*x4-tj.^2.*(4.9e+1./1.0e+1))],[2,4]); 
@@ -95,7 +97,7 @@ xg = xg0 + a * dx;
 %% The while loop: Jgnew > Jg 
 
 Jg_i = []; 
-while norm(dx) > 0.0000001 
+while norm(dx) > 1e-10
     
     while Jgnew >= Jg 
 
@@ -140,7 +142,7 @@ xg0_sol = xg0;
 % original initial guess 
 xg0_OG 
 
-% solution to initial guess 
+% Gauss-Newton approximated solution 
 xg0_sol
 
 % covariance 
