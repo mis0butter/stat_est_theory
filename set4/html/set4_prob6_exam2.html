@@ -1,0 +1,404 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>set4_prob6_exam2</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-09"><meta name="DC.source" content="set4_prob6_exam2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">set 4, prob 6</a></li><li><a href="#2">GN method</a></li><li><a href="#3">cost function plot</a></li><li><a href="#4">subfunctions</a></li><li><a href="#6">First cost function and step size-adjusted cost function</a></li><li><a href="#7">The while loop</a></li></ul></div><h2 id="1">set 4, prob 6</h2><pre class="codeinput">clear; clc
+
+z = 0;
+
+<span class="comment">% First guess</span>
+xg0_OG = 1.5 ;
+xg0 = xg0_OG ;
+</pre><h2 id="2">GN method</h2><pre class="codeinput"><span class="comment">% no step size adjustment</span>
+a_flag = 0;
+[xg0_a0, Jg_a0] = GN(a_flag, xg0, z);
+
+<span class="comment">% step size adjustment</span>
+a_flag = 1;
+[xg0_a1, Jg_a1] = GN(a_flag, xg0, z);
+
+<span class="comment">% original initial guess</span>
+xg0_OG
+
+<span class="comment">% solution to initial guess</span>
+xg0_a1(end)
+
+<span class="comment">% covariance</span>
+[~, ~, H, ~] = cost_fn(xg0_a1(end), z);
+Pxx = inv(H' * H)
+
+clear <span class="string">Jg</span>
+x = [-6 : 0.1 : 6];
+<span class="keyword">for</span> i = 1:length(x)
+    Jg(i) = cost_fn( x(i), z);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+xg0_OG =
+
+                       1.5
+
+
+ans =
+
+     -1.49877953906259e-10
+
+
+Pxx =
+
+     1
+
+</pre><h2 id="3">cost function plot</h2><p>The cost trajectory without step size adjustment begins to diverge immediately. The cost function (norm of the difference between the measurement, z, and the measurement model, h(x) = atan(x)) asymptotically reaches its max value after just 5 iterations. The step-size adjusted method achives the converged solution after just 3 iterations (of the outer loop). The crude step-size adjustment is sufficient to avoid divergence of the Gauss-Newton algorithm. To choose the step size adjustment more nearly optimally, one can take the derivative of the cost function with respect to a (the step size adjustment variable) and solve for a.</p><pre class="codeinput">ftitle = <span class="string">'Cost function '</span>;
+    figure(<span class="string">'name'</span>, ftitle)
+    plot(x, Jg, <span class="string">':'</span>);
+    hold <span class="string">on</span>; grid <span class="string">on</span>;
+    plot(xg0_a0(1:5), Jg_a0(1:5), <span class="string">'r'</span>);
+    plot(xg0_a1, Jg_a1, <span class="string">'b'</span>);
+    legend(<span class="string">'Cost fn'</span>, <span class="string">'no step adj'</span>, <span class="string">'step adj'</span>, <span class="string">'location'</span>, <span class="string">'best'</span>)
+    xlim([-6 6])
+    xlabel(<span class="string">'x'</span>);
+    ylabel(<span class="string">'Jg'</span>);
+    title(ftitle);
+</pre><img vspace="5" hspace="5" src="set4_prob6_exam2_01.png" alt=""> <h2 id="4">subfunctions</h2><pre class="codeinput"><span class="keyword">function</span> h = h_NL(x)
+<span class="comment">% Nonlinear measurement h</span>
+
+    h = atan(x);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> H = H_NL(x)
+<span class="comment">% Full jacobian of h</span>
+
+<span class="comment">%     H = (sec(x)).^2;</span>
+    H = 1 / (1 + x^2);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [Jg, h, H, dx] = cost_fn(xg, z)
+
+    <span class="comment">% NL at guess</span>
+    h = h_NL(xg);
+
+    <span class="comment">% jacobian at guess</span>
+    H = H_NL(xg);
+
+    <span class="comment">% Cost function</span>
+    Jg = norm(z - h);
+
+    <span class="comment">% Gauss-Newton dx</span>
+    dx = inv((H' * H)) * H' * (z - h);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [xg0_i, Jg_i] = GN(a_flag, xg0, z)
+</pre><h2 id="6">First cost function and step size-adjusted cost function</h2><pre class="codeinput">    <span class="comment">% First NL, jacobian, and cost fn at guess</span>
+    [Jg, h, H, dx] = cost_fn(xg0, z);
+
+    <span class="comment">% first a step</span>
+    a = 1;
+
+    <span class="comment">% First new cost function</span>
+    xg = xg0 + a * dx;
+
+    <span class="comment">% First new NL, jacobian, and cost fn at guess</span>
+    [Jgnew, h, H, ~] = cost_fn(xg, z);
+</pre><h2 id="7">The while loop</h2><pre class="codeinput">    i_dx = 0;
+    i_Jg = 0;
+    Jg_i = [];
+    xg0_i = [];
+
+    <span class="comment">% Outer loop: norm(dx) &gt; e</span>
+    <span class="keyword">while</span> norm(dx) &gt; 0.000001
+
+        <span class="keyword">if</span> a_flag == 1
+
+            <span class="comment">% Inner loop: Jgnew &gt;= Jg</span>
+            <span class="keyword">while</span> Jgnew &gt;= Jg
+
+                <span class="comment">% Next a</span>
+                a = a/2;
+                <span class="keyword">if</span> a &lt; eps
+                    <span class="keyword">break</span>
+                <span class="keyword">end</span>
+
+                <span class="comment">% Adjust step size and update cost fn</span>
+                xg = xg0 + a * dx;
+                [Jgnew, h, H, ~] = cost_fn(xg, z);
+
+                <span class="comment">% increase inner loop count</span>
+                i_Jg = i_Jg + 1;
+
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">% Back to outer loop: norm(idx) &gt; e</span>
+        <span class="keyword">if</span> a &lt; eps
+            <span class="keyword">break</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">% Next guess point</span>
+        xg0 = xg;
+        Jg = Jgnew;
+
+        <span class="comment">% Gauss-Newton dx (H, z, and h saved from last iteration)</span>
+        dx = inv((H' * H)) * H' * (z - h);
+
+        <span class="comment">% first a step</span>
+        a = 1;
+
+        <span class="comment">% Next step-size adjusted guess</span>
+        xg = xg0 + a * dx;
+
+        [Jgnew, h, H, ~] = cost_fn(xg, z);
+
+        <span class="comment">% Increase outer loop count and populate Jg, xg0 trajectory</span>
+        i_dx = i_dx + 1;
+        Jg_i = [Jg_i; Jg];
+        xg0_i = [xg0_i; xg0];
+
+    <span class="keyword">end</span>
+</pre><pre class="codeoutput">Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+Warning: Matrix is singular to working precision. 
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% set 4, prob 6 
+clear; clc 
+
+z = 0; 
+
+% First guess 
+xg0_OG = 1.5 ; 
+xg0 = xg0_OG ; 
+
+%% GN method 
+
+% no step size adjustment 
+a_flag = 0; 
+[xg0_a0, Jg_a0] = GN(a_flag, xg0, z); 
+
+% step size adjustment 
+a_flag = 1; 
+[xg0_a1, Jg_a1] = GN(a_flag, xg0, z); 
+
+% original initial guess 
+xg0_OG 
+
+% solution to initial guess 
+xg0_a1(end) 
+
+% covariance 
+[~, ~, H, ~] = cost_fn(xg0_a1(end), z); 
+Pxx = inv(H' * H)
+
+clear Jg
+x = [-6 : 0.1 : 6]; 
+for i = 1:length(x) 
+    Jg(i) = cost_fn( x(i), z); 
+end 
+
+%% cost function plot 
+% The cost trajectory without step size adjustment begins to diverge 
+% immediately. The cost function (norm of the difference between the 
+% measurement, z, and the measurement model, h(x) = atan(x)) asymptotically 
+% reaches its max value after just 5 iterations. The step-size adjusted 
+% method achives the converged solution after just 3 iterations (of the 
+% outer loop). The crude step-size adjustment is sufficient to avoid 
+% divergence of the Gauss-Newton algorithm. To choose the step size
+% adjustment more nearly optimally, one can take the derivative of the cost 
+% function with respect to a (the step size adjustment variable) and solve 
+% for a. 
+
+ftitle = 'Cost function '; 
+    figure('name', ftitle)
+    plot(x, Jg, ':');
+    hold on; grid on; 
+    plot(xg0_a0(1:5), Jg_a0(1:5), 'r'); 
+    plot(xg0_a1, Jg_a1, 'b'); 
+    legend('Cost fn', 'no step adj', 'step adj', 'location', 'best')
+    xlim([-6 6])
+    xlabel('x'); 
+    ylabel('Jg'); 
+    title(ftitle); 
+
+%% subfunctions 
+
+function h = h_NL(x) 
+% Nonlinear measurement h 
+    
+    h = atan(x); 
+
+end 
+  
+function H = H_NL(x) 
+% Full jacobian of h 
+
+%     H = (sec(x)).^2; 
+    H = 1 / (1 + x^2); 
+    
+end 
+
+function [Jg, h, H, dx] = cost_fn(xg, z)
+
+    % NL at guess 
+    h = h_NL(xg); 
+
+    % jacobian at guess 
+    H = H_NL(xg); 
+
+    % Cost function 
+    Jg = norm(z - h); 
+    
+    % Gauss-Newton dx 
+    dx = inv((H' * H)) * H' * (z - h); 
+
+end 
+
+function [xg0_i, Jg_i] = GN(a_flag, xg0, z) 
+
+
+    %% First cost function and step size-adjusted cost function 
+
+    % First NL, jacobian, and cost fn at guess 
+    [Jg, h, H, dx] = cost_fn(xg0, z); 
+
+    % first a step 
+    a = 1; 
+
+    % First new cost function 
+    xg = xg0 + a * dx; 
+
+    % First new NL, jacobian, and cost fn at guess 
+    [Jgnew, h, H, ~] = cost_fn(xg, z); 
+
+    %% The while loop
+
+    i_dx = 0; 
+    i_Jg = 0; 
+    Jg_i = []; 
+    xg0_i = []; 
+
+    % Outer loop: norm(dx) > e
+    while norm(dx) > 0.000001 
+
+        if a_flag == 1
+
+            % Inner loop: Jgnew >= Jg 
+            while Jgnew >= Jg 
+
+                % Next a 
+                a = a/2; 
+                if a < eps 
+                    break
+                end 
+
+                % Adjust step size and update cost fn 
+                xg = xg0 + a * dx; 
+                [Jgnew, h, H, ~] = cost_fn(xg, z); 
+
+                % increase inner loop count 
+                i_Jg = i_Jg + 1; 
+
+            end 
+        end 
+
+        % Back to outer loop: norm(idx) > e 
+        if a < eps 
+            break 
+        end 
+
+        % Next guess point 
+        xg0 = xg; 
+        Jg = Jgnew; 
+
+        % Gauss-Newton dx (H, z, and h saved from last iteration) 
+        dx = inv((H' * H)) * H' * (z - h); 
+
+        % first a step 
+        a = 1; 
+
+        % Next step-size adjusted guess 
+        xg = xg0 + a * dx; 
+
+        [Jgnew, h, H, ~] = cost_fn(xg, z); 
+
+        % Increase outer loop count and populate Jg, xg0 trajectory
+        i_dx = i_dx + 1; 
+        Jg_i = [Jg_i; Jg]; 
+        xg0_i = [xg0_i; xg0]; 
+
+    end 
+
+end 
+  
+      
+
+##### SOURCE END #####
+--></body></html>
