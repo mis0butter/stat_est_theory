@@ -43,7 +43,7 @@ nx = 6;
 nu = 3;
 nv = 3;
 % Set options for numerical integration
-options = odeset('reltol',1e-5);
+options = odeset('reltol',1e-1);
 % Initialize F and GAMMA 
 F0 = eye(nx); 
 F0 = reshape(F0, [], 1); 
@@ -90,6 +90,7 @@ GAMMAdot = A * GAMMA;
 Xdot = [xdot;Fdot(:);GAMMAdot(:)];
 
 end
+
 end
   
   

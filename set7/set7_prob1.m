@@ -20,15 +20,30 @@ Ghist = [];
 for i = 1:length(t) 
 
     tk = t(i); 
-    [xkp1, Fk, GAMMAk] = propagateOrbit(tk, T, xk, uk, vk, mu); 
+    [xkp1, ~, ~] = propagateOrbit(tk, T, xk, uk, vk, mu); 
 
     xk = xkp1; 
     xhist = [xhist; xk']; 
-    Fhist = [Fhist; Fk']; 
-    Ghist = [Ghist; GAMMAk']; 
+%     Fhist = [Fhist; Fk']; 
+%     Ghist = [Ghist; GAMMAk']; 
     
-end
+end 
 
 close all; 
 plot3(xhist(:,1), xhist(:,2), xhist(:,3))
+
+%% 
+
+tk = 0; 
+
+x0 = [r0; v0]; 
+[x0p1, Fk, GAMMAk] = propagateOrbit(tk, T, x0, uk, vk, mu); 
+
+x0bar = [r0-1; v0]; 
+[x0p1bar, ~, ~] = propagateOrbit(tk, T, x0bar, uk, vk, mu); 
+
+RHS = Fk * (x0 - x0bar); 
+LHS = x0p1 - x0p1bar; 
+
+norm(LHS) - norm(RHS) 
 
