@@ -1,23 +1,15 @@
-clear; clc 
-
 % altitude + radius (km) 
 r = ( 780 + 6378 ) * 1000; 
-
-% GM 
-mu = 3.986005e14; 
 
 % Keplerian orbit; initial velocity can be found via online calculator 
 r0 = [1; 0; 0] * r; 
 v0 = [0; 1; 0] * 7.4623 * 1000; 
 
-% find semi-major axis 
 oe = rv2oe([r0; v0], mu); 
 a = oe(1); 
 
-% period 
-P = a^(3/2); 
+P = (  )^
 
-% sample time 
 T = 1; 
 t = 0 : T : 7000; 
 
@@ -25,7 +17,7 @@ t = 0 : T : 7000;
 uk = zeros(3,1); 
 vk = zeros(3,1); 
 
-%% propagate orbit 
+mu = 1; 
 
 xk = [r0; v0]; 
 xhist = []; 
@@ -43,9 +35,12 @@ for i = 1:length(t)
     
 end 
 
-%% Final A 
+%% 
 
-A = Afun(xhist(end,:)', mu); 
+for i = 1:length(xhist) 
+    oe = rv2oe(xhist(i,:)', mu); 
+    a(i,:) = oe(1); 
+end 
 
 %% 
 
