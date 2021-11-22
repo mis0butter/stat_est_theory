@@ -89,6 +89,8 @@ P_srif
 
 %% results 
 
+disp('There is a significant difference for the state estimates for the second person, but not the first') 
+
 %% subfunctions 
 
 function [xhat_arr, Rxx_cell] = srif( ... 
