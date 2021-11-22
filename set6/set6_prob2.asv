@@ -17,10 +17,9 @@
 
 clear; clc; close all 
 
-%% KALMAN FILTER AND SQURE-ROOT INFORMATION FILTER: example 03a 
+%% KALMAN FILTER AND SQURE-ROOT INFORMATION FILTER 
 
-clear; 
-disp('EXAMPLE 03A') 
+% example 03a 
 kf_example03a; 
 
 [xhat_arr_kf, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
@@ -51,41 +50,14 @@ P_kf
 disp('SRIF terminal covariance: ') 
 P_srif 
 
+%% 
 
-
-%% KALMAN FILTER AND SQURE-ROOT INFORMATION FILTER: example 03b 
-
+% example 03b 
 clear; 
-disp('EXAMPLE 03B') 
 kf_example03b; 
-
-[xhat_arr_kf, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
+[xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
     xhat0, P0, zhist, Fk, Gammak, Qk, Hk, Rk ); 
-% plot_xhat_Pxx(thist, xhat_arr, Pxx_arr, Pzz_arr, P_cell)
-
-uk = [0; 0]; 
-nx = length(xhat0); 
-nv = length(Qk); 
-[xhat_arr_srif, Rxx_arr] = srif( ... 
-    xhat0, P0, zhist, Fk, Gammak, Qk, Hk, Rk, uk, nx, nv); 
-
-xhat_kf   = xhat_arr_kf(end,:); 
-xhat_srif = xhat_arr_srif(end,:); 
-P_kf      = P_cell{end}; 
-Rxx       = Rxx_arr{end}; 
-P_srif    = inv(Rxx) * inv(Rxx)'; 
-
-disp('KF terminal estimate: ')
-xhat_kf 
-
-disp('SRIF terminal estimate: ') 
-xhat_srif 
-
-disp('KF terminal covariance: ') 
-P_kf 
-
-disp('SRIF terminal covariance: ') 
-P_srif 
+plot_xhat_Pxx(thist, xhat_arr, Pxx_arr, Pzz_arr, P_cell)
 
 %% results 
 
