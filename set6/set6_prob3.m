@@ -34,6 +34,10 @@ N = length(zhist);
 x_star_arr = zeros(N, nx); 
 P_star_cell = cell(N,1); 
 
+x_star_arr(N,:) = x_star'; 
+P_star_cell{N} = P_star'; 
+
+% smoother filter 
 for k = N-1 : -1 : 1
     
     zx_star = zx_arr(k+1, :)'; 
@@ -58,7 +62,7 @@ for k = N-1 : -1 : 1
     P_star = inv(Rxx_star) * inv(Rxx_star)'; 
     
     % save outputs 
-    x_star_arr(k,:) = [x_star_arr; x_star]; 
+    x_star_arr(k,:) = x_star'; 
     P_star_cell{k} = P_star; 
     
 end 
