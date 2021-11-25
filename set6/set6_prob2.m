@@ -17,7 +17,7 @@
 
 clear; clc; close all 
 
-%% KALMAN FILTER AND SQURE-ROOT INFORMATION FILTER: example 03a 
+%% KALMAN FILTER AND SQUARE-ROOT INFORMATION FILTER: example 03a 
 
 clear; 
 disp('EXAMPLE 03A') 
@@ -107,7 +107,7 @@ Rvv = chol(inv(Qk));
 zv = zeros(nv, 1); 
 zx = Rxx * xhat0; 
 
-for i = 1:length(zhist)-1
+for i = 1:length(zhist)
 
     % PROPAGATION STEP 
     % a) QR factorize 
