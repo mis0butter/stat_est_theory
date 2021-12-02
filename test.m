@@ -1,8 +1,6 @@
 clear
 % clc
 
-rng(0)
-
 %% part 1: find transformation into cartesian coordinates 
 
 w = sym('w', [2 1]); 
@@ -27,7 +25,32 @@ y_lin = jacobian(y, [rho theta]);
 
 % covariance of linearized y 
 Rc = y_lin * R * y_lin.'; 
-Rc_fun = matlabFunction(Rc); 
+Rc_fn = matlabFunction(Rc); 
+
+%% run sims 
+
+mean_wc_arr = []; 
+for N = 100 : 10 : 10000
+    
+    mean_wc = calc_wc(N, Rc_fn); 
+    
+    mean_wc_arr = [mean_wc_arr; mean_wc]; 
+    
+end 
+
+%% 
+
+plot(mean_wc_arr) 
+xlabel('N') 
+title('w_c mean') 
+legend('w_c(1)', 'w_c(2)')
+
+%% functions 
+
+function mean_wc = calc_wc(N, Rc_fn)
+
+% Rc_fn = @(rho,sigma_rho,sigma_theta,theta)reshape([sigma_rho.^2.*cos(theta).^2+rho.^2.*sigma_theta.^2.*sin(theta).^2,sigma_rho.^2.*cos(theta).*sin(theta)-rho.^2.*sigma_theta.^2.*cos(theta).*sin(theta),sigma_rho.^2.*cos(theta).*sin(theta)-rho.^2.*sigma_theta.^2.*cos(theta).*sin(theta),sigma_rho.^2.*sin(theta).^2+rho.^2.*sigma_theta.^2.*cos(theta).^2],[2,2]); 
+
 
 %% part 3: simulate N = 100 realizations 
 
@@ -39,20 +62,15 @@ z2 = theta0;
 
 yc_true = [ z1 * cos(z2); z1 * sin(z2) ]; 
 
-% polar covariance 
 o_rho = 100; 
 o_theta = 0.5 * pi/180; 
 R = diag([o_rho^2; o_theta^2]); 
 
-% create noise 
-N = 100; 
 w = mvnrnd([0; 0], R, N); 
 
-% create measurements 
 z1 = rho0 + w(:,1); 
 z2 = theta0 + w(:,2); 
 
-% transform polar measurements to cartesian 
 for i = 1:length(w)
     yc(:,i) = [ z1(i) * cos(z2(i)); z1(i) * sin(z2(i)) ]; 
 end 
@@ -64,39 +82,6 @@ yc = yc';
 w_c = yc - yc_true'; 
 disp('w_c is not zero-mean') 
 
-N
-mean(w_c)
+mean_wc = mean(w_c); 
 
-%% part 5: covariance test statistic 
-
-Rc_double = Rc_fun( rho0, o_rho, o_theta, theta0 ); 
-
-% calculate error 
-for i = 1:length(w_c)
-    err(i,:) = w_c(i,:) * inv(Rc_double) * w_c(i,:)'; 
 end 
-
-% calculate mean of error as test statistic 
-err_mean = mean(err); 
-
-N = length(w); 
-Nx = length(x); 
-Nz = length(z); 
-
-% NEED STATISTICS TOOLBOX 
-a = .01; 
-r1 = chi2inv( a/2, N * Nz) / N; 
-r2 = chi2inv( 1 - a/2, N * Nz ) / N; 
-
-if err_mean > r1 && err_mean < r2 
-    disp('Covariance matrix can be accepted as correct!') 
-else
-    disp('Covariance matrix cannot be accepted as correct') 
-end 
-
-
-
-
-
-
-

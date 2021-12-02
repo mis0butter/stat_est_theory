@@ -1,28 +1,30 @@
 clear; clc 
 
-% altitude + radius (km) 
+% altitude + radius (m) 
 r = ( 780 + 6378 ) * 1000; 
 
 % GM 
 mu = 3.986005e14; 
 
 % Keplerian orbit; initial velocity can be found via online calculator 
-r0 = [1; 0; 0] * r; 
-v0 = [0; 1; 0] * 7.4623 * 1000; 
+v_mag = sqrt(mu/r); 
 
-% find semi-major axis 
-oe = rv2oe([r0; v0], mu); 
-a = oe(1); 
+% initial position and velocity 
+r0 = [1; 0; 0] * r; 
+v0 = [0; 1; 0] * v_mag ; 
 
 % period 
-P = a^(3/2); 
+P = 2 * pi * sqrt( r^3 / mu ); 
 
 % sample time 
-T = 1; 
-t = 0 : T : 7000; 
+% dt = 1; 
+thist = linspace(0, P, round(2*P)); 
+dt = thist(2) - thist(1); 
 
 % input 
 uk = zeros(3,1); 
+% uk = rand(length(thist), 3); 
+
 vk = zeros(3,1); 
 
 %% propagate orbit 
@@ -31,10 +33,11 @@ xk = [r0; v0];
 xhist = []; 
 Fhist = []; 
 Ghist = []; 
-for i = 1:length(t) 
+for i = 1:length(thist) 
 
-    tk = t(i); 
-    [xkp1, ~, ~] = propagateOrbit(tk, T, xk, uk, vk, mu); 
+    tk = thist(i); 
+    [xkp1, ~, ~] = propagateOrbit(tk, dt, xk, uk, vk, mu); 
+%     [xkp1, ~, ~] = propagateOrbit(tk, dt, xk, uk(i,:)', vk, mu); 
 
     xk = xkp1; 
     xhist = [xhist; xk']; 
@@ -56,14 +59,20 @@ plot3(xhist(:,1), xhist(:,2), xhist(:,3))
 
 tk = 0; 
 
-x0 = [r0; v0]; 
-[x0p1, Fk, GAMMAk] = propagateOrbit(tk, T, x0, uk, vk, mu); 
+uk = zeros(3,1); 
 
-x0bar = [r0-1; v0]; 
-[x0p1bar, ~, ~] = propagateOrbit(tk, T, x0bar, uk, vk, mu); 
+x0 = [r0; v0]; 
+[x0p1, Fk, GAMMAk] = propagateOrbit(tk, dt, x0, uk, vk, mu); 
+
+r0_bar = [r0(1) + 10; 0; 0]; 
+v0_bar = [0; v0(2) + 10; 0]; 
+x0bar = [r0_bar; v0_bar]; 
+[x0p1bar, Fk_bar, ~] = propagateOrbit(tk, dt, x0bar, uk, vk, mu); 
 
 RHS = Fk * (x0 - x0bar); 
 LHS = x0p1 - x0p1bar; 
 
 norm(LHS) - norm(RHS) 
+norm(LHS - RHS)
+
 
