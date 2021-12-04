@@ -6,7 +6,7 @@ r = ( 780 + 6378 ) * 1000;
 % GM 
 mu = 3.986005e14; 
 
-% Keplerian orbit; initial velocity can be found via online calculator 
+% Keplerian orbit  
 v_mag = sqrt(mu/r); 
 
 % initial position and velocity 
@@ -62,17 +62,20 @@ tk = 0;
 uk = zeros(3,1); 
 
 x0 = [r0; v0]; 
-[x0p1, Fk, GAMMAk] = propagateOrbit(tk, dt, x0, uk, vk, mu); 
+[x1, Fk, GAMMAk] = propagateOrbit(tk, dt, x0, uk, vk, mu); 
 
 r0_bar = [r0(1) + 10; 0; 0]; 
 v0_bar = [0; v0(2) + 10; 0]; 
 x0bar = [r0_bar; v0_bar]; 
-[x0p1bar, Fk_bar, ~] = propagateOrbit(tk, dt, x0bar, uk, vk, mu); 
+[x1bar, Fk_bar, ~] = propagateOrbit(tk, dt, x0bar, uk, vk, mu); 
 
 RHS = Fk * (x0 - x0bar); 
-LHS = x0p1 - x0p1bar; 
+LHS = x1 - x1bar; 
 
+disp('norm(LHS) - norm(RHS)')
 norm(LHS) - norm(RHS) 
+
+disp('norm(LHS - RHS)') 
 norm(LHS - RHS)
 
 

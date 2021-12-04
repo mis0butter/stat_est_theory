@@ -5,3 +5,5 @@ addpath(genpath('set2'))
 addpath(genpath('set1'))
 addpath(genpath('set6'))
 addpath(genpath('set7')) 
+addpath(genpath('set8')) 
+
