@@ -42,6 +42,8 @@ r2  = sqrt( ( x2a - p0a )^2 + ( x2b - p0b )^2 );
 T = [ d1a^2/r1^2 + d2a^2/r2^2,      d1a*d1b/r1^2 + d2a*d2b/r2^2; 
           d1a*d1b/r1^2 + d2a*d2b/r2^2,  d1b^2/r1^2 + d2b^2/r2^2]; 
       
+H = [ d1a / r1, d1b / r1; d2a / r2, d2b / r2 ]; 
+      
 GDOP = sqrt( trace(inv(T)) ); 
 
 

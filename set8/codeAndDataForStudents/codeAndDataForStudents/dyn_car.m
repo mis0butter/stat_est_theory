@@ -1,4 +1,4 @@
-function xdot = dyn_car(xaug)
+function xdot = dyn_car(t, xaug)
 %
 %Calculates the state derivative for a constant-velocity car modeled as a
 %box and driven at the back axle (back of the box).
@@ -21,6 +21,22 @@ function xdot = dyn_car(xaug)
 %
 %OUTPUTS:
 %   xdot - state derivative
+
+%% calculate A 
+
+% x = sym('x', [12 1]); 
+% syms t 
+% dx = sym('dx', [12 1]); 
+% 
+% dx(1) = x(3) * cos(t) + x(7); 
+% dx(2) = x(3) * sin (t) + x(8); 
+% dx(3) = x(9); 
+% dx(4) = x(10); 
+% dx(5) = x(11); 
+% dx(6) = x(12); 
+% dx(7:12) = zeros(6,1); 
+
+%% state derivative 
 
 %extract speed from the state vector
 s = xaug(3);
