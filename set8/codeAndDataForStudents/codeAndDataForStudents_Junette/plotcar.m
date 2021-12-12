@@ -1,4 +1,4 @@
-function plotcar(x, pstr, h)
+function plotcar(x, pstr, h, t)
 %
 %Plots the rectangular car specified by the state x into a figure of handle
 %h.
@@ -38,12 +38,15 @@ fp = x(1:2) + Rot*[x(5); -x(6)/2];
 bd = x(1:2) + Rot*[0; x(6)/2];
 bp = x(1:2) + Rot*[0; -x(6)/2];
 
-cla; 
+% cla; 
 hold on;
 plot([fd(1); fp(1)], [fd(2); fp(2)], pstr);
 plot([fd(1); bd(1)], [fd(2); bd(2)], pstr);
 plot([bd(1); bp(1)], [bd(2); bp(2)], pstr);
 plot([bp(1); fp(1)], [bp(2); fp(2)], pstr);
+
+% sgtitle('Car Plot') 
+title( sprintf('Time = %g secs', t )); 
 
 pause(0.05)
 

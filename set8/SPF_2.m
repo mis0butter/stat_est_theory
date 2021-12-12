@@ -11,8 +11,8 @@ r = r_bar + w_r;
 theta = theta_bar + w_theta; 
 
 % polar covariance 
-R = diag([ sigma_r^2 sigma_theta^2 ]); 
-R_fn = matlabFunction(R); 
+R_i = diag([ sigma_r^2 sigma_theta^2 ]); 
+R_fn = matlabFunction(R_i); 
 
 % cartesian coordinates 
 x = r * cos(theta); 
@@ -31,70 +31,55 @@ dx_bar_fn = matlabFunction(dx_bar);
 dy_bar_fn = matlabFunction(dy_bar); 
 
 % linearized cartesian covariance 
-Rc = [dx_bar; dy_bar] * R * [dx_bar; dy_bar].'; 
+Rc = [dx_bar; dy_bar] * R_i * [dx_bar; dy_bar].'; 
 Rc_fn = matlabFunction(Rc); 
 
 % inputs part i 
-r_bar_val = 76; 
-theta_bar_val = -3*pi/180; 
-sigma_r_val = 1; 
-sigma_theta_val = sqrt( pi/180 ); 
+r_bar_val_i = 76; 
+theta_bar_val_i = -3*pi/180; 
+sigma_r_val_i = 1; 
+sigma_theta_val_i = pi/180; 
 
 % compute 
-H = [ dx_bar_fn(r_bar_val, theta_bar_val); 
-      dy_bar_fn(r_bar_val, theta_bar_val) ]; 
-z_lin_i  = H * [r_bar_val; theta_bar_val]; 
-Rc_val_i = Rc_fn(r_bar_val, sigma_r_val, sigma_theta_val, theta_bar_val); 
+H = [ dx_bar_fn(r_bar_val_i, theta_bar_val_i); 
+      dy_bar_fn(r_bar_val_i, theta_bar_val_i) ]; 
+dr = [ r_bar_val_i - r_bar_val_i ]; 
+dtheta = [ theta_bar_val_i - theta_bar_val_i ]; 
+xy_bar = [ x_bar_fn(r_bar_val_i, theta_bar_val_i); y_bar_fn(r_bar_val_i, theta_bar_val_i) ]; 
+z_lin_i  = xy_bar + H * [dr; dtheta]; 
+Rc_val_i = Rc_fn(r_bar_val_i, sigma_r_val_i, sigma_theta_val_i, theta_bar_val_i); 
 
 % inputs part ii 
-r_bar_val = 76; 
-theta_bar_val = -3*pi/180; 
-sigma_r_val = 1; 
-sigma_theta_val = sqrt( 15*pi/180 ); 
+r_bar_val_ii = 76; 
+theta_bar_val_ii = -3*pi/180; 
+sigma_r_val_ii = 1; 
+sigma_theta_val_ii = 15*pi/180; 
 
 % compute 
-H = [ dx_bar_fn(r_bar_val, theta_bar_val); 
-      dy_bar_fn(r_bar_val, theta_bar_val) ]; 
-z_lin_ii  = H * [r_bar_val; theta_bar_val]; 
-Rc_val_ii = Rc_fn(r_bar_val, sigma_r_val, sigma_theta_val, theta_bar_val); 
+H = [ dx_bar_fn(r_bar_val_ii, theta_bar_val_ii); 
+      dy_bar_fn(r_bar_val_ii, theta_bar_val_ii) ]; 
+dr = [ r_bar_val_ii - r_bar_val_ii ]; 
+dtheta = [ theta_bar_val_ii - theta_bar_val_ii ]; 
+xy_bar = [ x_bar_fn(r_bar_val_ii, theta_bar_val_ii); y_bar_fn(r_bar_val_ii, theta_bar_val_ii) ]; 
+z_lin_ii  = xy_bar + H * [dr; dtheta]; 
+Rc_val_ii = Rc_fn(r_bar_val_ii, sigma_r_val_ii, sigma_theta_val_ii, theta_bar_val_ii); 
 
 %% part b: unscented transform 
 
-% inputs part i 
-r_bar_val = 76; 
-theta_bar_val = -3*pi/180; 
-sigma_r_val = 1; 
-sigma_theta_val = sqrt( pi/180 );
+% cholesky factorize 
+R_i = R_fn(sigma_r_val_i, sigma_theta_val_i); 
+
+[z_bar_i, Pzz_i] = unscented_transform(r_bar_val_i, theta_bar_val_i, R_i); 
 
 % cholesky factorize 
-R = R_fn(sigma_r_val, sigma_theta_val); 
+R_ii = R_fn(sigma_r_val_ii, sigma_theta_val_ii); 
 
-[z_bar_i, Pzz_i] = unscented_transform(r_bar_val, theta_bar_val, R); 
-
-% inputs part ii 
-r_bar_val = 76; 
-theta_bar_val = -3*pi/180; 
-sigma_r_val = 1; 
-sigma_theta_val = sqrt( 15*pi/180 ); 
-
-% cholesky factorize 
-R = R_fn(sigma_r_val, sigma_theta_val); 
-
-[z_bar_ii, Pzz_ii] = unscented_transform(r_bar_val, theta_bar_val, R); 
+[z_bar_ii, Pzz_ii] = unscented_transform(r_bar_val_ii, theta_bar_val_ii, R_ii); 
 
 %% part c: large random vectors 
 
-% inputs part i 
-r_bar_val = 76; 
-theta_bar_val = -3*pi/180; 
-sigma_r_val = 1; 
-sigma_theta_val = sqrt( pi/180 );
-
-% cholesky factorize 
-R = R_fn(sigma_r_val, sigma_theta_val); 
-
 N = 100000; 
-w = mvnrnd([r_bar_val; theta_bar_val], R, N); 
+w = mvnrnd([r_bar_val_i; theta_bar_val_i], R_i, N); 
 
 z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
 disp('Part i inputs:') 
@@ -102,17 +87,8 @@ fprintf('Mean of %d samples: x = %g, y = %g \n', N, mean(z(:,1)), mean(z(:,2)));
 fprintf('Linearized mean: x = %g, y = %g \n', z_lin_i(1), z_lin_i(2)); 
 fprintf('UT mean: x = %g, y = %g \n\n', z_bar_i(1), z_bar_i(2)); 
 
-% inputs part ii 
-r_bar_val = 76; 
-theta_bar_val = -3*pi/180; 
-sigma_r_val = 1; 
-sigma_theta_val = sqrt( 15*pi/180 ); 
-
-% cholesky factorize 
-R = R_fn(sigma_r_val, sigma_theta_val); 
-
 N = 100000; 
-w = mvnrnd([r_bar_val; theta_bar_val], R, N); 
+w = mvnrnd([r_bar_val_ii; theta_bar_val_ii], R_ii, N); 
 
 z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
 
@@ -132,9 +108,10 @@ a = 10^-3;
 b = 2; 
 k = 0; 
 nx = 2; 
+nv = 0; 
 nz = 2; 
-lambda = a^2 * (nx + 1/2) - nx; 
-% lambda = a^2 * (nx + nz + k) - (nx + nz); 
+% lambda = a^2 * (nx + 1/2) - nx; 
+lambda = a^2 * (nx + nv + k) - (nx + nv); 
 
 % build sigma points (still polar coordinates) 
 rtheta_bar = [r_bar_val; theta_bar_val]; 

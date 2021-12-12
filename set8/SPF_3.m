@@ -44,9 +44,7 @@ P_cell = {P};
 fname = 'Car Plot'; 
 h = figure('name', fname); 
     xlim([0 100]); ylim([-50 50]); 
-    plotcar(x_hat, '-', h)
-%     pause(0.05)
-%     drawnow 
+    plotcar(x_hat, '-', h, 0)
 
 %% UNSCENTED KALMAN FILTER 
 
@@ -118,14 +116,16 @@ x_hat_arr = [x_hat_arr; x_hat'];
 P_cell{j+1} = {P}; 
 
 % update plot 
-plotcar(x_hat, '-', h)
+plotcar(x_hat, '-', h, lidar(j).t)
 
 end 
 
 %% ANALYSIS 
 
 load problem3truth.mat
-
+for i = 1:length(car)
+    x_truth(i,:) = car(i).x'; 
+end 
 
 %% subfunctions 
 

@@ -40,9 +40,9 @@ z2 = theta0;
 yc_true = [ z1 * cos(z2); z1 * sin(z2) ]; 
 
 % polar covariance 
-o_rho = 100; 
-o_theta = 0.5 * pi/180; 
-R = diag([o_rho^2; o_theta^2]); 
+rho_sigma = 100; 
+theta_sigma = 0.5 * pi/180; 
+R = diag([rho_sigma^2; theta_sigma^2]); 
 
 % create noise 
 N = 100; 
@@ -69,7 +69,7 @@ mean(w_c)
 
 %% part 5: covariance test statistic 
 
-Rc_double = Rc_fun( rho0, o_rho, o_theta, theta0 ); 
+Rc_double = Rc_fun( rho0, rho_sigma, theta_sigma , theta0 ); 
 
 % calculate error 
 for i = 1:length(w_c)
