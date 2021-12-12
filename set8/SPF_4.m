@@ -4,27 +4,23 @@ clear
 load problem4data.mat 
 load problem4truth.mat 
 
-rng(0)
+% rng(0)
 
-% noise on robot wheel encoders 
-Q = diag( [ 0.1, 5*pi/180 ] )^2; 
-
-% noise on robot sonar 
-R = diag( [ 1 1 1 ] )^2; 
+% noise 
+Q = diag( [ 0.1, 5*pi/180 ] )^2;    % robot wheel encoders  
+R = diag( [ 1 1 1 ] )^2;            % robot sonar 
 
 % # particles 
 Ns  = 1000;
-
-% time step 
-dt = encoder(2).t - encoder(1).t; 
 
 % state size 
 nx = 3; 
 
 % grab truth states 
-truth = []; 
+x_truth = [];  t = []; 
 for i = 1:length(robot)
-    truth = [ truth; robot(i).x' ]; 
+    x_truth = [ x_truth; robot(i).x' ]; 
+    t       = [ t; robot(i).t ]; 
 end 
 
 %% initialize 
@@ -48,6 +44,7 @@ hf = figure('name', fname);
     hold on; 
     xlim([minx - 1, maxx + 2]) 
     ylim([miny - 1, maxy + 2])
+    xlabel('x'); ylabel('y') 
 
 %% PARTICLE FILTER 
 
@@ -65,15 +62,64 @@ for k = 1 : length(encoder)
     gcf = hf; 
     cla 
     scatter(XX_k(:,1), XX_k(:,2), 'g'); 
-    scatter(truth(1:k,1), truth(1:k,2), 'b');
+    scatter(x_truth(1:k,1), x_truth(1:k,2), 'b');
     scatter(x_hat(:,1), x_hat(:,2) , 'r'); 
 
     legend('particles', 'truth', 'est', 'location', 'southeast') 
     pause(0.05)
     
-end 
+end
+
+%% final analysis plot 
+
+% extract std devs 
+x_sigma = sqrt(squeeze(P(1,1,:))); 
+y_sigma = sqrt(squeeze(P(2,2,:))); 
+theta_sigma = sqrt(squeeze(P(3,3,:))); 
+
+fname = 'Robot Particle Filtering: Truth vs. Estimate';
+n = 3; p = 1; 
+pos = [100 100 600 600]; 
+figure('name', fname, 'position', pos) 
+hold on; grid on; 
+
+    % x compare 
+    subplot(n,p,1) 
+    hold on; 
+        plot_lines(1, t, x_truth, x_hat, x_sigma)
+        title('X Compare') 
+        legend('truth', 'est', 'est +/- \sigma', 'location', 'best')  
+        ylabel('X (m)') 
+
+    % x diff compare 
+    subplot(n,p,2) 
+    hold on; 
+        plot_lines(2, t, x_truth, x_hat, x_sigma)
+        title('Y Compare')  
+        ylabel('Y (m)') 
+    
+    % y compare 
+    subplot(n,p,3)
+    hold on; 
+        plot_lines(3, t, x_truth, x_hat, x_sigma)
+        title('\Theta Compare') 
+        xlabel('Time (s)') 
+        ylabel('rad') 
+        
+    sgtitle(fname)
+    
+    
 
 %% subfunctions 
+
+function plot_lines(i, t, x_truth, x_hat, x_sigma)
+
+    plot(t, x_truth(:,i), 'b', 'linewidth', 2); 
+    plot(t, x_hat(:,i), 'r--', 'linewidth', 2); 
+    plot(t, x_hat(:,i) + x_sigma, 'r--'); 
+    plot(t, x_hat(:,i) - x_sigma, 'r--'); 
+
+end 
 
 function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX_k, beacons, encoder, sonar, nx) 
 
@@ -90,6 +136,34 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
     % Calculate innovation 
     sonar_k = sonar(k).z'; 
     nu_k    = Z_mdl - sonar_k; 
+    
+    % update weights 
+    w_kp1 = update_weights(Ns, nu_k, R, w_k); 
+
+    % evaluate effective # of particles 
+    w_sq_sum = 0; 
+    for i = 1:Ns 
+        w_sq_sum = w_sq_sum + w_kp1(i)^2; 
+    end 
+    Ns_hat = 1 / w_sq_sum; 
+
+    % resample if necessary 
+    if Ns_hat < Ns / 2
+        [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns); 
+    end 
+
+    % Compute weighted estimate 
+    x_khatp1 = zeros(1, nx); 
+    P_kp1    = zeros(nx); 
+    for i = 1:Ns 
+        x_khatp1 = x_khatp1 + w_kp1(i) * XX_kp1(i,:);
+        xtilde   = (XX_kp1(i,:) - x_khatp1)'; 
+        P_kp1    = P_kp1 + w_kp1(i) * xtilde * xtilde';       % outer product 
+    end 
+
+end 
+
+function w_kp1 = update_weights(Ns, nu_k, R, w_k)
 
     % Recalculate weights 
     w_kp1 = zeros(Ns, 1); 
@@ -113,27 +187,6 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
 
     % Normalize weights 
     w_kp1 = w_kp1 ./ sum(w_kp1); 
-
-    % evaluate effective # of particles 
-    w_sq_sum = 0; 
-    for i = 1:Ns 
-        w_sq_sum = w_sq_sum + w_kp1(i)^2; 
-    end 
-    Ns_hat = 1 / w_sq_sum; 
-
-    % resample if necessary 
-    if Ns_hat < Ns / 2
-        [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns); 
-    end 
-
-    % Compute weighted estimate 
-    x_khatp1 = zeros(1, nx); 
-    P_kp1    = zeros(nx); 
-    for i = 1:Ns 
-        x_khatp1 = x_khatp1 + w_kp1(i) * XX_kp1(i,:);
-        xtilde   = (XX_kp1(i,:) - x_khatp1)'; 
-        P_kp1    = P_kp1 + w_kp1(i) * xtilde * xtilde';       % outer product 
-    end 
 
 end 
 
