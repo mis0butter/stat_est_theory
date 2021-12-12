@@ -44,7 +44,7 @@ hf = figure('name', fname);
     hold on; 
     xlim([minx - 1, maxx + 2]) 
     ylim([miny - 1, maxy + 2])
-    xlabel('x'); ylabel('y') 
+    xlabel('X (m)'); ylabel('Y (m)') 
 
 %% PARTICLE FILTER 
 
@@ -108,6 +108,18 @@ hold on; grid on;
         
     sgtitle(fname)
     
+%% PART B     
+% b. Compare your state estimate to the true state, stored in problem4truth.mat. In
+% particular, consider the following points:
+% i. Does your state estimate time history change much if you run the filter more
+% than once? Why might that be good or bad? Hint: try running the filter a few
+% times with only 100 particles.
+% ii. Why do clusters of particles sometimes persist in incorrect locations on the
+% map?
+% iii. Why would it be difficult to implement this filter as an extended Kalman
+% Filter?
+
+
     
 
 %% subfunctions 
