@@ -35,7 +35,7 @@ w_k0   = ones(Ns, 1) / Ns;
 
 % start figure 
 fname = 'Robot Particle Filtering'; 
-hf = figure('name', fname); 
+hf_map = figure('name', fname); 
     sgtitle(fname) 
     hold on; 
     xlim([minx - 1, maxx + 2]) 
@@ -61,7 +61,7 @@ for k = 1 : length(encoder)
     P(:,:,k) = P_k; 
     
     % update figure 
-    gcf = hf; 
+    gcf = hf_map; 
         cla 
         scatter(XX_k(:,1), XX_k(:,2), 4, 'g'); 
         scatter(x_truth(1:k,1), x_truth(1:k,2), 12, 'b', 'filled');
