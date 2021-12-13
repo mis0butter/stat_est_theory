@@ -44,7 +44,7 @@ hf = figure('name', fname);
     hold on; 
     xlim([minx - 1, maxx + 2]) 
     ylim([miny - 1, maxy + 2])
-    xlabel('x'); ylabel('y') 
+    xlabel('X (m)'); ylabel('Y (m)') 
 
 %% PARTICLE FILTER 
 
@@ -77,47 +77,61 @@ x_sigma = sqrt(squeeze(P(1,1,:)));
 y_sigma = sqrt(squeeze(P(2,2,:))); 
 theta_sigma = sqrt(squeeze(P(3,3,:))); 
 
-fname = 'Truth vs. Estimate';
-pos   = [100 100 1200 600]; 
+fname = 'Robot Particle Filtering: Truth vs. Estimate';
 n = 3; p = 1; 
+pos = [100 100 600 600]; 
 figure('name', fname, 'position', pos) 
 hold on; grid on; 
 
     % x compare 
     subplot(n,p,1) 
     hold on; 
-        plot(t, x_truth(:,1)); 
-        plot(t, x_hat(:,1), 'r', 'linewi', 2); 
-        plot(t, x_hat(:,1) + x_sigma, 'r--'); 
-        plot(t, x_hat(:,1) - x_sigma, 'r--'); 
+        plot_lines(1, t, x_truth, x_hat, x_sigma)
         title('X Compare') 
-        legend('truth', 'est') 
+        legend('truth', 'est', 'est +/- \sigma', 'location', 'best')  
+        ylabel('X (m)') 
 
     % x diff compare 
     subplot(n,p,2) 
     hold on; 
-        plot(t, x_truth(:,2)); 
-        plot(t, x_hat(:,2)); 
-        plot(t, x_hat(:,2) + x_sigma, 'r--'); 
-        plot(t, x_hat(:,2) - x_sigma, 'r--'); 
-        title('Y Compare') 
-        legend('truth', 'est') 
+        plot_lines(2, t, x_truth, x_hat, x_sigma)
+        title('Y Compare')  
+        ylabel('Y (m)') 
     
     % y compare 
     subplot(n,p,3)
     hold on; 
-        plot(t, x_truth(:,3)); 
-        plot(t, x_hat(:,3)); 
-        plot(t, x_hat(:,3) + x_sigma, 'r--'); 
-        plot(t, x_hat(:,3) - x_sigma, 'r--'); 
+        plot_lines(3, t, x_truth, x_hat, x_sigma)
         title('\Theta Compare') 
-        legend('truth', 'est') 
+        xlabel('Time (s)') 
+        ylabel('rad') 
         
-    sgtitle('test')
+    sgtitle(fname)
     
+%% PART B     
+% b. Compare your state estimate to the true state, stored in problem4truth.mat. In
+% particular, consider the following points:
+% i. Does your state estimate time history change much if you run the filter more
+% than once? Why might that be good or bad? Hint: try running the filter a few
+% times with only 100 particles.
+% ii. Why do clusters of particles sometimes persist in incorrect locations on the
+% map?
+% iii. Why would it be difficult to implement this filter as an extended Kalman
+% Filter?
+
+
     
 
 %% subfunctions 
+
+function plot_lines(i, t, x_truth, x_hat, x_sigma)
+
+    plot(t, x_truth(:,i), 'b', 'linewidth', 2); 
+    plot(t, x_hat(:,i), 'r--', 'linewidth', 2); 
+    plot(t, x_hat(:,i) + x_sigma, 'r--'); 
+    plot(t, x_hat(:,i) - x_sigma, 'r--'); 
+
+end 
 
 function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX_k, beacons, encoder, sonar, nx) 
 
@@ -248,6 +262,18 @@ function [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns)
             wi = wi + 1; 
         end 
         XX_kp1_new(pi,:) = XX_kp1(wi,:); 
+        
+        
+        % for each patricle, increment m until we meet the criteria
+        for m=1:Ns
+            if (sum(w_kp1(1:m-1)) <= n_rand) && (n_r< sum(wikp1(1:m)))
+                  % if the criteria is met, X_new(:,i) = X_new(:,m) 
+                  Xi_new(:,ii)     = Xi(:,m);
+                  % wik_new gets 1/Ns
+                  wik_new(ii)      = 1/Ns;
+                break;
+            end
+        end
 
     end 
 

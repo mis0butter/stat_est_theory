@@ -1,3 +1,5 @@
+%% SPF 4: PARTICLE FILTER 
+
 clear 
 % clc 
 
@@ -10,12 +12,6 @@ load problem4truth.mat
 Q = diag( [ 0.1, 5*pi/180 ] )^2;    % robot wheel encoders  
 R = diag( [ 1 1 1 ] )^2;            % robot sonar 
 
-% # particles 
-Ns  = 1000;
-
-% state size 
-nx = 3; 
-
 % grab truth states 
 x_truth = [];  t = []; 
 for i = 1:length(robot)
@@ -25,28 +21,34 @@ end
 
 %% initialize 
 
+% # particles 
+Ns  = 1000;
+
+% state size 
+nx = 3; 
+
 % draw initial particles from initial uniform probability density,
 % initialize weights equally 
 r0     = unifrnd(minx, maxx, [Ns, 2]); 
 theta0 = rand(Ns, 1) * 2*pi; 
 w_k0   = ones(Ns, 1) / Ns; 
 
-XX_k  = [ r0, theta0 ]; 
-w_k   = w_k0; 
-
-x_hat = []; 
-P     = []; 
-
 % start figure 
 fname = 'Robot Particle Filtering'; 
 hf = figure('name', fname); 
-    title(fname) 
+    sgtitle(fname) 
     hold on; 
     xlim([minx - 1, maxx + 2]) 
     ylim([miny - 1, maxy + 2])
     xlabel('X (m)'); ylabel('Y (m)') 
 
 %% PARTICLE FILTER 
+
+XX_k  = [ r0, theta0 ]; 
+w_k   = w_k0; 
+
+x_hat = []; 
+P     = []; 
 
 % measurement index 
 for k = 1 : length(encoder) 
@@ -60,13 +62,13 @@ for k = 1 : length(encoder)
     
     % update figure 
     gcf = hf; 
-    cla 
-    scatter(XX_k(:,1), XX_k(:,2), 'g'); 
-    scatter(x_truth(1:k,1), x_truth(1:k,2), 'b');
-    scatter(x_hat(:,1), x_hat(:,2) , 'r'); 
+        cla 
+        scatter(XX_k(:,1), XX_k(:,2), 4, 'g'); 
+        scatter(x_truth(1:k,1), x_truth(1:k,2), 12, 'b', 'filled');
+        scatter(x_hat(:,1), x_hat(:,2) , 12, 'r', 'filled'); 
 
-    legend('particles', 'truth', 'est', 'location', 'southeast') 
-    pause(0.05)
+        legend('particles', 'truth', 'est', 'location', 'southeast') 
+        pause(0.02)
     
 end
 
@@ -166,9 +168,11 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
 
     % Compute weighted estimate 
     x_khatp1 = zeros(1, nx); 
-    P_kp1    = zeros(nx); 
     for i = 1:Ns 
         x_khatp1 = x_khatp1 + w_kp1(i) * XX_kp1(i,:);
+    end 
+    P_kp1 = zeros(nx); 
+    for i = 1:Ns 
         xtilde   = (XX_kp1(i,:) - x_khatp1)'; 
         P_kp1    = P_kp1 + w_kp1(i) * xtilde * xtilde';       % outer product 
     end 
@@ -262,6 +266,17 @@ function [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns)
             wi = wi + 1; 
         end 
         XX_kp1_new(pi,:) = XX_kp1(wi,:); 
+        
+%         % for each patricle, increment m until we meet the criteria
+%         for m = 1:Ns
+%             if (sum(w_kp1(1:m-1)) <= n_rand) && (n_rand < sum(w_kp1(1:m)))
+%                   % if the criteria is met, X_new(:,i) = X_new(:,m) 
+%                   XX_kp1_new(pi,:)     = XX_kp1(m,:);
+%                   % wik_new gets 1/Ns
+% %                   wik_new(ii)      = 1/Ns;
+%                 break;
+%             end
+%         end
 
     end 
 
