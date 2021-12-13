@@ -155,10 +155,7 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
     w_kp1 = update_weights(Ns, nu_k, R, w_k); 
 
     % evaluate effective # of particles 
-    w_sq_sum = 0; 
-    for i = 1:Ns 
-        w_sq_sum = w_sq_sum + w_kp1(i)^2; 
-    end 
+    w_sq_sum = sum(w_kp1.^2); 
     Ns_hat = 1 / w_sq_sum; 
 
     % resample if necessary 
