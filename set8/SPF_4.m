@@ -177,6 +177,12 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
         P_kp1    = P_kp1 + w_kp1(i) * xtilde * xtilde';       % outer product 
     end 
 
+    % FASTER STATE AND COVARIANCE 
+    x_khatp1 = sum(w_kp1 .* XX_kp1); 
+    xtilde   = XX_kp1 - x_khatp1; 
+    P_kp1    = xtilde' * (xtilde .* w_kp1); 
+    
+    
 end 
 
 function w_kp1 = update_weights(Ns, nu_k, R, w_k)
