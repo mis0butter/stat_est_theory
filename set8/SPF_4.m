@@ -22,7 +22,7 @@ end
 %% initialize 
 
 % # particles 
-Ns  = 1000;
+Ns = 1000;
 
 % state size 
 nx = 3; 
@@ -35,7 +35,8 @@ w_k0   = ones(Ns, 1) / Ns;
 
 % start figure 
 fname = 'Robot Particle Filtering'; 
-hf_map = figure('name', fname); 
+pos   = [ 800 200 800 600 ]; 
+hf_map = figure('name', fname, 'position', pos); 
     sgtitle(fname) 
     hold on; 
     xlim([minx - 1, maxx + 2]) 
@@ -46,7 +47,6 @@ hf_map = figure('name', fname);
 
 XX_k  = [ r0, theta0 ]; 
 w_k   = w_k0; 
-
 x_hat = []; 
 P     = []; 
 
@@ -68,7 +68,7 @@ for k = 1 : length(encoder)
         scatter(x_hat(:,1), x_hat(:,2) , 12, 'r', 'filled'); 
 
         legend('particles', 'truth', 'est', 'location', 'southeast') 
-        pause(0.02)
+        pause(0.001)
     
 end
 
@@ -81,7 +81,7 @@ theta_sigma = sqrt(squeeze(P(3,3,:)));
 
 fname = 'Robot Particle Filtering: Truth vs. Estimate';
 n = 3; p = 1; 
-pos = [100 100 600 600]; 
+pos = [100 100 800 800]; 
 figure('name', fname, 'position', pos) 
 hold on; grid on; 
 
@@ -90,7 +90,7 @@ hold on; grid on;
     hold on; 
         plot_lines(1, t, x_truth, x_hat, x_sigma)
         title('X Compare') 
-        legend('truth', 'est', 'est +/- \sigma', 'location', 'best')  
+        legend('truth', 'est', 'est +/- \sigma', 'location', 'southeast')  
         ylabel('X (m)') 
 
     % x diff compare 
@@ -148,8 +148,8 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
     Z_mdl = Z_mdl_fn(XX_kp1, beacons, Ns); 
 
     % Calculate innovation 
-    sonar_k = sonar(k).z'; 
-    nu_k    = Z_mdl - sonar_k; 
+    z_meas = sonar(k).z'; 
+    nu_k   = Z_mdl - z_meas; 
     
     % update weights 
     w_kp1 = update_weights(Ns, nu_k, R, w_k); 
@@ -165,20 +165,20 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
 
     % Weighted state and covariance 
     x_khatp1 = sum(w_kp1 .* XX_kp1); 
-    xtilde   = XX_kp1 - x_khatp1; 
-    P_kp1    = xtilde' * (xtilde .* w_kp1); 
-    
+    xtilde   = (XX_kp1 - x_khatp1)'; 
+    P_kp1    = (w_kp1' .* xtilde) * xtilde'; 
     
 end 
 
 function w_kp1 = update_weights(Ns, nu_k, R, w_k)
 
     % Recalculate weights 
-    w_kp1 = zeros(Ns, 1); 
+    w_kp1    = zeros(Ns, 1); 
+    w_kp1_ln = zeros(Ns, 1); 
     for i = 1:Ns 
         
+        % current innovation 
         nu_ki = nu_k(i,:)'; 
-        nR = length(R); 
 
         % pdf 
         p_ki = exp( -1/2 * nu_ki' * R^-1 * nu_ki ); 
@@ -189,9 +189,7 @@ function w_kp1 = update_weights(Ns, nu_k, R, w_k)
     end 
     
     % Update according to log likelihood 
-    for i = 1:Ns 
-        w_kp1(i) = exp( w_kp1_ln(i) - max(w_kp1_ln) ); 
-    end 
+    w_kp1 = exp( w_kp1_ln - max(w_kp1_ln) ); 
 
     % Normalize weights 
     w_kp1 = w_kp1 ./ sum(w_kp1); 
@@ -258,17 +256,6 @@ function [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns)
             wi = wi + 1; 
         end 
         XX_kp1_new(pi,:) = XX_kp1(wi,:); 
-        
-%         % for each patricle, increment m until we meet the criteria
-%         for m = 1:Ns
-%             if (sum(w_kp1(1:m-1)) <= n_rand) && (n_rand < sum(w_kp1(1:m)))
-%                   % if the criteria is met, X_new(:,i) = X_new(:,m) 
-%                   XX_kp1_new(pi,:)     = XX_kp1(m,:);
-%                   % wik_new gets 1/Ns
-% %                   wik_new(ii)      = 1/Ns;
-%                 break;
-%             end
-%         end
 
     end 
 
