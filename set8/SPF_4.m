@@ -166,18 +166,7 @@ function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX
         [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns); 
     end 
 
-    % Compute weighted estimate 
-    x_khatp1 = zeros(1, nx); 
-    for i = 1:Ns 
-        x_khatp1 = x_khatp1 + w_kp1(i) * XX_kp1(i,:);
-    end 
-    P_kp1 = zeros(nx); 
-    for i = 1:Ns 
-        xtilde   = (XX_kp1(i,:) - x_khatp1)'; 
-        P_kp1    = P_kp1 + w_kp1(i) * xtilde * xtilde';       % outer product 
-    end 
-
-    % FASTER STATE AND COVARIANCE 
+    % Weighted state and covariance 
     x_khatp1 = sum(w_kp1 .* XX_kp1); 
     xtilde   = XX_kp1 - x_khatp1; 
     P_kp1    = xtilde' * (xtilde .* w_kp1); 
