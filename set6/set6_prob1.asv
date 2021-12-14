@@ -23,14 +23,12 @@ rng(0)
 % monte carlo and KF 
 disp('MC and KF using large Q for MC and small Q for KF:')
 mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0); 
-[xtilde10_cummean, xtilde35_cummean] = mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0); 
 
 rng(0)
 
 % monte carlo and KF 
 disp('MC and KF using large Q for MC and large Q for KF:')
 mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_a, Rk, xhat0, P0); 
-[xtilde10_cummean, xtilde35_cummean] = mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_a, Rk, xhat0, P0); 
 
 disp('The covariance and average error of the estimate is larger; the filter is less consistent'); 
 
@@ -44,14 +42,15 @@ figure()
 
 %% subfunctions 
 
-function [xtilde10_cummean, xtilde35_cummean] = mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0)
+function mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0)
 
 xtilde10 = []; 
 xtilde35 = []; 
 xtilde = []; 
 
 n = 1000; 
-for i = 1 : n % run 50 or 10000 monte carlos 
+
+for i = 1 : 1000 % run 50 or 10000 monte carlos 
 
     kmax = 50; % zhist --> 10 or 35 
     [xhist, zhist] = mcltisim(Fk, Gammak, Hk, Qk_a, Rk, xhat0, P0, kmax); 
@@ -71,13 +70,20 @@ for i = 1 : n % run 50 or 10000 monte carlos
         sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10(:,1)), cov(xtilde10(:,2)) )
         sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35(:,1)), mean(xtilde35(:,2)) )
         sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35(:,1)), cov(xtilde35(:,2)) )
-    elseif i == n
+    elseif i == 1000
         sprintf('i = %d', n) 
         sprintf('xtilde10 x1 mean = %g, x2 mean = %g', mean(xtilde10(:,1)), mean(xtilde10(:,2)) )
         sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10(:,1)), cov(xtilde10(:,2)) )
         sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35(:,1)), mean(xtilde35(:,2)) )
         sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35(:,1)), cov(xtilde35(:,2)) )
     end 
+    
+    xtilde_k = xhist - xhat; 
+    % filter consistency 
+    for k = 1:length(xtilde_k) 
+        err(k,:) = xtilde_k(k,:) * inv(P_cell{k}) * xtilde_k(k,:)'; 
+    end 
+    
 
 end 
 
@@ -87,6 +93,8 @@ for i = 1:length(xtilde10)
     xtilde10_cummean(i) = xtilde10_cumsum(i) / i; 
     xtilde35_cummean(i) = xtilde35_cumsum(i) / i; 
 end 
+
+
 
 end 
 
@@ -181,7 +189,7 @@ end
 
 %% subfunctions KALMAN FILTER 
 
-function [xhat_arr, Pxx_arr, Pzz_arr, P_cell] = kf( ... 
+function [xhat_arr, Pxx_arr, Pzz_arr, P_arr] = kf( ... 
     xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk )
 
 % initialize for k = 0 
@@ -192,7 +200,7 @@ P    = P0;
 xbar_arr = []; 
 Pbar_arr = []; 
 xhat_arr = [xhat']; 
-P_cell   = {P}; 
+P_arr    = P; 
 Pxx_arr  = [P(1,1)]; 
 Pzz_arr  = [P(2,2)]; 
 
@@ -217,7 +225,7 @@ for k = 0 : length(zhist)-1
     xbar_arr = [xbar_arr; xbar']; 
     Pbar_arr = [Pbar_arr; Pbar]; 
     xhat_arr = [xhat_arr; xhat']; 
-    P_cell{k} = P; 
+    P_arr{k+1} = P; 
     Pxx_arr  = [Pxx_arr; P(1,1)]; 
     Pzz_arr  = [Pzz_arr; P(2,2)]; 
 

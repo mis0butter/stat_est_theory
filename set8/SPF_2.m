@@ -78,7 +78,7 @@ R_ii = R_fn(sigma_r_val_ii, sigma_theta_val_ii);
 
 %% part c: large random vectors 
 
-N = 100000; 
+N = 1e7; 
 w = mvnrnd([r_bar_val_i; theta_bar_val_i], R_i, N); 
 
 z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
@@ -86,8 +86,9 @@ disp('Part i inputs:')
 fprintf('Mean of %d samples: x = %g, y = %g \n', N, mean(z(:,1)), mean(z(:,2)));
 fprintf('Linearized mean: x = %g, y = %g \n', z_lin_i(1), z_lin_i(2)); 
 fprintf('UT mean: x = %g, y = %g \n\n', z_bar_i(1), z_bar_i(2)); 
+fprintf('UT covariance:')
+% Pzz
 
-N = 100000; 
 w = mvnrnd([r_bar_val_ii; theta_bar_val_ii], R_ii, N); 
 
 z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
@@ -100,8 +101,8 @@ fprintf('UT mean: x = %g, y = %g \n', z_bar_ii(1), z_bar_ii(2));
 
 %% subfunctions 
 
-function [z_bar, Pzz] = unscented_transform(r_bar_val, theta_bar_val, R) 
-s = chol(R)'; 
+function [z_bar, Pzz] = unscented_transform(r_bar_val, theta_bar_val, P) 
+s = chol(P)'; 
 
 % obtain lambda 
 a = 10^-3; 
@@ -134,7 +135,7 @@ end
 % determine weighting 
 w_0m = lambda / (nx + lambda); 
 w_im = 1 / ( 2*(nx + lambda) ); 
-w_0c = lambda / (nx + lambda) + 1 - a^2 - b; 
+w_0c = lambda / (nx + lambda) + 1 - a^2 + b; 
 w_ic = 1 / ( 2*(nx + lambda) ); 
 
 % recombine with the weighting 

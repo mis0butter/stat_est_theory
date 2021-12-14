@@ -131,8 +131,6 @@ end
 
 % i. What effects, if any, do the values of a, b, and k have on the final
 % state estimate? 
-%   A: They adjust the weights applied to each particle (qualitative
-%   discussion) 
 
 % ii. What do you notice about the state estimates, in particular length
 % and width, as the target car performs its different maneuvers? 
