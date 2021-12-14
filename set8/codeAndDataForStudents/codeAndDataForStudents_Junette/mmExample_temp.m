@@ -67,9 +67,9 @@ end
 % switchHist = [3];
 % switchIndex = [1];
 
-% switchHist = [1 3 2 3 3];
-switchHist = [1 1 1 1 1]; 
-switchHist = [1 3 2 1 3]; 
+switchHist = [1 3 2 3 3];
+% switchHist = [1 1 1 1 1]; 
+% switchHist = [1 3 2 1 3]; 
 % switchHist = [1 2 1 2 3]; 
 switchIndex = [1, 201, 401, 601, 801]; 
 
@@ -109,6 +109,9 @@ P1 = 10*eye(nx);
 
 N_mu = 100; 
 mu_lb_vec = linspace(1e-10, 1e-2, N_mu)'; 
+
+% N_mu = 1; 
+% mu_lb_vec = 1e-5; 
     
 % select alpha 
 a = 0.01; 
@@ -166,17 +169,17 @@ end
     iidum = 1:Nsim-1;
     plot(tkhist(iidum), xtrue_hist(iidum,1) - xhat_hist(iidum,1));
     hold on;
-    plot(tkhist(iidum), sqrt(P_hist(:,:,iidum(1,1))), 'k');
-    plot(tkhist(iidum), -sqrt(P_hist(:,:,iidum(1,1))), 'k');
+    plot(tkhist(iidum), sqrt(squeeze(P_hist(1,1,iidum))), 'k');
+    plot(tkhist(iidum), -sqrt(squeeze(P_hist(1,1,iidum))), 'k');
     ylabel('\Delta \theta_z (rad)');
     title('Estimation errors and covariances');
 
     subplot(212)
     iidum = 1:Nsim-1;
-    plot(tkhist(iidum), xtrue_hist(:,:,iidum(2,2)) - xhat_hist(iidum,2));
+    plot(tkhist(iidum), xtrue_hist(iidum,2) - xhat_hist(iidum,2));
     hold on;
-    plot(tkhist(iidum), sqrt(P_hist(:,:,iidum(2,2))), 'k');
-    plot(tkhist(iidum), -sqrt(P_hist(:,:,iidum(2,2))), 'k');
+    plot(tkhist(iidum), sqrt(squeeze(P_hist(2,2,iidum))), 'k');
+    plot(tkhist(iidum), -sqrt(squeeze(P_hist(2,2,iidum))), 'k');
     ylabel('\Delta \omega_z (rad/s)');
     xlabel('Time (s)');
 

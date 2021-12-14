@@ -119,18 +119,34 @@ hold on; grid on;
 % times with only 100 particles.
 %   A: The state estimate time history usually does not change much, which
 %   is good. Running the filter with 100 particles makes the estimate
-%   significantly worse. 
+%   time history change more, using fewer particles make the estimate time 
+%   history change less. This good because this ensures that the particle 
+%   filter does not converge on an incorrect initial guess. 
+
+%   A: A consequence of the particle filter is that fewer particles leads
+%   to degeneracy of the filter. Fewer particles will result in particles
+%   in wrong locations having higher probabilities, which will lead to
+%   clusters of particles persisting in incorrect locations. 
 
 % ii. Why do clusters of particles sometimes persist in incorrect locations on the
 % map?
 %   A: The clusters of particles sometimes persist because when the weights
 %   get updated, drawing from the probability distribution function does
 %   not always immediately cancel the incorrect particles. 
-%   A: log-likelihood local minima pockets 
+%   A: log-likelihood local minima pockets . The particles are stuck in
+%   local extrema. The more nonlinearities in the dynamics, the more local
+%   minima and maxima that exist in the probability distribution function. 
 
 % iii. Why would it be difficult to implement this filter as an extended Kalman
 % Filter?
-%   A: The nonlinearities would lead the EKF to become degenerate 
+%   A: The nonlinearities would lead the EKF to become degenerate. 
+%   A: Nonlinearities would lead to degeneracy in the EKF. 
+% The UKF does not require computing Jacobians, can be used with 
+% discontinuous transformation, and is, most importantly, more accurate 
+% than EKF for highly nonlinear transformations. The probability
+% distribution function is not Gaussian, which makes the EKF unsuitable as 
+% the EKF relies on linearizing conditioning on Gaussian distributions. 
+% Particle filter is better. 
 
     
 

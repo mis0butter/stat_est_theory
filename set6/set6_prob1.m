@@ -17,7 +17,7 @@ kf_example02b
 Gk = Gammak; 
 
 
-n = 1000; 
+n = 10000; 
 Nx = 2; 
 Nz = 1; 
 

@@ -1,4 +1,4 @@
-close all; 
+% close all; 
 clear; 
 % clc
 
@@ -131,22 +131,31 @@ end
 
 % i. What effects, if any, do the values of a, b, and k have on the final
 % state estimate? 
-%   A: They adjust the weights applied to each particle (qualitative
-%   discussion) 
+%   A: The spread of the sigma points around the mean state value is controlled by two parameters α and κ. A third parameter, β, impacts the weights of the transformed points during state and measurement covariance calculations.
+% α — Determines the spread of the sigma points around the mean state value. It is usually a small positive value. The spread of sigma points is proportional to α. Smaller values correspond to sigma points closer to the mean state.
+% κ — A second scaling parameter that is usually set to 0. Smaller values correspond to sigma points closer to the mean state. The spread is proportional to the square-root of κ.
+% β — Incorporates prior knowledge of the distribution of the state. For Gaussian distributions, β = 2 is optimal.
 
 % ii. What do you notice about the state estimates, in particular length
 % and width, as the target car performs its different maneuvers? 
-%   A: The length and width vary slightly in estimate. 
+%   A: The length and width vary slightly in estimate due to the
+%   orientation of the car relative to the LIDAR sensors. There are times
+%   while the car is turning where the LIDAR is only able to sense
+%   certain parameters past an inflection point of the car's motion. 
 
-% iii. Why would it be difficult to implemeent this as an extended Kalman
+% iii. Why would it be difficult to implement this as an extended Kalman
 % filter? 
-%   A: Nonlinearities would lead to degeneracy in the EKF. Taking the
-%   jacobian would be difficult. 
+%   A: Nonlinearities would lead to degeneracy in the EKF. 
+% The UKF does not require computing Jacobians, can be used with 
+% discontinuous transformation, and is, most importantly, more accurate 
+% than EKF for highly nonlinear transformations.
 
-% iv. Why did we choose to use the bearing-bearing-range maesurment instead
+% iv. Why did we choose to use the bearing-bearing-range measurement instead
 % of some other measurement vector? 
-%   A: Using only bearing data would make the state weakly observable. 
-%   A: Minimal set. Fewer than three estimates? 
+%   A: Using only bearing data would make the state weakly observable (weak 
+%   notion of location). Two bearing measurements and distance (range) are 
+%   the minimal set required for determining the length, width, location, 
+%   and orientation of the car. 
 
 %% subfunctions 
 

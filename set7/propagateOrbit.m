@@ -43,7 +43,7 @@ nx = 6;
 nu = 3;
 nv = 3;
 % Set options for numerical integration
-options = odeset('reltol',1e-10); 
+options = odeset('abstol', 1e-10, 'reltol',1e-10); 
 % Initialize F and GAMMA 
 F0 = eye(nx); 
 F0 = reshape(F0, [], 1); 
@@ -71,28 +71,28 @@ GAMMAk = reshape(GAMMAvec,nx,nv);
 %----- odePHI is a nested function that has access to all input paramters
 function [Xdot] = odePHI(t,X)
 
-%-- Calculate the time derivative of the nx-by-1 state vector
-x    = X(1:nx,1);
-rs   = x(1:3); 
-vs   = x(4:6);
-xdot = zeros(nx,1);
-xdot(1:3) = X(4:6); 
-xdot(4:6) = -mu * rs / norm(rs)^3 + uk + vk; 
+    %-- Calculate the time derivative of the nx-by-1 state vector
+    x    = X(1:nx,1);
+    rs   = x(1:3); 
+    vs   = x(4:6);
+    xdot = zeros(nx,1);
+    xdot(1:3) = X(4:6); 
+    xdot(4:6) = -mu * rs / norm(rs)^3 + uk + vk; 
 
-% Calculate A(t) 
-A = Afun(x, mu);
+    % Calculate A(t) 
+    A = Afun(x, mu);
 
-% Time derivatives Fdot and GAMMAdot
-D    = [zeros(3); eye(3)];
-Fvec = X(nx+1:(nx+1)*nx);
-F    = reshape(Fvec,nx,nx);
-GAMMAvec = X((nx+1)*nx + 1:end);
-GAMMA = reshape(GAMMAvec, [nx nv]);
+    % Time derivatives Fdot and GAMMAdot
+    D    = [zeros(3); eye(3)];
+    Fvec = X(nx+1:(nx+1)*nx);
+    F    = reshape(Fvec,nx,nx);
+    GAMMAvec = X((nx+1)*nx + 1:end);
+    GAMMA = reshape(GAMMAvec, [nx nv]);
 
-% Dynamical equations 
-Fdot = A * F; 
-GAMMAdot = A * GAMMA; 
-Xdot = [xdot; Fdot(:); GAMMAdot(:)];
+    % Dynamical equations 
+    Fdot = A * F; 
+    GAMMAdot = A * GAMMA + D; 
+    Xdot = [xdot; Fdot(:); GAMMAdot(:)];
 
 end
 

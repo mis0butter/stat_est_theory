@@ -13,31 +13,31 @@ v_mag = sqrt(mu/r);
 r0 = [1; 0; 0] * r; 
 v0 = [0; 1; 0] * v_mag ; 
 
-% period 
+% period (s) 
 P = 2 * pi * sqrt( r^3 / mu ); 
 
 % sample time 
 % dt = 1; 
-thist = linspace(0, P, round(2*P)); 
+thist = linspace(0, 5*P, 5*P+1); 
 dt = thist(2) - thist(1); 
 
 % input 
-uk = zeros(3,1); 
-% uk = rand(length(thist), 3); 
+% uk = zeros(length(thist), 3);
+% uk(1:200, 1:3) = ones(200, 3); 
+uk = rand(length(thist), 3); 
 
 vk = zeros(3,1); 
 
 %% propagate orbit 
 
 xk = [r0; v0]; 
-xhist = []; 
+xhist = [xk']; 
 Fhist = []; 
 Ghist = []; 
-for i = 1:length(thist) 
+for i = 1:length(thist)-1 
 
     tk = thist(i); 
-    [xkp1, ~, ~] = propagateOrbit(tk, dt, xk, uk, vk, mu); 
-%     [xkp1, ~, ~] = propagateOrbit(tk, dt, xk, uk(i,:)', vk, mu); 
+    [xkp1, ~, ~] = propagateOrbit(tk, dt, xk, uk(i,:)', vk, mu); 
 
     xk = xkp1; 
     xhist = [xhist; xk']; 
@@ -46,16 +46,22 @@ for i = 1:length(thist)
     
 end 
 
+xhist(end,:) - xhist(1,:) 
+
 %% Final A 
 
 A = Afun(xhist(end,:)', mu); 
 
-%% 
+%% plot 
 
 close all; 
-plot3(xhist(:,1), xhist(:,2), xhist(:,3))
+% plot3(xhist(:,1), xhist(:,2), xhist(:,3))
 
-%% 
+% input xhist must be a [3 x N] array 
+plot_globe( [ xhist(:,1:3) ]' ); 
+
+
+%% validate Fk matrix 
 
 tk = 0; 
 

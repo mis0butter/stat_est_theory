@@ -1,6 +1,8 @@
 clear
 clc 
 
+rng(0)
+
 %%
 
 syms r_bar w_r theta_bar w_theta
@@ -47,7 +49,7 @@ dr = [ r_bar_val_i - r_bar_val_i ];
 dtheta = [ theta_bar_val_i - theta_bar_val_i ]; 
 xy_bar = [ x_bar_fn(r_bar_val_i, theta_bar_val_i); y_bar_fn(r_bar_val_i, theta_bar_val_i) ]; 
 z_lin_i  = xy_bar + H * [dr; dtheta]; 
-Rc_val_i = Rc_fn(r_bar_val_i, sigma_r_val_i, sigma_theta_val_i, theta_bar_val_i); 
+P_lin_i = Rc_fn(r_bar_val_i, sigma_r_val_i, sigma_theta_val_i, theta_bar_val_i); 
 
 % inputs part ii 
 r_bar_val_ii = 76; 
@@ -62,42 +64,53 @@ dr = [ r_bar_val_ii - r_bar_val_ii ];
 dtheta = [ theta_bar_val_ii - theta_bar_val_ii ]; 
 xy_bar = [ x_bar_fn(r_bar_val_ii, theta_bar_val_ii); y_bar_fn(r_bar_val_ii, theta_bar_val_ii) ]; 
 z_lin_ii  = xy_bar + H * [dr; dtheta]; 
-Rc_val_ii = Rc_fn(r_bar_val_ii, sigma_r_val_ii, sigma_theta_val_ii, theta_bar_val_ii); 
+P_lin_ii = Rc_fn(r_bar_val_ii, sigma_r_val_ii, sigma_theta_val_ii, theta_bar_val_ii); 
 
 %% part b: unscented transform 
 
 % cholesky factorize 
 R_i = R_fn(sigma_r_val_i, sigma_theta_val_i); 
 
-[z_bar_i, Pzz_i] = unscented_transform(r_bar_val_i, theta_bar_val_i, R_i); 
+[z_UT_i, P_UT_i] = unscented_transform(r_bar_val_i, theta_bar_val_i, R_i); 
 
 % cholesky factorize 
 R_ii = R_fn(sigma_r_val_ii, sigma_theta_val_ii); 
 
-[z_bar_ii, Pzz_ii] = unscented_transform(r_bar_val_ii, theta_bar_val_ii, R_ii); 
+[z_UT_ii, P_UT_ii] = unscented_transform(r_bar_val_ii, theta_bar_val_ii, R_ii); 
 
 %% part c: large random vectors 
 
 N = 1e7; 
+
+% Part i 
 w = mvnrnd([r_bar_val_i; theta_bar_val_i], R_i, N); 
 
 z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
+P_sto_i = cov(z); 
 disp('Part i inputs:') 
-fprintf('Mean of %d samples: x = %g, y = %g \n', N, mean(z(:,1)), mean(z(:,2)));
-fprintf('Linearized mean: x = %g, y = %g \n', z_lin_i(1), z_lin_i(2)); 
-fprintf('UT mean: x = %g, y = %g \n\n', z_bar_i(1), z_bar_i(2)); 
+fprintf('Mean of many samples: x = %g, y = %g \n', mean(z(:,1)), mean(z(:,2)));
+fprintf('Linearized mean:      x = %g, y = %g \n', z_lin_i(1), z_lin_i(2)); 
+fprintf('UT mean:              x = %g, y = %g \n\n', z_UT_i(1), z_UT_i(2)); 
 fprintf('UT covariance:')
-% Pzz
 
+P_sto_i
+P_lin_i 
+P_UT_i 
+
+% Part ii 
 w = mvnrnd([r_bar_val_ii; theta_bar_val_ii], R_ii, N); 
 
 z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
+P_sto_ii = cov(z); 
 
 disp('Part ii inputs: ') 
-fprintf('Mean of %d samples: x = %g, y = %g \n', N, mean(z(:,1)), mean(z(:,2))); 
-fprintf('Linearized mean: x = %g, y = %g \n', z_lin_ii(1), z_lin_ii(2)); 
-fprintf('UT mean: x = %g, y = %g \n', z_bar_ii(1), z_bar_ii(2)); 
+fprintf('Mean of many samples: x = %g, y = %g \n', mean(z(:,1)), mean(z(:,2))); 
+fprintf('Linearized mean:      x = %g, y = %g \n', z_lin_ii(1), z_lin_ii(2)); 
+fprintf('UT mean:              x = %g, y = %g \n', z_UT_ii(1), z_UT_ii(2)); 
 
+P_sto_ii 
+P_lin_ii
+P_UT_ii 
 
 %% subfunctions 
 
