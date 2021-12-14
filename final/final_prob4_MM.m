@@ -75,7 +75,7 @@ utruekhist = 2*randn(Nsim,nu);
 Hkp1 = [1 0];
 x1 = [0;0.1];
 
-%----- Generate truth-model states and measurements
+%% ----- Generate truth-model states and measurements
 xk = x1;
 ii = 1;
 for k=1:Nsim-1
@@ -96,6 +96,8 @@ for k=1:Nsim-1
   ztrue_hist(kp1,:) = zkp1';
   xk = xkp1;
 end
+
+%% 
 
 %----- Run the Multiple-model filter
 % Set up initial states and covariances

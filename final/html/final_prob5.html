@@ -1,0 +1,528 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>final_prob5</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-12-14"><meta name="DC.source" content="final_prob5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">part b: unscented transform</a></li><li><a href="#4">part c: large random vectors</a></li><li><a href="#5">Case i</a></li><li><a href="#6">Case ii</a></li><li><a href="#7">Comment on your results</a></li><li><a href="#8">subfunctions</a></li></ul></div><pre class="codeinput">clear
+clc
+
+rng(0)
+</pre><pre class="codeinput">syms <span class="string">r_bar</span> <span class="string">w_r</span> <span class="string">theta_bar</span> <span class="string">w_theta</span>
+syms <span class="string">sigma_r</span> <span class="string">sigma_theta</span>
+
+<span class="comment">% polar measurements</span>
+r = r_bar + w_r;
+theta = theta_bar + w_theta;
+
+<span class="comment">% polar covariance</span>
+R_i = diag([ sigma_r^2 sigma_theta^2 ]);
+R_fn = matlabFunction(R_i);
+
+<span class="comment">% cartesian coordinates</span>
+x = r * cos(theta);
+y = r * sin(theta);
+
+<span class="comment">% expected cartesian</span>
+x_bar = r_bar * cos(theta_bar);
+y_bar = r_bar * sin(theta_bar);
+x_bar_fn = matlabFunction(x_bar);
+y_bar_fn = matlabFunction(y_bar);
+
+<span class="comment">% linearized cartesian about expected values</span>
+dx_bar = jacobian(x_bar, [r_bar theta_bar]);
+dy_bar = jacobian(y_bar, [r_bar theta_bar]);
+dx_bar_fn = matlabFunction(dx_bar);
+dy_bar_fn = matlabFunction(dy_bar);
+
+<span class="comment">% linearized cartesian covariance</span>
+Rc = [dx_bar; dy_bar] * R_i * [dx_bar; dy_bar].';
+Rc_fn = matlabFunction(Rc);
+
+<span class="comment">% inputs part i</span>
+r_bar_val_i = 76;
+theta_bar_val_i = -3*pi/180;
+sigma_r_val_i = 1;
+sigma_theta_val_i = pi/180;
+
+<span class="comment">% compute</span>
+H = [ dx_bar_fn(r_bar_val_i, theta_bar_val_i);
+      dy_bar_fn(r_bar_val_i, theta_bar_val_i) ];
+dr = [ r_bar_val_i - r_bar_val_i ];
+dtheta = [ theta_bar_val_i - theta_bar_val_i ];
+xy_bar = [ x_bar_fn(r_bar_val_i, theta_bar_val_i); y_bar_fn(r_bar_val_i, theta_bar_val_i) ];
+z_lin_i  = xy_bar + H * [dr; dtheta];
+P_lin_i = Rc_fn(r_bar_val_i, sigma_r_val_i, sigma_theta_val_i, theta_bar_val_i);
+
+<span class="comment">% inputs part ii</span>
+r_bar_val_ii = 76;
+theta_bar_val_ii = -3*pi/180;
+sigma_r_val_ii = 1;
+sigma_theta_val_ii = 15*pi/180;
+
+<span class="comment">% compute</span>
+H = [ dx_bar_fn(r_bar_val_ii, theta_bar_val_ii);
+      dy_bar_fn(r_bar_val_ii, theta_bar_val_ii) ];
+dr = [ r_bar_val_ii - r_bar_val_ii ];
+dtheta = [ theta_bar_val_ii - theta_bar_val_ii ];
+xy_bar = [ x_bar_fn(r_bar_val_ii, theta_bar_val_ii); y_bar_fn(r_bar_val_ii, theta_bar_val_ii) ];
+z_lin_ii  = xy_bar + H * [dr; dtheta];
+P_lin_ii = Rc_fn(r_bar_val_ii, sigma_r_val_ii, sigma_theta_val_ii, theta_bar_val_ii);
+</pre><h2 id="3">part b: unscented transform</h2><pre class="codeinput"><span class="comment">% cholesky factorize</span>
+R_i = R_fn(sigma_r_val_i, sigma_theta_val_i);
+
+[z_UT_i, P_UT_i] = unscented_transform(r_bar_val_i, theta_bar_val_i, R_i);
+
+<span class="comment">% cholesky factorize</span>
+R_ii = R_fn(sigma_r_val_ii, sigma_theta_val_ii);
+
+[z_UT_ii, P_UT_ii] = unscented_transform(r_bar_val_ii, theta_bar_val_ii, R_ii);
+</pre><h2 id="4">part c: large random vectors</h2><pre class="codeinput">N = 1e7;
+</pre><h2 id="5">Case i</h2><pre class="codeinput">w = mvnrnd([r_bar_val_i; theta_bar_val_i], R_i, N);
+z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];
+P_sto_i = cov(z);
+
+disp(<span class="string">'Case i:'</span>)
+disp(<span class="string">'Linearized mean and covariance:'</span>);
+z_lin_i'
+P_lin_i
+
+disp(<span class="string">'Unscented mean and covariance:'</span>);
+z_UT_i
+P_UT_i
+
+disp(<span class="string">'True mean and covariance:'</span>);
+mean(z)
+P_sto_i
+</pre><pre class="codeoutput">Case i:
+Linearized mean and covariance:
+
+ans =
+
+          75.8958446413476         -3.97753267446373
+
+
+P_lin_i =
+
+          1.00208022865585        0.0396931273239757
+        0.0396931273239757          1.75738998803218
+
+Unscented mean and covariance:
+
+z_UT_i =
+
+          75.8842850327492         -3.97692686226219
+
+
+P_UT_i =
+
+          1.00234747818872        0.0396791213909831
+        0.0396791213909813          1.75739072169245
+
+True mean and covariance:
+
+ans =
+
+          75.8844390709919         -3.97723672573676
+
+
+P_sto_i =
+
+          1.00165308489859         0.039052110136577
+         0.039052110136577            1.756663275305
+
+</pre><h2 id="6">Case ii</h2><pre class="codeinput">w = mvnrnd([r_bar_val_ii; theta_bar_val_ii], R_ii, N);
+z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];
+P_sto_ii = cov(z);
+
+disp(<span class="string">'Case ii:'</span>)
+disp(<span class="string">'Linearized mean and covariance:'</span>);
+z_lin_ii'
+P_lin_ii
+
+disp(<span class="string">'Unscented mean and covariance:'</span>);
+z_UT_ii
+P_UT_ii
+
+disp(<span class="string">'True mean and covariance:'</span>);
+mean(z)
+P_sto_ii
+</pre><pre class="codeoutput">Case ii:
+Linearized mean and covariance:
+
+ans =
+
+          75.8958446413476         -3.97753267446373
+
+
+P_lin_ii =
+
+          2.08159916631931          20.6381415338717
+          20.6381415338717          394.799199588487
+
+Unscented mean and covariance:
+
+z_UT_ii =
+
+          73.2949350737035         -3.84122478100471
+
+
+P_UT_ii =
+
+          15.6110670950729          19.9290912253928
+            19.92909122532          394.836341251303
+
+True mean and covariance:
+
+ans =
+
+          73.3390054525815         -3.83663171984719
+
+
+P_sto_ii =
+
+          14.5962973188707           18.584811702349
+           18.584811702349          369.136213687784
+
+</pre><h2 id="7">Comment on your results</h2><pre class="codeinput">disp(<span class="string">'The unscented mean is much closer to the true mean than the linearized mean. '</span>);
+disp(<span class="string">'The unscented covariance is also smaller than the the linearized covariance. '</span>);
+disp(<span class="string">'Norm(linearized covariance) - norm(unscented covariance) = '</span>)
+norm(P_lin_ii) - norm(P_UT_ii)
+
+disp(<span class="string">'The unscented transform produces more accurate results than linearization with smaller uncertainty.'</span>)
+</pre><pre class="codeoutput">The unscented mean is much closer to the true mean than the linearized mean. 
+The unscented covariance is also smaller than the the linearized covariance. 
+Norm(linearized covariance) - norm(unscented covariance) = 
+
+ans =
+
+      1.80888077920827e-05
+
+The unscented transform produces more accurate results than linearization with smaller uncertainty.
+</pre><h2 id="8">subfunctions</h2><pre class="codeinput"><span class="keyword">function</span> [z_bar, Pzz] = unscented_transform(r_bar_val, theta_bar_val, P)
+s = chol(P)';
+
+<span class="comment">% obtain lambda</span>
+a = 10^-3;
+b = 2;
+k = 0;
+nx = 2;
+nv = 0;
+nz = 2;
+<span class="comment">% lambda = a^2 * (nx + 1/2) - nx;</span>
+lambda = a^2 * (nx + nv + k) - (nx + nv);
+
+<span class="comment">% build sigma points (still polar coordinates)</span>
+rtheta_bar = [r_bar_val; theta_bar_val];
+R = rtheta_bar' ;
+<span class="keyword">for</span> i = 1 : nx
+    Ri = rtheta_bar + sqrt( nx + lambda ) * s(:,i);
+    R = [ R; Ri' ];
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = nx + 1 : 2*nx
+    Ri = rtheta_bar - sqrt( nx + lambda) * s(:, i-nx);
+    R = [ R; Ri' ];
+<span class="keyword">end</span>
+
+<span class="comment">% push sigma points through measurement model --&gt;</span>
+z = @(sigma) [sigma(1) * cos(sigma(2)); sigma(1) * sin(sigma(2))];
+<span class="keyword">for</span> i = 1 : 2*nx + 1
+    Z(i,:) = z(R(i,:));
+<span class="keyword">end</span>
+
+<span class="comment">% determine weighting</span>
+w_0m = lambda / (nx + lambda);
+w_im = 1 / ( 2*(nx + lambda) );
+w_0c = lambda / (nx + lambda) + 1 - a^2 + b;
+w_ic = 1 / ( 2*(nx + lambda) );
+
+<span class="comment">% recombine with the weighting</span>
+z_bar = w_0m * Z(1,:);
+<span class="keyword">for</span> i = 2 : 2*nx+1
+    z_bar = z_bar + w_ic * Z(i,:);
+<span class="keyword">end</span>
+
+<span class="comment">% covariance</span>
+ztilde = Z - z_bar; ztilde = ztilde';
+Pzz = zeros(size(nz));
+<span class="keyword">for</span> i = 1:length(ztilde)
+    <span class="keyword">if</span> i == 1
+        w = w_0c;
+    <span class="keyword">else</span>
+        w = w_ic;
+    <span class="keyword">end</span>
+    Pzz = Pzz + w * ztilde(:,i) * ztilde(:,i)';
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear
+clc 
+
+rng(0)
+
+%%
+
+syms r_bar w_r theta_bar w_theta
+syms sigma_r sigma_theta 
+
+% polar measurements 
+r = r_bar + w_r; 
+theta = theta_bar + w_theta; 
+
+% polar covariance 
+R_i = diag([ sigma_r^2 sigma_theta^2 ]); 
+R_fn = matlabFunction(R_i); 
+
+% cartesian coordinates 
+x = r * cos(theta); 
+y = r * sin(theta); 
+
+% expected cartesian 
+x_bar = r_bar * cos(theta_bar); 
+y_bar = r_bar * sin(theta_bar); 
+x_bar_fn = matlabFunction(x_bar); 
+y_bar_fn = matlabFunction(y_bar); 
+
+% linearized cartesian about expected values 
+dx_bar = jacobian(x_bar, [r_bar theta_bar]); 
+dy_bar = jacobian(y_bar, [r_bar theta_bar]); 
+dx_bar_fn = matlabFunction(dx_bar); 
+dy_bar_fn = matlabFunction(dy_bar); 
+
+% linearized cartesian covariance 
+Rc = [dx_bar; dy_bar] * R_i * [dx_bar; dy_bar].'; 
+Rc_fn = matlabFunction(Rc); 
+
+% inputs part i 
+r_bar_val_i = 76; 
+theta_bar_val_i = -3*pi/180; 
+sigma_r_val_i = 1; 
+sigma_theta_val_i = pi/180; 
+
+% compute 
+H = [ dx_bar_fn(r_bar_val_i, theta_bar_val_i); 
+      dy_bar_fn(r_bar_val_i, theta_bar_val_i) ]; 
+dr = [ r_bar_val_i - r_bar_val_i ]; 
+dtheta = [ theta_bar_val_i - theta_bar_val_i ]; 
+xy_bar = [ x_bar_fn(r_bar_val_i, theta_bar_val_i); y_bar_fn(r_bar_val_i, theta_bar_val_i) ]; 
+z_lin_i  = xy_bar + H * [dr; dtheta]; 
+P_lin_i = Rc_fn(r_bar_val_i, sigma_r_val_i, sigma_theta_val_i, theta_bar_val_i); 
+
+% inputs part ii 
+r_bar_val_ii = 76; 
+theta_bar_val_ii = -3*pi/180; 
+sigma_r_val_ii = 1; 
+sigma_theta_val_ii = 15*pi/180; 
+
+% compute 
+H = [ dx_bar_fn(r_bar_val_ii, theta_bar_val_ii); 
+      dy_bar_fn(r_bar_val_ii, theta_bar_val_ii) ]; 
+dr = [ r_bar_val_ii - r_bar_val_ii ]; 
+dtheta = [ theta_bar_val_ii - theta_bar_val_ii ]; 
+xy_bar = [ x_bar_fn(r_bar_val_ii, theta_bar_val_ii); y_bar_fn(r_bar_val_ii, theta_bar_val_ii) ]; 
+z_lin_ii  = xy_bar + H * [dr; dtheta]; 
+P_lin_ii = Rc_fn(r_bar_val_ii, sigma_r_val_ii, sigma_theta_val_ii, theta_bar_val_ii); 
+
+%% part b: unscented transform 
+
+% cholesky factorize 
+R_i = R_fn(sigma_r_val_i, sigma_theta_val_i); 
+
+[z_UT_i, P_UT_i] = unscented_transform(r_bar_val_i, theta_bar_val_i, R_i); 
+
+% cholesky factorize 
+R_ii = R_fn(sigma_r_val_ii, sigma_theta_val_ii); 
+
+[z_UT_ii, P_UT_ii] = unscented_transform(r_bar_val_ii, theta_bar_val_ii, R_ii); 
+
+%% part c: large random vectors 
+
+N = 1e7; 
+
+%% Case i 
+
+w = mvnrnd([r_bar_val_i; theta_bar_val_i], R_i, N); 
+z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
+P_sto_i = cov(z); 
+
+disp('Case i:') 
+disp('Linearized mean and covariance:');   
+z_lin_i' 
+P_lin_i 
+
+disp('Unscented mean and covariance:'); 
+z_UT_i 
+P_UT_i 
+
+disp('True mean and covariance:'); 
+mean(z) 
+P_sto_i 
+
+%% Case ii 
+
+w = mvnrnd([r_bar_val_ii; theta_bar_val_ii], R_ii, N); 
+z = [ w(:,1) .* cos(w(:,2)), w(:,1) .* sin(w(:,2)) ];  
+P_sto_ii = cov(z); 
+
+disp('Case ii:') 
+disp('Linearized mean and covariance:');   
+z_lin_ii' 
+P_lin_ii 
+
+disp('Unscented mean and covariance:'); 
+z_UT_ii
+P_UT_ii 
+
+disp('True mean and covariance:'); 
+mean(z) 
+P_sto_ii 
+
+%% Comment on your results 
+
+disp('The unscented mean is much closer to the true mean than the linearized mean. '); 
+disp('The unscented covariance is also smaller than the the linearized covariance. '); 
+disp('Norm(linearized covariance) - norm(unscented covariance) = ')
+norm(P_lin_ii) - norm(P_UT_ii)
+
+disp('The unscented transform produces more accurate results than linearization with smaller uncertainty.') 
+
+
+%% subfunctions 
+
+function [z_bar, Pzz] = unscented_transform(r_bar_val, theta_bar_val, P) 
+s = chol(P)'; 
+
+% obtain lambda 
+a = 10^-3; 
+b = 2; 
+k = 0; 
+nx = 2; 
+nv = 0; 
+nz = 2; 
+% lambda = a^2 * (nx + 1/2) - nx; 
+lambda = a^2 * (nx + nv + k) - (nx + nv); 
+
+% build sigma points (still polar coordinates) 
+rtheta_bar = [r_bar_val; theta_bar_val]; 
+R = rtheta_bar' ; 
+for i = 1 : nx
+    Ri = rtheta_bar + sqrt( nx + lambda ) * s(:,i); 
+    R = [ R; Ri' ]; 
+end 
+for i = nx + 1 : 2*nx
+    Ri = rtheta_bar - sqrt( nx + lambda) * s(:, i-nx); 
+    R = [ R; Ri' ]; 
+end 
+
+% push sigma points through measurement model REPLACE_WITH_DASH_DASH> 
+z = @(sigma) [sigma(1) * cos(sigma(2)); sigma(1) * sin(sigma(2))]; 
+for i = 1 : 2*nx + 1
+    Z(i,:) = z(R(i,:)); 
+end 
+
+% determine weighting 
+w_0m = lambda / (nx + lambda); 
+w_im = 1 / ( 2*(nx + lambda) ); 
+w_0c = lambda / (nx + lambda) + 1 - a^2 + b; 
+w_ic = 1 / ( 2*(nx + lambda) ); 
+
+% recombine with the weighting 
+z_bar = w_0m * Z(1,:); 
+for i = 2 : 2*nx+1
+    z_bar = z_bar + w_ic * Z(i,:); 
+end  
+
+% covariance 
+ztilde = Z - z_bar; ztilde = ztilde'; 
+Pzz = zeros(size(nz)); 
+for i = 1:length(ztilde) 
+    if i == 1 
+        w = w_0c; 
+    else
+        w = w_ic; 
+    end 
+    Pzz = Pzz + w * ztilde(:,i) * ztilde(:,i)'; 
+end 
+
+end 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
