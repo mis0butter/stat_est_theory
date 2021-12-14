@@ -16,42 +16,83 @@ kf_example02b
 % Qk_c = second alternate Qk 
 Gk = Gammak; 
 
-%% monte carlo and KF 
+
+n = 10000; 
+Nx = 2; 
+Nz = 1; 
+
+% NEED STATISTICS TOOLBOX 
+a = .01; 
+r1 = chi2inv( a/2, n * Nx) / n; 
+r2 = chi2inv( 1 - a/2, n * Nx ) / n; 
+
+%% LARGE Q MC, SMALL Q KF 
 
 rng(0) 
 
 % monte carlo and KF 
-disp('MC and KF using large Q for MC and small Q for KF:')
-mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0); 
-[xtilde10_cummean, xtilde35_cummean] = mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0); 
+txt = 'MC and KF using large Q for MC and small Q for KF:'; 
+disp(txt); 
+[xtilde10_vec, err10_vec, xtilde35_vec, err35_vec] = ... 
+    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0, n); 
+
+xtilde10_cumsum = cumsum(xtilde10_vec); 
+xtilde35_cumsum = cumsum(xtilde35_vec); 
+for k = 1:length(xtilde10_vec) 
+    xtilde10_cummean(k) = xtilde10_cumsum(k) / k; 
+    xtilde35_cummean(k) = xtilde35_cumsum(k) / k; 
+end 
+
+hf = figure(); 
+    subplot(2,1,1) 
+        plot(xtilde10_cummean); hold on; grid on; 
+        plot(xtilde35_cummean, '--'); 
+        legend('xtilde10', 'xtilde35'); 
+        title(txt); 
+        
+%% LARGE Q MC, LARGE Q KF 
 
 rng(0)
 
 % monte carlo and KF 
-disp('MC and KF using large Q for MC and large Q for KF:')
-mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_a, Rk, xhat0, P0); 
-[xtilde10_cummean, xtilde35_cummean] = mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_a, Rk, xhat0, P0); 
+txt = 'MC and KF using large Q for MC and large Q for KF:';  
+disp(txt); 
+[xtilde10_vec, err10_vec, xtilde35_vec, err35_vec] = ... 
+    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_a, Rk, xhat0, P0, n); 
+
+xtilde10_cumsum = cumsum(xtilde10_vec); 
+xtilde35_cumsum = cumsum(xtilde35_vec); 
+for k = 1:length(xtilde10_vec) 
+    xtilde10_cummean(k) = xtilde10_cumsum(k) / k; 
+    xtilde35_cummean(k) = xtilde35_cumsum(k) / k; 
+end 
+
+figure(hf); 
+    subplot(2,1,2) 
+        plot(xtilde10_cummean); hold on; grid on; 
+        plot(xtilde35_cummean, '--'); 
+        legend('xtilde10', 'xtilde35'); 
+        title(txt); 
 
 disp('The covariance and average error of the estimate is larger; the filter is less consistent'); 
 
-%% plot 
+%% 
 
-figure() 
-    plot(xtilde10_cummean); hold on; grid on; 
-    plot(xtilde35_cummean, '--'); 
-    legend('xtilde10', 'xtilde35'); 
+
 
 
 %% subfunctions 
 
-function [xtilde10_cummean, xtilde35_cummean] = mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0)
+function [xtilde10_vec, err10_vec, xtilde35_vec, err35_vec] = ... 
+    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0, n)
 
-xtilde10 = []; 
-xtilde35 = []; 
-xtilde = []; 
+xtilde10_vec = []; 
+xtilde35_vec = []; 
+xtilde_vec   = []; 
+err10_vec    = []; 
+err35_vec    = []; 
 
-n = 1000; 
-for i = 1 : n % run 50 or 10000 monte carlos 
+for i_mc = 1 : n % run 50 or 10000 monte carlos 
 
     kmax = 50; % zhist --> 10 or 35 
     [xhist, zhist] = mcltisim(Fk, Gammak, Hk, Qk_a, Rk, xhat0, P0, kmax); 
@@ -61,31 +102,32 @@ for i = 1 : n % run 50 or 10000 monte carlos
         xhat0, P0, zhist, Fk, Gammak, Qk_c, Hk, Rk );
 
     % xtilde = truth - estimate (xhat0 in 1st element) 
-    xtilde10 = [xtilde10; xhist(11,:) - xhat(11,:)]; 
-    xtilde35 = [xtilde35; xhist(36,:) - xhat(36,:)]; 
-    xtilde = [xtilde; xhist - xhat]; 
+    xtilde10_vec = [xtilde10_vec; xhist(11,:) - xhat(11,:)]; 
+    xtilde35_vec = [xtilde35_vec; xhist(36,:) - xhat(36,:)]; 
+    xtilde_vec = [xtilde_vec; xhist - xhat]; 
     
-    if i == 50
+    xtilde10 = xhist(11,:) - xhat(11,:); 
+    err10 = xtilde10 * inv(P_cell{11}) * xtilde10'; 
+    err10_vec = [err10_vec; err10]; 
+    
+    xtilde35 = xhist(36,:) - xhat(36,:); 
+    err35 = xtilde35 * inv(P_cell{36}) * xtilde35'; 
+    err35_vec = [err35_vec; err35]; 
+    
+    if i_mc == 50
         disp('i = 50') 
-        sprintf('xtilde10 x1 mean = %g, x2 mean = %g', mean(xtilde10(:,1)), mean(xtilde10(:,2)) )
-        sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10(:,1)), cov(xtilde10(:,2)) )
-        sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35(:,1)), mean(xtilde35(:,2)) )
-        sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35(:,1)), cov(xtilde35(:,2)) )
-    elseif i == n
+        sprintf('xtilde10 x1 mean = %g, x2 mean = %g', mean(xtilde10_vec(:,1)), mean(xtilde10_vec(:,2)) )
+        sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10_vec(:,1)), cov(xtilde10_vec(:,2)) )
+        sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35_vec(:,1)), mean(xtilde35_vec(:,2)) )
+        sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35_vec(:,1)), cov(xtilde35_vec(:,2)) )
+    elseif i_mc == n
         sprintf('i = %d', n) 
-        sprintf('xtilde10 x1 mean = %g, x2 mean = %g', mean(xtilde10(:,1)), mean(xtilde10(:,2)) )
-        sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10(:,1)), cov(xtilde10(:,2)) )
-        sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35(:,1)), mean(xtilde35(:,2)) )
-        sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35(:,1)), cov(xtilde35(:,2)) )
+        sprintf('xtilde10 x1 mean = %g, x2 mean = %g', mean(xtilde10_vec(:,1)), mean(xtilde10_vec(:,2)) )
+        sprintf('xtilde10 x1 cov = %g, x2 cov = %g', cov(xtilde10_vec(:,1)), cov(xtilde10_vec(:,2)) )
+        sprintf('xtilde35 x1 mean = %g, x2 mean = %g', mean(xtilde35_vec(:,1)), mean(xtilde35_vec(:,2)) )
+        sprintf('xtilde35 x1 cov = %g, x2 cov = %g', cov(xtilde35_vec(:,1)), cov(xtilde35_vec(:,2)) )
     end 
 
-end 
-
-xtilde10_cumsum = cumsum(xtilde10); 
-xtilde35_cumsum = cumsum(xtilde35); 
-for i = 1:length(xtilde10) 
-    xtilde10_cummean(i) = xtilde10_cumsum(i) / i; 
-    xtilde35_cummean(i) = xtilde35_cumsum(i) / i; 
 end 
 
 end 
