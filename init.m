@@ -6,4 +6,4 @@ addpath(genpath('set1'))
 addpath(genpath('set6'))
 addpath(genpath('set7')) 
 addpath(genpath('set8')) 
-
+addpath(genpath('final'))

@@ -1,0 +1,615 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>final_prob1</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-12-14"><meta name="DC.source" content="final_prob1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">SRIF (forward dynamics)</a></li><li><a href="#3">smoother (backward dynamics)</a></li><li><a href="#4">plot</a></li><li><a href="#5">periodogram</a></li><li><a href="#6">hand in numerical values for x&#710;(10), x&#8727;(10), P(10), and P&#8727;(10). Choose</a></li><li><a href="#7">subfunctions</a></li></ul></div><pre class="codeinput"><span class="comment">% Final prob 1: Problem Set 6, Number 3, except use the matrices Q(k) = [200, 10; 10, 20] and</span>
+<span class="comment">% R(k) = 3. Hand in plots of your filtered and smoothed time histories, and hand in numerical</span>
+<span class="comment">% values for x&#710;(10), x&#8727;(10), P(10), and P&#8727;(10). Choose an appropriate test to determine whether</span>
+<span class="comment">% P(10) &#8804; P&#8727;(10). Comment on the qualitative smoothness of x&#8727;(k) vs. x&#710;(10).</span>
+
+<span class="comment">% set 6 prob 3: Calculate the smoothed estimates for the problem in kf example03a.m. Compare x&#710;(10)</span>
+<span class="comment">% with x&#8727;(10) and compare P(10) with P&#8727;(10). Is P&#8727;(10) &#8804; P(10)? Do the smoothed state</span>
+<span class="comment">% time history estimate plots look &#8220;smoother&#8221; than the filtered state time history estimate</span>
+<span class="comment">% plots?</span>
+</pre><h2 id="2">SRIF (forward dynamics)</h2><pre class="codeinput">clear; clc
+
+disp(<span class="string">'EXAMPLE 03A'</span>)
+kf_example03a;
+
+Qk = [200, 10; 10, 20];
+Rk = 3;
+
+uk = [0; 0];
+nx = length(xhat0);
+nv = length(Qk);
+[xhat_arr_srif, Rxx_arr, zx_arr, zv_bar_arr, Rvv_bar_cell, Rvx_bar_cell] = <span class="keyword">...</span>
+    srif( xhat0, P0, zhist, Fk, Gammak, Qk, Hk, Rk, uk, nx, nv);
+</pre><pre class="codeoutput">EXAMPLE 03A
+</pre><h2 id="3">smoother (backward dynamics)</h2><pre class="codeinput">zx_star = zx_arr(end,:)';
+Rxx_star = Rxx_arr{end};
+<span class="comment">% wx_star = wx;</span>
+
+<span class="comment">% START AT k = N</span>
+x_star = inv(Rxx_star) * zx_star;
+P_star = inv(Rxx_star) * inv(Rxx_star)';
+Rvv = chol(inv(Qk));
+zv  = zeros(nv, 1);
+
+<span class="comment">% initialize</span>
+N = length(zhist);
+x_star_arr = zeros(N, nx);
+P_star_cell = cell(N,1);
+
+x_star_arr(N,:) = x_star';
+P_star_cell{N} = P_star';
+
+<span class="comment">% smoother filter</span>
+<span class="keyword">for</span> k = N-1 : -1 : 1
+
+    zx_star = zx_arr(k+1, :)';
+    Rxx_star = Rxx_arr{k+1};
+
+    Rvv_bar = Rvv_bar_cell{k+1};
+    Rvx_bar = Rvx_bar_cell{k+1};
+
+    A = [ Rvv_bar + Rvx_bar * Gammak,   Rvx_bar * Fk;
+          Rxx_star * Gammak,            Rxx_star * Fk ];
+    [QA, RA] = qr(A);
+
+    R_QR = QA' * A;
+    Rxx_star = R_QR(nv+1:end, nv+1:end);
+
+    zv_bar = zv_bar_arr(k+1,:)';
+    z_star = QA' * [ zv_bar; zx_star ];
+    zx_star = z_star(nv+1:end);
+
+    <span class="comment">% extract state and covariance</span>
+    x_star = inv(Rxx_star) * zx_star;
+    P_star = inv(Rxx_star) * inv(Rxx_star)';
+
+    <span class="comment">% save outputs</span>
+    x_star_arr(k,:) = x_star';
+    P_star_cell{k} = P_star;
+
+<span class="keyword">end</span>
+</pre><h2 id="4">plot</h2><pre class="codeinput">fname = <span class="string">'Filtered vs. Smoothed'</span>;
+figure(<span class="string">'name'</span>, fname, <span class="string">'position'</span>, [100 100 1200 600]);
+n = 3; p = 2;
+
+subplot(n,p,1)
+    plot(thist, xhat_arr_srif(:,1)); hold <span class="string">on</span>; grid <span class="string">on</span>;
+    plot(thist, x_star_arr(:,1), <span class="string">'--'</span>);
+    title(<span class="string">'x_1: filtered and smoothed'</span>);
+    legend(<span class="string">'$\hat{x_1}$'</span>, <span class="string">'$x^*_1$'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
+    ylabel(<span class="string">'x units'</span>)
+subplot(n,p,2)
+    plot(thist, xhat_arr_srif(:,1) - x_star_arr(:,1));
+    title(<span class="string">'x1: filtered - smoothed'</span>);
+
+subplot(n,p,3)
+    plot(thist, xhat_arr_srif(:,2)); hold <span class="string">on</span>; grid <span class="string">on</span>;
+    plot(thist, x_star_arr(:,2), <span class="string">'--'</span>);
+    title(<span class="string">'x_2: filtered and smoothed'</span>);
+    legend(<span class="string">'$\hat{x_2}$'</span>, <span class="string">'$x^*_2$'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
+    ylabel(<span class="string">'x units'</span>)
+subplot(n,p,4)
+    plot(thist, xhat_arr_srif(:,2) - x_star_arr(:,2));
+    title(<span class="string">'x_2: filtered - smoothed'</span>);
+
+subplot(n,p,5)
+    plot(thist, xhat_arr_srif(:,3)); hold <span class="string">on</span>; grid <span class="string">on</span>;
+    plot(thist, x_star_arr(:,3), <span class="string">'--'</span>);
+    title(<span class="string">'x_3: filtered and smoothed'</span>);
+    xlabel(<span class="string">'Time (s)'</span>)
+    legend(<span class="string">'$\hat{x_3}$'</span>, <span class="string">'$x^*_3$'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
+    ylabel(<span class="string">'x units'</span>)
+subplot(n,p,6)
+    plot(thist, xhat_arr_srif(:,3) - x_star_arr(:,3));
+    title(<span class="string">'x_3: filtered - smoothed'</span>);
+    xlabel(<span class="string">'Time (s)'</span>)
+
+sgtitle(fname);
+</pre><img vspace="5" hspace="5" src="final_prob1_01.png" alt=""> <h2 id="5">periodogram</h2><pre class="codeinput"><span class="comment">% [pxx_hat, fs_hat]   = periodogram(xhat_arr_srif);</span>
+<span class="comment">% [pss_star, fs_star] = periodogram(x_star_arr);</span>
+<span class="comment">%</span>
+<span class="comment">% fname = 'Filtered vs. Smoothed PSD';</span>
+<span class="comment">% figure('name', fname)</span>
+<span class="comment">%</span>
+<span class="comment">% subplot(3,1,1)</span>
+<span class="comment">%     semilogy(fs_hat, pxx_hat(:,1)); hold on;</span>
+<span class="comment">%     semilogy(fs_star, pss_star(:,1), '--');</span>
+<span class="comment">%</span>
+<span class="comment">% subplot(3,1,2)</span>
+<span class="comment">%     semilogy(fs_hat, pxx_hat(:,2)); hold on;</span>
+<span class="comment">%     semilogy(fs_star, pss_star(:,2), '--');</span>
+<span class="comment">%</span>
+<span class="comment">% subplot(3,1,3)</span>
+<span class="comment">%     semilogy(fs_hat, pxx_hat(:,3)); hold on;</span>
+<span class="comment">%     semilogy(fs_star, pss_star(:,3), '--');</span>
+</pre><h2 id="6">hand in numerical values for x&#710;(10), x&#8727;(10), P(10), and P&#8727;(10). Choose</h2><p>an appropriate test to determine whether P(10) &#8804; P&#8727;(10). Comment on the qualitative smoothness of x&#8727;(k) vs. x&#710;(10).</p><pre class="codeinput">disp(<span class="string">'x^(10) = '</span>)
+disp(xhat_arr_srif(10,:) )
+
+disp(<span class="string">'x*(10) = '</span>)
+disp(x_star_arr(10,:))
+
+disp(<span class="string">'x^(10) - x*(10) = '</span>)
+disp(xhat_arr_srif(10,:) - x_star_arr(10,:) )
+
+disp(<span class="string">'P(10) = '</span>)
+Rxx10 = Rxx_arr{10}; Pxx10 = inv(Rxx10) * inv(Rxx10)';
+disp(Pxx10 )
+
+disp(<span class="string">'P*(10) = '</span>)
+disp(P_star_cell{10} )
+
+disp(<span class="string">'It can be shown that P*(10) &lt; P(10):'</span>)
+
+disp(<span class="string">'Norm(P(10)) = '</span>)
+disp(norm(Pxx10) )
+
+disp(<span class="string">'Norm(P*(10)) = '</span>)
+disp(norm(P_star_cell{10}))
+
+txt = [ <span class="string">'x* is slightly smoother than x^. This is a good thing as we wish '</span>, <span class="keyword">...</span>
+    <span class="string">'to retain as much valuable information in the data while reducing as '</span>, <span class="keyword">...</span>
+    <span class="string">'much noise as possible without curve fitting to a particular function.'</span>, <span class="keyword">...</span>
+    ] ;
+disp(txt)
+
+<span class="comment">% In statistics and image processing, to smooth a data set is to create an</span>
+<span class="comment">% approximating function that attempts to capture important patterns in the</span>
+<span class="comment">% data, while leaving out noise or other fine-scale structures/rapid phenomena.</span>
+<span class="comment">%</span>
+<span class="comment">% In smoothing, the data points of a signal are modified so individual points</span>
+<span class="comment">% higher than the adjacent points (presumably because of noise) are reduced,</span>
+<span class="comment">% and points that are lower than the adjacent points are increased leading to</span>
+<span class="comment">% a smoother signal. Smoothing may be used in two important ways that can aid</span>
+<span class="comment">% in data analysis (1) by being able to extract more information from the</span>
+<span class="comment">% data as long as the assumption of smoothing is reasonable and (2) by being</span>
+<span class="comment">% able to provide analyses that are both flexible and robust.[1] Many</span>
+<span class="comment">% different algorithms are used in smoothing.</span>
+<span class="comment">%</span>
+<span class="comment">% Smoothing may be distinguished from the related and partially overlapping</span>
+<span class="comment">% concept of curve fitting in the following ways:</span>
+<span class="comment">%</span>
+<span class="comment">% curve fitting often involves the use of an explicit function form for the</span>
+<span class="comment">% result, whereas the immediate results from smoothing are the "smoothed"</span>
+<span class="comment">% values with no later use made of a functional form if there is one;</span>
+<span class="comment">% the aim of smoothing is to give a general idea of relatively slow changes</span>
+<span class="comment">% of value with little attention paid to the close matching of data values,</span>
+<span class="comment">% while curve fitting concentrates on achieving as close a match as possible.</span>
+</pre><pre class="codeoutput">x^(10) = 
+         -3454.14901159571         -560.052811977033         -31.0412760936411
+
+x*(10) = 
+         -3454.30365843153         -560.017490062307         -30.8407969018893
+
+x^(10) - x*(10) = 
+         0.154646835822859        -0.035321914725273        -0.200479191751747
+
+P(10) = 
+          13.5520894202657         -1.70208065918152         -7.34473971512019
+         -1.70208065918152          2.31626499888182         0.377097282076377
+         -7.34473971512019         0.377097282076377          9.10633440247233
+
+P*(10) = 
+          12.6385332698102         -1.49342102335987         -6.16043485888851
+         -1.49342102335987          2.26860635896187         0.106597630927508
+         -6.16043485888851         0.106597630927508          7.57103961868193
+
+It can be shown that P*(10) &lt; P(10):
+Norm(P(10)) = 
+          19.1536883016155
+
+Norm(P*(10)) = 
+          16.8819091503244
+
+x* is slightly smoother than x^. This is a good thing as we wish to retain as much valuable information in the data while reducing as much noise as possible without curve fitting to a particular function.
+</pre><h2 id="7">subfunctions</h2><pre class="codeinput"><span class="keyword">function</span> [xhat_arr, Rxx_cell, zx_arr, zv_bar_arr, Rvv_bar_cell, Rvx_bar_cell] = <span class="keyword">...</span>
+    srif( xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk, uk, nx, nv)
+
+<span class="comment">% Initialize</span>
+xhat_arr = [];
+Rxx_cell = {};
+zx_arr = [];
+zv_bar_arr = [];
+Rvv_bar_cell = {};
+Rvx_bar_cell = {};
+
+<span class="comment">% START AT k = 0:</span>
+I = inv(P0);
+Rxx = chol(I);
+Rvv = chol(inv(Qk));
+zv = zeros(nv, 1);
+zx = Rxx * xhat0;
+
+<span class="keyword">for</span> k = 1:length(zhist)
+
+    <span class="comment">% PROPAGATION STEP</span>
+    <span class="comment">% a) QR factorize</span>
+    A = [Rvv, zeros(2,3); -Rxx * inv(Fk) * Gk, Rxx * inv(Fk)];
+    [QA, RA] = qr(A);
+
+    <span class="comment">% [ Rvv_bar(k) [2x2], Rvx_bar(k+1) [2x3];</span>
+    <span class="comment">%   0 [3x2]         , Rxx_bar(k+1) [3x3] ] = RA</span>
+
+    <span class="comment">% b) orthonormal transformation</span>
+    B = [ zv; zx + Rxx * inv(Fk) * Gk * uk ];
+    [zv_zx_bar] = QA' * B;
+
+    <span class="comment">% c) extract Rxx_bar(k+1) and zx_bar(k+1)</span>
+    zv_bar = zv_zx_bar(1:nv);
+    zx_bar = zv_zx_bar(nv+1:end);
+    Rxx_bar = RA(nv+1:end, nv+1:end);
+
+    <span class="comment">% extract Rvv and Rvx bars</span>
+    Rvv_bar = RA(1:nv, 1:nv);
+    Rvx_bar = RA(1:nv, nv+1:end);
+
+    <span class="comment">% MEASUREMENT UPDATE:</span>
+    <span class="comment">% a) Cholesky factorize R</span>
+    Ra = chol(Rk);
+
+    <span class="comment">% b) Transform z(k+1) and H(k+1)</span>
+    za = inv(Ra)' * zhist(k);
+    Ha = inv(Ra)' * Hk;
+
+    <span class="comment">% c) perform another QR factorization:</span>
+    [QB, RB] = qr([Rxx_bar; Ha]);
+
+    <span class="comment">% d) transform as</span>
+    [zx_zr] = QB' * [zx_bar; za];
+
+    <span class="comment">% e) extract Rxx_bar(k+1) and zx(k+1)</span>
+    zx = zx_zr(1:nx);
+    Rxx = RB(1:nx, :);
+
+    xhat = inv(Rxx) * zx;
+
+    zx_arr = [zx_arr; zx'];
+    zv_bar_arr = [zv_bar_arr; zv_bar'];
+    xhat_arr = [xhat_arr; xhat'];
+    Rxx_cell{k} = Rxx;
+    Rvv_bar_cell{k} = Rvv_bar;
+    Rvx_bar_cell{k} = Rvx_bar;
+
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Final prob 1: Problem Set 6, Number 3, except use the matrices Q(k) = [200, 10; 10, 20] and
+% R(k) = 3. Hand in plots of your filtered and smoothed time histories, and hand in numerical
+% values for xˆ(10), x∗(10), P(10), and P∗(10). Choose an appropriate test to determine whether
+% P(10) ≤ P∗(10). Comment on the qualitative smoothness of x∗(k) vs. xˆ(10).
+
+% set 6 prob 3: Calculate the smoothed estimates for the problem in kf example03a.m. Compare xˆ(10)
+% with x∗(10) and compare P(10) with P∗(10). Is P∗(10) ≤ P(10)? Do the smoothed state
+% time history estimate plots look “smoother” than the filtered state time history estimate
+% plots?
+
+%% SRIF (forward dynamics) 
+
+clear; clc 
+
+disp('EXAMPLE 03A') 
+kf_example03a; 
+
+Qk = [200, 10; 10, 20]; 
+Rk = 3; 
+
+uk = [0; 0]; 
+nx = length(xhat0); 
+nv = length(Qk); 
+[xhat_arr_srif, Rxx_arr, zx_arr, zv_bar_arr, Rvv_bar_cell, Rvx_bar_cell] = ... 
+    srif( xhat0, P0, zhist, Fk, Gammak, Qk, Hk, Rk, uk, nx, nv); 
+
+
+%% smoother (backward dynamics) 
+
+zx_star = zx_arr(end,:)'; 
+Rxx_star = Rxx_arr{end}; 
+% wx_star = wx; 
+
+% START AT k = N 
+x_star = inv(Rxx_star) * zx_star; 
+P_star = inv(Rxx_star) * inv(Rxx_star)'; 
+Rvv = chol(inv(Qk)); 
+zv  = zeros(nv, 1); 
+
+% initialize 
+N = length(zhist); 
+x_star_arr = zeros(N, nx); 
+P_star_cell = cell(N,1); 
+
+x_star_arr(N,:) = x_star'; 
+P_star_cell{N} = P_star'; 
+
+% smoother filter 
+for k = N-1 : -1 : 1
+    
+    zx_star = zx_arr(k+1, :)'; 
+    Rxx_star = Rxx_arr{k+1}; 
+    
+    Rvv_bar = Rvv_bar_cell{k+1}; 
+    Rvx_bar = Rvx_bar_cell{k+1}; 
+    
+    A = [ Rvv_bar + Rvx_bar * Gammak,   Rvx_bar * Fk; 
+          Rxx_star * Gammak,            Rxx_star * Fk ]; 
+    [QA, RA] = qr(A); 
+    
+    R_QR = QA' * A; 
+    Rxx_star = R_QR(nv+1:end, nv+1:end); 
+    
+    zv_bar = zv_bar_arr(k+1,:)'; 
+    z_star = QA' * [ zv_bar; zx_star ]; 
+    zx_star = z_star(nv+1:end); 
+    
+    % extract state and covariance 
+    x_star = inv(Rxx_star) * zx_star; 
+    P_star = inv(Rxx_star) * inv(Rxx_star)'; 
+    
+    % save outputs 
+    x_star_arr(k,:) = x_star'; 
+    P_star_cell{k} = P_star; 
+    
+end 
+
+%% plot 
+
+fname = 'Filtered vs. Smoothed'; 
+figure('name', fname, 'position', [100 100 1200 600]); 
+n = 3; p = 2; 
+
+subplot(n,p,1) 
+    plot(thist, xhat_arr_srif(:,1)); hold on; grid on; 
+    plot(thist, x_star_arr(:,1), 'REPLACE_WITH_DASH_DASH'); 
+    title('x_1: filtered and smoothed'); 
+    legend('$\hat{x_1}$', '$x^*_1$', 'Interpreter', 'latex')
+    ylabel('x units') 
+subplot(n,p,2) 
+    plot(thist, xhat_arr_srif(:,1) - x_star_arr(:,1)); 
+    title('x1: filtered - smoothed'); 
+
+subplot(n,p,3) 
+    plot(thist, xhat_arr_srif(:,2)); hold on; grid on; 
+    plot(thist, x_star_arr(:,2), 'REPLACE_WITH_DASH_DASH'); 
+    title('x_2: filtered and smoothed');
+    legend('$\hat{x_2}$', '$x^*_2$', 'Interpreter', 'latex')
+    ylabel('x units') 
+subplot(n,p,4) 
+    plot(thist, xhat_arr_srif(:,2) - x_star_arr(:,2)); 
+    title('x_2: filtered - smoothed');
+    
+subplot(n,p,5) 
+    plot(thist, xhat_arr_srif(:,3)); hold on; grid on; 
+    plot(thist, x_star_arr(:,3), 'REPLACE_WITH_DASH_DASH'); 
+    title('x_3: filtered and smoothed');
+    xlabel('Time (s)') 
+    legend('$\hat{x_3}$', '$x^*_3$', 'Interpreter', 'latex')
+    ylabel('x units') 
+subplot(n,p,6) 
+    plot(thist, xhat_arr_srif(:,3) - x_star_arr(:,3)); 
+    title('x_3: filtered - smoothed');
+    xlabel('Time (s)') 
+    
+sgtitle(fname); 
+
+ %% periodogram 
+
+% [pxx_hat, fs_hat]   = periodogram(xhat_arr_srif); 
+% [pss_star, fs_star] = periodogram(x_star_arr); 
+% 
+% fname = 'Filtered vs. Smoothed PSD'; 
+% figure('name', fname)
+% 
+% subplot(3,1,1) 
+%     semilogy(fs_hat, pxx_hat(:,1)); hold on; 
+%     semilogy(fs_star, pss_star(:,1), 'REPLACE_WITH_DASH_DASH'); 
+% 
+% subplot(3,1,2) 
+%     semilogy(fs_hat, pxx_hat(:,2)); hold on; 
+%     semilogy(fs_star, pss_star(:,2), 'REPLACE_WITH_DASH_DASH'); 
+% 
+% subplot(3,1,3) 
+%     semilogy(fs_hat, pxx_hat(:,3)); hold on; 
+%     semilogy(fs_star, pss_star(:,3), 'REPLACE_WITH_DASH_DASH'); 
+
+%% hand in numerical values for xˆ(10), x∗(10), P(10), and P∗(10). Choose 
+% an appropriate test to determine whether P(10) ≤ P∗(10). Comment on the 
+% qualitative smoothness of x∗(k) vs. xˆ(10).
+
+disp('x^(10) = ')
+disp(xhat_arr_srif(10,:) )
+
+disp('x*(10) = ')
+disp(x_star_arr(10,:))
+
+disp('x^(10) - x*(10) = ')
+disp(xhat_arr_srif(10,:) - x_star_arr(10,:) )
+
+disp('P(10) = ') 
+Rxx10 = Rxx_arr{10}; Pxx10 = inv(Rxx10) * inv(Rxx10)'; 
+disp(Pxx10 )
+
+disp('P*(10) = ') 
+disp(P_star_cell{10} )
+
+disp('It can be shown that P*(10) < P(10):')
+
+disp('Norm(P(10)) = ') 
+disp(norm(Pxx10) )
+
+disp('Norm(P*(10)) = ') 
+disp(norm(P_star_cell{10}))
+
+txt = [ 'x* is slightly smoother than x^. This is a good thing as we wish ', ... 
+    'to retain as much valuable information in the data while reducing as ', ... 
+    'much noise as possible without curve fitting to a particular function.', ... 
+    ] ; 
+disp(txt) 
+
+% In statistics and image processing, to smooth a data set is to create an 
+% approximating function that attempts to capture important patterns in the 
+% data, while leaving out noise or other fine-scale structures/rapid phenomena. 
+% 
+% In smoothing, the data points of a signal are modified so individual points 
+% higher than the adjacent points (presumably because of noise) are reduced, 
+% and points that are lower than the adjacent points are increased leading to 
+% a smoother signal. Smoothing may be used in two important ways that can aid 
+% in data analysis (1) by being able to extract more information from the 
+% data as long as the assumption of smoothing is reasonable and (2) by being
+% able to provide analyses that are both flexible and robust.[1] Many 
+% different algorithms are used in smoothing.
+% 
+% Smoothing may be distinguished from the related and partially overlapping 
+% concept of curve fitting in the following ways:
+% 
+% curve fitting often involves the use of an explicit function form for the 
+% result, whereas the immediate results from smoothing are the "smoothed" 
+% values with no later use made of a functional form if there is one;
+% the aim of smoothing is to give a general idea of relatively slow changes 
+% of value with little attention paid to the close matching of data values, 
+% while curve fitting concentrates on achieving as close a match as possible.
+
+    
+%% subfunctions 
+
+function [xhat_arr, Rxx_cell, zx_arr, zv_bar_arr, Rvv_bar_cell, Rvx_bar_cell] = ... 
+    srif( xhat0, P0, zhist, Fk, Gk, Qk, Hk, Rk, uk, nx, nv)
+
+% Initialize 
+xhat_arr = []; 
+Rxx_cell = {}; 
+zx_arr = []; 
+zv_bar_arr = []; 
+Rvv_bar_cell = {}; 
+Rvx_bar_cell = {}; 
+
+% START AT k = 0: 
+I = inv(P0); 
+Rxx = chol(I); 
+Rvv = chol(inv(Qk)); 
+zv = zeros(nv, 1); 
+zx = Rxx * xhat0; 
+
+for k = 1:length(zhist)
+
+    % PROPAGATION STEP 
+    % a) QR factorize 
+    A = [Rvv, zeros(2,3); -Rxx * inv(Fk) * Gk, Rxx * inv(Fk)]; 
+    [QA, RA] = qr(A); 
+    
+    % [ Rvv_bar(k) [2x2], Rvx_bar(k+1) [2x3]; 
+    %   0 [3x2]         , Rxx_bar(k+1) [3x3] ] = RA 
+
+    % b) orthonormal transformation 
+    B = [ zv; zx + Rxx * inv(Fk) * Gk * uk ];  
+    [zv_zx_bar] = QA' * B; 
+
+    % c) extract Rxx_bar(k+1) and zx_bar(k+1) 
+    zv_bar = zv_zx_bar(1:nv); 
+    zx_bar = zv_zx_bar(nv+1:end); 
+    Rxx_bar = RA(nv+1:end, nv+1:end); 
+    
+    % extract Rvv and Rvx bars 
+    Rvv_bar = RA(1:nv, 1:nv); 
+    Rvx_bar = RA(1:nv, nv+1:end); 
+
+    % MEASUREMENT UPDATE: 
+    % a) Cholesky factorize R 
+    Ra = chol(Rk); 
+
+    % b) Transform z(k+1) and H(k+1) 
+    za = inv(Ra)' * zhist(k); 
+    Ha = inv(Ra)' * Hk; 
+
+    % c) perform another QR factorization: 
+    [QB, RB] = qr([Rxx_bar; Ha]); 
+
+    % d) transform as 
+    [zx_zr] = QB' * [zx_bar; za];    
+
+    % e) extract Rxx_bar(k+1) and zx(k+1) 
+    zx = zx_zr(1:nx); 
+    Rxx = RB(1:nx, :); 
+    
+    xhat = inv(Rxx) * zx; 
+    
+    zx_arr = [zx_arr; zx']; 
+    zv_bar_arr = [zv_bar_arr; zv_bar']; 
+    xhat_arr = [xhat_arr; xhat']; 
+    Rxx_cell{k} = Rxx;  
+    Rvv_bar_cell{k} = Rvv_bar; 
+    Rvx_bar_cell{k} = Rvx_bar; 
+    
+end 
+
+end 
+##### SOURCE END #####
+--></body></html>
