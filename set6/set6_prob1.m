@@ -17,7 +17,7 @@ kf_example02b
 Gk = Gammak; 
 
 
-n = 10000; 
+n = 1000; 
 Nx = 2; 
 Nz = 1; 
 
@@ -50,6 +50,20 @@ hf = figure();
         legend('xtilde10', 'xtilde35'); 
         title(txt); 
         
+mean_err10 = mean(err10_vec); 
+mean_err35 = mean(err35_vec); 
+if r1 < mean_err10 && mean_err10 < r2 
+    disp('nu10 is consistent!') 
+else 
+    disp('nu10 is not consistent');  
+end 
+if r1 < mean_err35 && mean_err35 < r2 
+    disp('nu35 is consistent!') 
+else 
+    disp('nu35 is not consistent');  
+end 
+
+        
 %% LARGE Q MC, LARGE Q KF 
 
 rng(0)
@@ -73,10 +87,21 @@ figure(hf);
         plot(xtilde35_cummean, '--'); 
         legend('xtilde10', 'xtilde35'); 
         title(txt); 
+        
+mean_err10 = mean(err10_vec); 
+mean_err35 = mean(err35_vec); 
+if r1 < mean_err10 && mean_err10 < r2 
+    disp('\nu10 is consistent!') 
+else 
+    disp('\nu10 is not consistent');  
+end 
+if r1 < mean_err35 && mean_err35 < r2 
+    disp('\nu35 is consistent!') 
+else 
+    disp('\nu35 is not consistent');  
+end 
 
-disp('The covariance and average error of the estimate is larger; the filter is less consistent'); 
-
-%% 
+%% The 
 
 
 

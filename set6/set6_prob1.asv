@@ -16,7 +16,17 @@ kf_example02b
 % Qk_c = second alternate Qk 
 Gk = Gammak; 
 
-%% monte carlo and KF 
+
+n = 10000; 
+Nx = 2; 
+Nz = 1; 
+
+% NEED STATISTICS TOOLBOX 
+a = .01; 
+r1 = chi2inv( a/2, n * Nx) / n; 
+r2 = chi2inv( 1 - a/2, n * Nx ) / n; 
+
+%% LARGE Q MC, SMALL Q KF 
 
 rng(0) 
 
@@ -24,7 +34,7 @@ rng(0)
 txt = 'MC and KF using large Q for MC and small Q for KF:'; 
 disp(txt); 
 [xtilde10_vec, err10_vec, xtilde35_vec, err35_vec] = ... 
-    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0); 
+    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0, n); 
 
 xtilde10_cumsum = cumsum(xtilde10_vec); 
 xtilde35_cumsum = cumsum(xtilde35_vec); 
@@ -39,18 +49,23 @@ hf = figure();
         plot(xtilde35_cummean, '--'); 
         legend('xtilde10', 'xtilde35'); 
         title(txt); 
+        
+mean_err10 = mean(err10_vec); 
+mean_err35 = mea
+if r1 > 
+        mean(err10_vec) 
+        mean(err35_vec) 
+
+        
+%% LARGE Q MC, LARGE Q KF 
 
 rng(0)
 
 % monte carlo and KF 
 txt = 'MC and KF using large Q for MC and large Q for KF:';  
-disp(txt)
-mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_a, Rk, xhat0, P0); 
-[xtilde10, xtilde10_cummean, xtilde35, xtilde35_cummean] = ... 
-    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0); 
-
+disp(txt); 
 [xtilde10_vec, err10_vec, xtilde35_vec, err35_vec] = ... 
-    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0); 
+    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_a, Rk, xhat0, P0, n); 
 
 xtilde10_cumsum = cumsum(xtilde10_vec); 
 xtilde35_cumsum = cumsum(xtilde35_vec); 
@@ -68,13 +83,15 @@ figure(hf);
 
 disp('The covariance and average error of the estimate is larger; the filter is less consistent'); 
 
-%% plot 
+%% The 
+
+
 
 
 %% subfunctions 
 
 function [xtilde10_vec, err10_vec, xtilde35_vec, err35_vec] = ... 
-    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0)
+    mcltisim_kf(Fk, Gammak, Hk, Qk_a, Qk_c, Rk, xhat0, P0, n)
 
 xtilde10_vec = []; 
 xtilde35_vec = []; 
@@ -82,7 +99,6 @@ xtilde_vec   = [];
 err10_vec    = []; 
 err35_vec    = []; 
 
-n = 1000; 
 for i_mc = 1 : n % run 50 or 10000 monte carlos 
 
     kmax = 50; % zhist --> 10 or 35 
@@ -98,11 +114,11 @@ for i_mc = 1 : n % run 50 or 10000 monte carlos
     xtilde_vec = [xtilde_vec; xhist - xhat]; 
     
     xtilde10 = xhist(11,:) - xhat(11,:); 
-    err10 = xtilde10 * P_cell{11} * xtilde10'; 
+    err10 = xtilde10 * inv(P_cell{11}) * xtilde10'; 
     err10_vec = [err10_vec; err10]; 
     
     xtilde35 = xhist(36,:) - xhat(36,:); 
-    err35 = xtilde35 * P_cell{36} * xtilde35'; 
+    err35 = xtilde35 * inv(P_cell{36}) * xtilde35'; 
     err35_vec = [err35_vec; err35]; 
     
     if i_mc == 50
