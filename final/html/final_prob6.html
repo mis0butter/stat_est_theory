@@ -1,0 +1,824 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>final_prob6</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-12-14"><meta name="DC.source" content="final_prob6.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">UNSCENTED KALMAN FILTER</a></li><li><a href="#4">DYNAMICS PROPAGATION</a></li><li><a href="#5">MEASUREMENT UPDATE</a></li><li><a href="#7">ANALYSIS</a></li><li><a href="#8">PART B questions</a></li><li><a href="#9">subfunctions</a></li></ul></div><pre class="codeinput"><span class="comment">% close all;</span>
+clear;
+<span class="comment">% clc</span>
+
+<span class="comment">% sim dt</span>
+dt = 0.1;
+
+<span class="comment">% process noise covariance</span>
+Q = diag([0.25 0.25 3 40*pi/180 0.1 0.1])^2 / dt;
+
+<span class="comment">% measurement vector:</span>
+<span class="comment">% z = [b_min b_max r_min]';</span>
+<span class="comment">%   b_min = minimum bearing (rad)</span>
+<span class="comment">%   b_max = maximum bearing (rad)</span>
+<span class="comment">%   r_min = minimum range (m)</span>
+
+<span class="comment">% measurement covariance</span>
+R = diag( [2*pi/180, 2*pi/180, 0.1] )^2;
+
+<span class="comment">% initial state est and covar</span>
+x0 = [90; 4.25; 13; pi; 5; 2];
+P0 = diag([2 5 1 pi/4 4 2])^2;
+
+x_hat = x0;
+P     = P0;
+
+<span class="comment">% for lambda</span>
+a = 10^-3;
+b = 2;
+k = 0;
+nx = 6;
+nz = 3;
+nv = 6;
+
+<span class="comment">% load LIDAR data</span>
+<span class="comment">% load problem3data.mat</span>
+load <span class="string">problem3dataMod.mat</span>
+N = length(lidar);
+
+<span class="comment">% initialize output arrays</span>
+x_hat_arr = [];
+<span class="comment">% P_cell = ;</span>
+
+<span class="comment">% % create plot</span>
+<span class="comment">% fname = 'Car Plot';</span>
+<span class="comment">% h = figure('name', fname);</span>
+<span class="comment">%     xlim([0 100]); ylim([-50 50]);</span>
+<span class="comment">%     plotcar(x_hat, '-', h, 0)</span>
+</pre><h2 id="2">UNSCENTED KALMAN FILTER</h2><pre class="codeinput"><span class="comment">% iterate through measurements</span>
+<span class="keyword">for</span> j = 1 : N
+</pre><pre class="codeinput"><span class="comment">% augmented state and covariance</span>
+xa = [ x_hat; zeros(6,1) ];
+Pa = [ P, zeros(6); zeros(6), Q ];
+</pre><h2 id="4">DYNAMICS PROPAGATION</h2><pre class="codeinput"><span class="comment">% cholesky factorize Pa</span>
+Sx = chol(Pa)';
+
+<span class="comment">% build sigma points</span>
+lambda_xv = a^2 * (nx + nv + k) - (nx + nv);
+XX = build_SP(xa, Pa, nx, nv, lambda_xv);
+
+<span class="comment">% propagate sigma points</span>
+XX_prop = [];
+<span class="keyword">for</span> i = 1:length(XX)
+
+    [tvec, XX_i_prop] = ode45(@dyn_car, [0 dt], XX(i,:));
+    XX_i_prop = XX_i_prop(end,:);
+    XX_prop   = [ XX_prop; XX_i_prop ];
+
+<span class="keyword">end</span>
+
+<span class="comment">% combine sigma points</span>
+[x_bar, P_bar] = combine_SP(nx, nv, lambda_xv, a, b, XX_prop);
+</pre><h2 id="5">MEASUREMENT UPDATE</h2><pre class="codeinput"><span class="comment">% push sigma points through measurement model. Use min bearing, max</span>
+<span class="comment">% bearing, and min range</span>
+zj   = lidar(j).z;
+z_rj = zj(:,1);     <span class="comment">% range</span>
+z_bj = zj(:,2);     <span class="comment">% bearing</span>
+z    = [ min(z_bj); max(z_bj); min(z_rj) ];
+
+<span class="comment">% stack states and covariance</span>
+xa_bar = [x_bar; zeros(nz,1)];
+Pa_bar = [P_bar, zeros(nx, nz); zeros(nz, nx), R];
+
+<span class="comment">% build sigma points</span>
+lambda_xz = a^2 * (nx + nz + k) - (nx + nz);
+XX_bar = build_SP(xa_bar, Pa_bar, nz, nx, lambda_xz);
+
+<span class="comment">% push sigma points through measurement model</span>
+ZZ_bar = [];
+<span class="keyword">for</span> i = 1:length(XX_bar)
+    ZZ_i_bar = h_car(XX_bar(i,:));
+    ZZ_bar   = [ ZZ_bar; ZZ_i_bar' ];
+<span class="keyword">end</span>
+
+<span class="comment">% combine sigma points</span>
+[z_bar, Pzz] = combine_SP(nz, nx, lambda_xz, a, b, ZZ_bar);
+
+<span class="comment">% calculate Pxz</span>
+Pxz = calc_Pxz(nx, nz, lambda_xz, a, b, XX_bar, x_bar, ZZ_bar, z_bar);
+
+<span class="comment">% LMMSE update!!!</span>
+x_hat = x_bar + Pxz * Pzz^(-1) * [z - z_bar];
+P     = P_bar - Pxz * Pzz^(-1) * Pxz';
+
+<span class="comment">% save state and covariance</span>
+x_hat_arr = [x_hat_arr; x_hat'];
+<span class="comment">% P_cell{j} = {P};</span>
+P_arr(:,:,j) = P;
+
+<span class="comment">% update plot</span>
+<span class="comment">% plotcar(x_hat, '-', h, lidar(j).t)</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><h2 id="7">ANALYSIS</h2><pre class="codeinput"><span class="comment">%   x - state of the rectangular car.  State elements are:</span>
+<span class="comment">%       x - vehicle x-position (back axle, m)</span>
+<span class="comment">%       y - vehicle y-position (back axle, m)</span>
+<span class="comment">%       s - vehicle forward speed (no-slip assumed)</span>
+<span class="comment">%       t - vehicle heading (rad.)</span>
+<span class="comment">%       l - vehicle length (m)</span>
+<span class="comment">%       w - vehicle width (m)</span>
+
+h = figure;
+xlim([0 100]); ylim([-50 50]);
+xlabel(<span class="string">'x (m)'</span>)
+ylabel(<span class="string">'y (m'</span> )
+<span class="keyword">for</span> i = 1:length(x_hat_arr)
+    hold <span class="string">on</span>;
+    plotcar(x_hat_arr(i,:)', <span class="string">'-'</span>, h, lidar(i).t);
+<span class="keyword">end</span>
+
+load <span class="string">problem3truth.mat</span>
+<span class="keyword">for</span> i = 1:length(car)
+    x_truth(i,:) = car(i).x';
+    t(i,:)       = car(i).t;
+<span class="keyword">end</span>
+
+sigma_arr = [];
+<span class="keyword">for</span> i = 1:6
+    sigma_arr(:,i) = sqrt(squeeze(P_arr(i,i,:)));
+<span class="keyword">end</span>
+
+titles = {<span class="string">'Vehicle x (back axle)'</span>;
+    <span class="string">'Vehicle y (back axle)'</span>;
+    <span class="string">'Vehicle forward speed (No-slip assumed)'</span>;
+    <span class="string">'Vehicle heading'</span>;
+    <span class="string">'Vehicle length'</span>;
+    <span class="string">'Vehicle width'</span>};
+units = {<span class="string">'m'</span>, <span class="string">'m'</span>, <span class="string">'m/s'</span>, <span class="string">'rad'</span>, <span class="string">'m'</span>, <span class="string">'m'</span>};
+
+fname = <span class="string">'State Time Histories'</span>;
+n = 3; p = 2;
+figure(<span class="string">'name'</span>, fname, <span class="string">'position'</span>, [100 100 800 600]);
+
+<span class="keyword">for</span> i = 1:6
+
+    subplot(n,p,i)
+        plot(t, x_truth(:,i), <span class="string">'b'</span>, <span class="string">'linewidth'</span>, 2); hold <span class="string">on</span>; grid <span class="string">on</span>;
+        plot(t, x_hat_arr(:,i), <span class="string">'r--'</span>, <span class="string">'linewidth'</span>, 2);
+        plot(t, x_hat_arr(:,i) + sigma_arr(:,i), <span class="string">'r--'</span>);
+        plot(t, x_hat_arr(:,i) - sigma_arr(:,i), <span class="string">'r--'</span>);
+        title(titles{i});
+        ylabel(units{i});
+        bigger_ylim
+
+    <span class="keyword">if</span> i == 5 || i == 6
+        xlabel(<span class="string">'Time (s)'</span>)
+    <span class="keyword">elseif</span> i == 2
+        legend(<span class="string">'truth'</span>, <span class="string">'est'</span>, <span class="string">'est +/- \sigma'</span>, <span class="string">'location'</span>, <span class="string">'best'</span>);
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+    sgtitle(fname)
+</pre><img vspace="5" hspace="5" src="final_prob6_01.png" alt=""> <img vspace="5" hspace="5" src="final_prob6_02.png" alt=""> <h2 id="8">PART B questions</h2><pre class="codeinput"><span class="comment">% i. What effects, if any, do the values of a, b, and k have on the final</span>
+<span class="comment">% state estimate?</span>
+<span class="comment">%   A: The spread of the sigma points around the mean state value is controlled</span>
+<span class="comment">% by two parameters &#945; and &#954;. A third parameter, &#946;, impacts the weights of the</span>
+<span class="comment">% transformed points during state and measurement covariance calculations.</span>
+<span class="comment">% &#945; &#8212; Determines the spread of the sigma points around the mean state value.</span>
+<span class="comment">% It is usually a small positive value. The spread of sigma points is proportional to &#945;.</span>
+<span class="comment">% Smaller values correspond to sigma points closer to the mean state.</span>
+<span class="comment">% &#954; &#8212; A second scaling parameter that is usually set to 0. Smaller values</span>
+<span class="comment">% correspond to sigma points closer to the mean state. The spread is proportional</span>
+<span class="comment">% to the square-root of &#954;.</span>
+<span class="comment">% &#946; &#8212; Incorporates prior knowledge of the distribution of the state. For</span>
+<span class="comment">% Gaussian distributions, &#946; = 2 is optimal.</span>
+
+disp(<span class="string">'Part b questions'</span>);
+
+fprintf(<span class="string">'\n'</span>)
+
+disp(<span class="string">'Question i: '</span>)
+disp(<span class="string">'What effects, if any, do the values of a, b, and k have on the final state estimate? '</span>);
+
+fprintf(<span class="string">'\n'</span>)
+
+disp(<span class="string">'Answer:'</span>)
+disp(<span class="string">'Alpha and kappa control the spread of the sigma points around the mean state value.'</span>)
+disp(<span class="string">'The spread of sigma points is proportional to alpha. A larger alpha means a larger spread of sigma points.'</span>)
+disp(<span class="string">'Kappa is a scaling parameter usually set to 0. A larger kappa also means a larger spread of sigma points.'</span>)
+disp(<span class="string">'The square root of kappa is proportional to the spread.'</span>)
+disp(<span class="string">'Beta impacts the weights of the transformed points during state and measurement calculations.'</span>)
+disp(<span class="string">'Beta incorporates a priori knowlege of the state distribution; beta = 2 is optimal for Gaussian distributions.'</span>)
+
+fprintf(<span class="string">'\n'</span>)
+<span class="comment">% ii. What do you notice about the state estimates, in particular length</span>
+<span class="comment">% and width, as the target car performs its different maneuvers?</span>
+<span class="comment">%   A: The length and width vary slightly in estimate due to the</span>
+<span class="comment">%   orientation of the car relative to the LIDAR sensors. There are times</span>
+<span class="comment">%   while the car is turning where the LIDAR is only able to sense</span>
+<span class="comment">%   certain parameters past an inflection point of the car's motion.</span>
+
+disp(<span class="string">'Question ii'</span>)
+disp(<span class="string">'What do you notice about the state estimates, in particular length and width, as the target car performs its different maneuvers? '</span>);
+
+fprintf(<span class="string">'\n'</span>)
+
+disp(<span class="string">'Answer:'</span>)
+disp(<span class="string">'The length and width vary in estimate due to the orientation of the car relative to the LIDAR sensors.'</span>)
+disp(<span class="string">'The LIDAR is only able to see certain parts of the car past an inflection point of the motion of the car.'</span>)
+
+fprintf(<span class="string">'\n'</span>)
+
+<span class="comment">% iii. Why would it be difficult to implement this as an extended Kalman</span>
+<span class="comment">% filter?</span>
+<span class="comment">%   A: Nonlinearities would lead to degeneracy in the EKF.</span>
+<span class="comment">% The UKF does not require computing Jacobians, can be used with</span>
+<span class="comment">% discontinuous transformation, and is, most importantly, more accurate</span>
+<span class="comment">% than EKF for highly nonlinear transformations.</span>
+
+disp(<span class="string">'Question iii'</span>)
+disp(<span class="string">'Why would it be difficult to implement this as an extended Kalman filter? '</span>)
+
+fprintf(<span class="string">'\n'</span>)
+
+disp(<span class="string">'Answer:'</span>)
+disp(<span class="string">'The EKF linearizes a nonlinear function about a single point. '</span>)
+disp(<span class="string">'As can be seen from the state time histories plots, the truth states have high nonlinearities.'</span>)
+disp(<span class="string">'Computing the Jacobian would be difficult, and linearization would still be less accurate than the unscented transform.'</span>)
+
+fprintf(<span class="string">'\n'</span>)
+
+<span class="comment">% iv. Why did we choose to use the bearing-bearing-range measurement instead</span>
+<span class="comment">% of some other measurement vector?</span>
+<span class="comment">%   A: Using only bearing data would make the state weakly observable (weak</span>
+<span class="comment">%   notion of location). Two bearing measurements and distance (range) are</span>
+<span class="comment">%   the minimal set required for determining the length, width, location,</span>
+<span class="comment">%   and orientation of the car.</span>
+
+disp(<span class="string">'Question iv'</span>)
+disp(<span class="string">'Why did we choose to use the bearing-bearing-range measurement instead of some other measurement vector? '</span>)
+
+fprintf(<span class="string">'\n'</span>)
+disp(<span class="string">'Answer:'</span>)
+disp(<span class="string">'Two bearing measurements and a range measurement are the minimal set required for determing the state.'</span>)
+disp(<span class="string">'At least two bearing measurements are required for determining the length and width of the car.'</span>)
+disp(<span class="string">'Using only bearing data would make the state weakly observable with an inaccurate notion of location.'</span>)
+</pre><pre class="codeoutput">Part b questions
+
+Question i: 
+What effects, if any, do the values of a, b, and k have on the final state estimate? 
+
+Answer:
+Alpha and kappa control the spread of the sigma points around the mean state value.
+The spread of sigma points is proportional to alpha. A larger alpha means a larger spread of sigma points.
+Kappa is a scaling parameter usually set to 0. A larger kappa also means a larger spread of sigma points.
+The square root of kappa is proportional to the spread.
+Beta impacts the weights of the transformed points during state and measurement calculations.
+Beta incorporates a priori knowlege of the state distribution; beta = 2 is optimal for Gaussian distributions.
+
+Question ii
+What do you notice about the state estimates, in particular length and width, as the target car performs its different maneuvers? 
+
+Answer:
+The length and width vary in estimate due to the orientation of the car relative to the LIDAR sensors.
+The LIDAR is only able to see certain parts of the car past an inflection point of the motion of the car.
+
+Question iii
+Why would it be difficult to implement this as an extended Kalman filter? 
+
+Answer:
+The EKF linearizes a nonlinear function about a single point. 
+As can be seen from the state time histories plots, the truth states have high nonlinearities.
+Computing the Jacobian would be difficult, and linearization would still be less accurate than the unscented transform.
+
+Question iv
+Why did we choose to use the bearing-bearing-range measurement instead of some other measurement vector? 
+
+Answer:
+Two bearing measurements and a range measurement are the minimal set required for determing the state.
+At least two bearing measurements are required for determining the length and width of the car.
+Using only bearing data would make the state weakly observable with an inaccurate notion of location.
+</pre><h2 id="9">subfunctions</h2><pre class="codeinput"><span class="keyword">function</span> XX = build_SP(xa, Pa, nx, nv, lambda)
+
+    <span class="comment">% cholesky factorize Pa</span>
+    Sx = chol(Pa)';
+
+    <span class="comment">% build sigma points. REMEMBER: there will be 2*(nx+nv)+1 sigma points</span>
+    XX(1,:) = xa';
+    <span class="keyword">for</span> i = 1 : nx + nv
+
+        XXi = xa' + sqrt( nx + nv + lambda ) * Sx(:,i)';
+        XX  = [ XX; XXi ];
+
+    <span class="keyword">end</span>
+    <span class="keyword">for</span> i = nx + nv + 1 : 2*(nx + nv)
+
+        XXi = xa' - sqrt( nx + nv + lambda) * Sx(:, i - nx - nv)';
+        XX  = [ XX; XXi ];
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> Pxz = calc_Pxz(nx, nz, lambda_xz, a, b, XX_bar, x_bar, ZZ_bar, z_bar)
+
+    <span class="comment">% determine weights</span>
+    w_0m = lambda_xz / (nx + nz + lambda_xz);
+    w_im = 1 / (2*(nx + nz + lambda_xz));
+    w_0c = lambda_xz / (nx + nz + lambda_xz) + 1 - a^2 + b;
+    w_ic = w_im;
+
+    Pxz = zeros(size(nx, nz));
+    N_SP = 2*(nx + nz) + 1;
+    <span class="keyword">for</span> i = 1 : N_SP
+
+        <span class="keyword">if</span> i == 1;      wP = w_0c;
+        <span class="keyword">else</span>;           wP = w_ic;
+        <span class="keyword">end</span>
+
+        <span class="comment">% build Pa_bar</span>
+        xtilde = [ XX_bar(i, 1:nx)' - x_bar ];
+        ztilde = [ ZZ_bar(i, 1:nz)' - z_bar ];
+
+        Pi  = wP * (xtilde) * (ztilde)';
+        Pxz = Pxz + Pi;
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [x_bar, Pxx_bar] = combine_SP(nx, nv, lambda, a, b, XX_prop)
+
+    <span class="comment">% determine weights</span>
+    w_0m = lambda / (nx + nv + lambda);
+    w_im = 1 / (2*(nx + nv + lambda));
+    w_0c = lambda / (nx + nv + lambda) + 1 - a^2 + b;
+    w_ic = w_im;
+
+    N_SP = 2*(nx+nv) + 1;
+
+    <span class="comment">% use predicted sigma points to calculate predicted state x_bar</span>
+    x_bar = zeros(1, nx);
+    <span class="keyword">for</span> i = 1 : N_SP
+
+        <span class="keyword">if</span> i == 1;      wx = w_0m;
+        <span class="keyword">else</span>;           wx = w_im;
+        <span class="keyword">end</span>
+
+        <span class="comment">% build xa_bar</span>
+        xi_bar = wx * XX_prop(i, 1:nx);
+        x_bar = x_bar + xi_bar;
+
+    <span class="keyword">end</span>
+
+    <span class="comment">% predict Pa_bar</span>
+    Pxx_bar = zeros(nx);
+    <span class="keyword">for</span> i = 1 : N_SP
+
+        <span class="keyword">if</span> i == 1;      wP = w_0c;
+        <span class="keyword">else</span>;           wP = w_ic;
+        <span class="keyword">end</span>
+
+        <span class="comment">% build Pa_bar</span>
+        xtilde = [ XX_prop(i, 1:nx) - x_bar ]';
+        Pi_bar = wP * (xtilde) * (xtilde)';
+        Pxx_bar = Pxx_bar + Pi_bar;
+
+    <span class="keyword">end</span>
+
+    x_bar = x_bar';
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% close all; 
+clear; 
+% clc
+
+% sim dt 
+dt = 0.1; 
+
+% process noise covariance 
+Q = diag([0.25 0.25 3 40*pi/180 0.1 0.1])^2 / dt; 
+
+% measurement vector:
+% z = [b_min b_max r_min]'; 
+%   b_min = minimum bearing (rad)
+%   b_max = maximum bearing (rad) 
+%   r_min = minimum range (m) 
+
+% measurement covariance 
+R = diag( [2*pi/180, 2*pi/180, 0.1] )^2; 
+
+% initial state est and covar 
+x0 = [90; 4.25; 13; pi; 5; 2]; 
+P0 = diag([2 5 1 pi/4 4 2])^2; 
+
+x_hat = x0; 
+P     = P0; 
+
+% for lambda 
+a = 10^-3; 
+b = 2; 
+k = 0; 
+nx = 6; 
+nz = 3; 
+nv = 6; 
+
+% load LIDAR data 
+% load problem3data.mat 
+load problem3dataMod.mat 
+N = length(lidar); 
+
+% initialize output arrays 
+x_hat_arr = []; 
+% P_cell = ; 
+
+% % create plot 
+% fname = 'Car Plot'; 
+% h = figure('name', fname); 
+%     xlim([0 100]); ylim([-50 50]); 
+%     plotcar(x_hat, '-', h, 0)
+
+%% UNSCENTED KALMAN FILTER 
+
+% iterate through measurements 
+for j = 1 : N 
+
+% augmented state and covariance 
+xa = [ x_hat; zeros(6,1) ]; 
+Pa = [ P, zeros(6); zeros(6), Q ]; 
+
+%% DYNAMICS PROPAGATION 
+
+% cholesky factorize Pa 
+Sx = chol(Pa)'; 
+
+% build sigma points 
+lambda_xv = a^2 * (nx + nv + k) - (nx + nv); 
+XX = build_SP(xa, Pa, nx, nv, lambda_xv); 
+
+% propagate sigma points 
+XX_prop = []; 
+for i = 1:length(XX)
+    
+    [tvec, XX_i_prop] = ode45(@dyn_car, [0 dt], XX(i,:)); 
+    XX_i_prop = XX_i_prop(end,:); 
+    XX_prop   = [ XX_prop; XX_i_prop ]; 
+    
+end 
+
+% combine sigma points 
+[x_bar, P_bar] = combine_SP(nx, nv, lambda_xv, a, b, XX_prop); 
+
+%% MEASUREMENT UPDATE 
+
+% push sigma points through measurement model. Use min bearing, max
+% bearing, and min range 
+zj   = lidar(j).z; 
+z_rj = zj(:,1);     % range 
+z_bj = zj(:,2);     % bearing 
+z    = [ min(z_bj); max(z_bj); min(z_rj) ]; 
+
+% stack states and covariance 
+xa_bar = [x_bar; zeros(nz,1)]; 
+Pa_bar = [P_bar, zeros(nx, nz); zeros(nz, nx), R]; 
+
+% build sigma points 
+lambda_xz = a^2 * (nx + nz + k) - (nx + nz); 
+XX_bar = build_SP(xa_bar, Pa_bar, nz, nx, lambda_xz); 
+
+% push sigma points through measurement model 
+ZZ_bar = []; 
+for i = 1:length(XX_bar)
+    ZZ_i_bar = h_car(XX_bar(i,:)); 
+    ZZ_bar   = [ ZZ_bar; ZZ_i_bar' ]; 
+end 
+
+% combine sigma points 
+[z_bar, Pzz] = combine_SP(nz, nx, lambda_xz, a, b, ZZ_bar); 
+
+% calculate Pxz 
+Pxz = calc_Pxz(nx, nz, lambda_xz, a, b, XX_bar, x_bar, ZZ_bar, z_bar); 
+
+% LMMSE update!!! 
+x_hat = x_bar + Pxz * Pzz^(-1) * [z - z_bar]; 
+P     = P_bar - Pxz * Pzz^(-1) * Pxz'; 
+
+% save state and covariance
+x_hat_arr = [x_hat_arr; x_hat']; 
+% P_cell{j} = {P}; 
+P_arr(:,:,j) = P; 
+
+% update plot 
+% plotcar(x_hat, '-', h, lidar(j).t)
+
+end 
+
+%% ANALYSIS 
+
+%   x - state of the rectangular car.  State elements are:
+%       x - vehicle x-position (back axle, m)
+%       y - vehicle y-position (back axle, m)
+%       s - vehicle forward speed (no-slip assumed)
+%       t - vehicle heading (rad.)
+%       l - vehicle length (m)
+%       w - vehicle width (m)
+
+h = figure; 
+xlim([0 100]); ylim([-50 50]); 
+xlabel('x (m)') 
+ylabel('y (m' ) 
+for i = 1:length(x_hat_arr) 
+    hold on; 
+    plotcar(x_hat_arr(i,:)', '-', h, lidar(i).t); 
+end 
+
+load problem3truth.mat
+for i = 1:length(car)
+    x_truth(i,:) = car(i).x'; 
+    t(i,:)       = car(i).t; 
+end 
+
+sigma_arr = []; 
+for i = 1:6
+    sigma_arr(:,i) = sqrt(squeeze(P_arr(i,i,:))); 
+end 
+
+titles = {'Vehicle x (back axle)'; 
+    'Vehicle y (back axle)'; 
+    'Vehicle forward speed (No-slip assumed)'; 
+    'Vehicle heading'; 
+    'Vehicle length'; 
+    'Vehicle width'}; 
+units = {'m', 'm', 'm/s', 'rad', 'm', 'm'}; 
+
+fname = 'State Time Histories'; 
+n = 3; p = 2; 
+figure('name', fname, 'position', [100 100 800 600]); 
+
+for i = 1:6 
+    
+    subplot(n,p,i) 
+        plot(t, x_truth(:,i), 'b', 'linewidth', 2); hold on; grid on; 
+        plot(t, x_hat_arr(:,i), 'rREPLACE_WITH_DASH_DASH', 'linewidth', 2); 
+        plot(t, x_hat_arr(:,i) + sigma_arr(:,i), 'rREPLACE_WITH_DASH_DASH'); 
+        plot(t, x_hat_arr(:,i) - sigma_arr(:,i), 'rREPLACE_WITH_DASH_DASH'); 
+        title(titles{i}); 
+        ylabel(units{i}); 
+        bigger_ylim 
+        
+    if i == 5 || i == 6
+        xlabel('Time (s)') 
+    elseif i == 2
+        legend('truth', 'est', 'est +/- \sigma', 'location', 'best'); 
+    end 
+    
+end 
+        
+    sgtitle(fname) 
+
+%% PART B questions 
+
+% i. What effects, if any, do the values of a, b, and k have on the final
+% state estimate? 
+%   A: The spread of the sigma points around the mean state value is controlled 
+% by two parameters α and κ. A third parameter, β, impacts the weights of the 
+% transformed points during state and measurement covariance calculations.
+% α — Determines the spread of the sigma points around the mean state value. 
+% It is usually a small positive value. The spread of sigma points is proportional to α. 
+% Smaller values correspond to sigma points closer to the mean state.
+% κ — A second scaling parameter that is usually set to 0. Smaller values 
+% correspond to sigma points closer to the mean state. The spread is proportional 
+% to the square-root of κ.
+% β — Incorporates prior knowledge of the distribution of the state. For 
+% Gaussian distributions, β = 2 is optimal.
+
+disp('Part b questions'); 
+
+fprintf('\n')
+
+disp('Question i: ')
+disp('What effects, if any, do the values of a, b, and k have on the final state estimate? '); 
+
+fprintf('\n')
+
+disp('Answer:') 
+disp('Alpha and kappa control the spread of the sigma points around the mean state value.') 
+disp('The spread of sigma points is proportional to alpha. A larger alpha means a larger spread of sigma points.')
+disp('Kappa is a scaling parameter usually set to 0. A larger kappa also means a larger spread of sigma points.') 
+disp('The square root of kappa is proportional to the spread.') 
+disp('Beta impacts the weights of the transformed points during state and measurement calculations.')
+disp('Beta incorporates a priori knowlege of the state distribution; beta = 2 is optimal for Gaussian distributions.') 
+
+fprintf('\n')
+% ii. What do you notice about the state estimates, in particular length
+% and width, as the target car performs its different maneuvers? 
+%   A: The length and width vary slightly in estimate due to the
+%   orientation of the car relative to the LIDAR sensors. There are times
+%   while the car is turning where the LIDAR is only able to sense
+%   certain parameters past an inflection point of the car's motion. 
+
+disp('Question ii')
+disp('What do you notice about the state estimates, in particular length and width, as the target car performs its different maneuvers? '); 
+
+fprintf('\n')
+
+disp('Answer:')
+disp('The length and width vary in estimate due to the orientation of the car relative to the LIDAR sensors.') 
+disp('The LIDAR is only able to see certain parts of the car past an inflection point of the motion of the car.') 
+
+fprintf('\n')
+
+% iii. Why would it be difficult to implement this as an extended Kalman
+% filter? 
+%   A: Nonlinearities would lead to degeneracy in the EKF. 
+% The UKF does not require computing Jacobians, can be used with 
+% discontinuous transformation, and is, most importantly, more accurate 
+% than EKF for highly nonlinear transformations.
+
+disp('Question iii') 
+disp('Why would it be difficult to implement this as an extended Kalman filter? ') 
+
+fprintf('\n')
+
+disp('Answer:') 
+disp('The EKF linearizes a nonlinear function about a single point. ')
+disp('As can be seen from the state time histories plots, the truth states have high nonlinearities.') 
+disp('Computing the Jacobian would be difficult, and linearization would still be less accurate than the unscented transform.') 
+
+fprintf('\n')
+
+% iv. Why did we choose to use the bearing-bearing-range measurement instead
+% of some other measurement vector? 
+%   A: Using only bearing data would make the state weakly observable (weak 
+%   notion of location). Two bearing measurements and distance (range) are 
+%   the minimal set required for determining the length, width, location, 
+%   and orientation of the car. 
+
+disp('Question iv') 
+disp('Why did we choose to use the bearing-bearing-range measurement instead of some other measurement vector? ') 
+
+fprintf('\n')
+disp('Answer:') 
+disp('Two bearing measurements and a range measurement are the minimal set required for determing the state.') 
+disp('At least two bearing measurements are required for determining the length and width of the car.') 
+disp('Using only bearing data would make the state weakly observable with an inaccurate notion of location.') 
+
+%% subfunctions 
+
+function XX = build_SP(xa, Pa, nx, nv, lambda) 
+
+    % cholesky factorize Pa 
+    Sx = chol(Pa)'; 
+
+    % build sigma points. REMEMBER: there will be 2*(nx+nv)+1 sigma points 
+    XX(1,:) = xa'; 
+    for i = 1 : nx + nv 
+
+        XXi = xa' + sqrt( nx + nv + lambda ) * Sx(:,i)'; 
+        XX  = [ XX; XXi ]; 
+
+    end 
+    for i = nx + nv + 1 : 2*(nx + nv)
+
+        XXi = xa' - sqrt( nx + nv + lambda) * Sx(:, i - nx - nv)'; 
+        XX  = [ XX; XXi ]; 
+
+    end 
+
+end 
+
+function Pxz = calc_Pxz(nx, nz, lambda_xz, a, b, XX_bar, x_bar, ZZ_bar, z_bar)
+
+    % determine weights 
+    w_0m = lambda_xz / (nx + nz + lambda_xz); 
+    w_im = 1 / (2*(nx + nz + lambda_xz)); 
+    w_0c = lambda_xz / (nx + nz + lambda_xz) + 1 - a^2 + b; 
+    w_ic = w_im; 
+
+    Pxz = zeros(size(nx, nz)); 
+    N_SP = 2*(nx + nz) + 1; 
+    for i = 1 : N_SP
+
+        if i == 1;      wP = w_0c; 
+        else;           wP = w_ic; 
+        end
+
+        % build Pa_bar 
+        xtilde = [ XX_bar(i, 1:nx)' - x_bar ]; 
+        ztilde = [ ZZ_bar(i, 1:nz)' - z_bar ]; 
+
+        Pi  = wP * (xtilde) * (ztilde)'; 
+        Pxz = Pxz + Pi; 
+
+    end 
+
+end 
+
+function [x_bar, Pxx_bar] = combine_SP(nx, nv, lambda, a, b, XX_prop) 
+
+    % determine weights 
+    w_0m = lambda / (nx + nv + lambda); 
+    w_im = 1 / (2*(nx + nv + lambda)); 
+    w_0c = lambda / (nx + nv + lambda) + 1 - a^2 + b; 
+    w_ic = w_im; 
+    
+    N_SP = 2*(nx+nv) + 1; 
+
+    % use predicted sigma points to calculate predicted state x_bar 
+    x_bar = zeros(1, nx); 
+    for i = 1 : N_SP
+
+        if i == 1;      wx = w_0m; 
+        else;           wx = w_im; 
+        end
+
+        % build xa_bar 
+        xi_bar = wx * XX_prop(i, 1:nx); 
+        x_bar = x_bar + xi_bar; 
+
+    end  
+
+    % predict Pa_bar 
+    Pxx_bar = zeros(nx); 
+    for i = 1 : N_SP
+
+        if i == 1;      wP = w_0c; 
+        else;           wP = w_ic; 
+        end
+
+        % build Pa_bar 
+        xtilde = [ XX_prop(i, 1:nx) - x_bar ]'; 
+        Pi_bar = wP * (xtilde) * (xtilde)'; 
+        Pxx_bar = Pxx_bar + Pi_bar; 
+
+    end 
+    
+    x_bar = x_bar';
+
+end 
+
+
+##### SOURCE END #####
+--></body></html>

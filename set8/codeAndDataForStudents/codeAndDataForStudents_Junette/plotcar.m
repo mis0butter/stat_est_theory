@@ -45,9 +45,9 @@ plot([fd(1); bd(1)], [fd(2); bd(2)], pstr);
 plot([bd(1); bp(1)], [bd(2); bp(2)], pstr);
 plot([bp(1); fp(1)], [bp(2); fp(2)], pstr);
 
-% sgtitle('Car Plot') 
-title( sprintf('Time = %g secs', t )); 
+sgtitle('Car Est Plot') 
+% title( sprintf('Time = %g secs', t )); 
 
-pause(0.05)
+% pause(0.05)
 
 return;

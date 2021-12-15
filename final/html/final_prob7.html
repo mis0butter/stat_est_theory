@@ -1,0 +1,838 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>final_prob7</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-12-14"><meta name="DC.source" content="final_prob7.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">SPF 4: PARTICLE FILTER</a></li><li><a href="#2">PARTICLE FILTER</a></li><li><a href="#3">PART B</a></li><li><a href="#4">Question i</a></li><li><a href="#5">Question ii</a></li><li><a href="#6">Question iii</a></li><li><a href="#7">subfunctions</a></li></ul></div><h2 id="1">SPF 4: PARTICLE FILTER</h2><pre class="codeinput">clear
+<span class="comment">% clc</span>
+
+load <span class="string">problem4data.mat</span>
+load <span class="string">problem4truth.mat</span>
+
+rng(1)
+
+<span class="comment">% noise</span>
+Q = diag( [ 0.1, 5*pi/180 ] )^2;    <span class="comment">% robot wheel encoders</span>
+R = diag( [ 1 1 1 ] )^2;            <span class="comment">% robot sonar</span>
+
+<span class="comment">% grab truth states</span>
+x_truth = [];  t = [];
+<span class="keyword">for</span> i = 1:length(robot)
+    x_truth = [ x_truth; robot(i).x' ];
+    t       = [ t; robot(i).t ];
+<span class="keyword">end</span>
+
+<span class="comment">% state size</span>
+nx = 3;
+</pre><h2 id="2">PARTICLE FILTER</h2><pre class="codeinput"><span class="comment">% # particles</span>
+Ns = 1000;
+
+<span class="comment">% particle filter</span>
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx);
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat);
+</pre><img vspace="5" hspace="5" src="final_prob7_01.png" alt=""> <h2 id="3">PART B</h2><p>b. Compare your state estimate to the true state, stored in problem4truth.mat.</p><pre class="codeinput">plot_state(t, P, x_truth, x_hat, Ns);
+</pre><img vspace="5" hspace="5" src="final_prob7_02.png" alt=""> <h2 id="4">Question i</h2><pre class="codeinput"><span class="comment">% In particular, consider the following points:</span>
+<span class="comment">% i. Does your state estimate time history change much if you run the filter more</span>
+<span class="comment">% than once? Why might that be good or bad? Hint: try running the filter a few</span>
+<span class="comment">% times with only 100 particles.</span>
+<span class="comment">%   A: The state estimate time history usually does not change much, which</span>
+<span class="comment">%   is good. Running the filter with 100 particles makes the estimate</span>
+<span class="comment">%   time history change more, using fewer particles make the estimate time</span>
+<span class="comment">%   history change less. This good because this ensures that the particle</span>
+<span class="comment">%   filter does not converge on an incorrect initial guess.</span>
+
+<span class="comment">%   A: A consequence of the particle filter is that fewer particles leads</span>
+<span class="comment">%   to degeneracy of the filter. Fewer particles will result in particles</span>
+<span class="comment">%   in wrong locations having higher probabilities, which will lead to</span>
+<span class="comment">%   clusters of particles persisting in incorrect locations.</span>
+
+disp(<span class="string">'Question i:'</span>)
+disp(<span class="string">'Does your state estimate time history change much if you run the filter more than once?'</span>)
+disp(<span class="string">'Why might that be good or bad? Hint: try running the filter a few times with only 100 particles.'</span>)
+
+fprintf(<span class="string">'\n'</span>)
+
+disp(<span class="string">'Answer:'</span>)
+disp(<span class="string">'The state estimate history changes slightly but not much with 1000 particles.'</span>)
+disp(<span class="string">'This is good because this means that the particle filter would not converge (for long) on an incorrect initial guess.'</span>)
+disp(<span class="string">'However, when there are too few particles the state estimate time history changes more drastically.'</span>)
+disp(<span class="string">'See the following plots using N = 100 particles in the filter. '</span>)
+disp(<span class="string">'For the rng(0) results, the theta state estimate is completely off. '</span>)
+disp(<span class="string">'For the rng(1) results, the particle filter takes a while to converge on the neighborhood of the truth state.'</span>)
+disp(<span class="string">'For the rng(2) results, the results look closer to the 1000 particles result,'</span>)
+disp(<span class="string">'but this demonstration shows that using fewer particles leads to degernacy in the filter.'</span>)
+disp(<span class="string">'Fewer particles result in particles in wrong locations having higher probabilities, '</span>)
+disp(<span class="string">'which will lead to particles persisting in incorrect locations.'</span>)
+
+<span class="comment">% # particles</span>
+Ns = 100;
+
+rng_seed = 0; rng(rng_seed);
+
+<span class="comment">% particle filter</span>
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx);
+plot_state(t, P, x_truth, x_hat, Ns)
+sgtitle(sprintf(<span class="string">'State time history with Ns = %d, rng = %d'</span>, Ns, rng_seed));
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat);
+sgtitle(sprintf(<span class="string">'Particles plot with Ns = %d, rng = %d'</span>, Ns, rng_seed));
+
+rng_seed = 1; rng(rng_seed);
+
+<span class="comment">% particle filter</span>
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx);
+plot_state(t, P, x_truth, x_hat, Ns)
+sgtitle(sprintf(<span class="string">'State time history with Ns = %d, rng = %d'</span>, Ns, rng_seed));
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat);
+sgtitle(sprintf(<span class="string">'Particles plot with Ns = %d, rng = %d'</span>, Ns, rng_seed));
+
+rng_seed = 2; rng(rng_seed);
+
+<span class="comment">% particle filter</span>
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx);
+plot_state(t, P, x_truth, x_hat, Ns)
+sgtitle(sprintf(<span class="string">'State time history with Ns = %d, rng = %d'</span>, Ns, rng_seed));
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat);
+sgtitle(sprintf(<span class="string">'Particles plot with Ns = %d, rng = %d'</span>, Ns, rng_seed));
+</pre><pre class="codeoutput">Question i:
+Does your state estimate time history change much if you run the filter more than once?
+Why might that be good or bad? Hint: try running the filter a few times with only 100 particles.
+
+Answer:
+The state estimate history changes slightly but not much with 1000 particles.
+This is good because this means that the particle filter would not converge (for long) on an incorrect initial guess.
+However, when there are too few particles the state estimate time history changes more drastically.
+See the following plots using N = 100 particles in the filter. 
+For the rng(0) results, the theta state estimate is completely off. 
+For the rng(1) results, the particle filter takes a while to converge on the neighborhood of the truth state.
+For the rng(2) results, the results look closer to the 1000 particles result,
+but this demonstration shows that using fewer particles leads to degernacy in the filter.
+Fewer particles result in particles in wrong locations having higher probabilities, 
+which will lead to particles persisting in incorrect locations.
+</pre><img vspace="5" hspace="5" src="final_prob7_03.png" alt=""> <img vspace="5" hspace="5" src="final_prob7_04.png" alt=""> <img vspace="5" hspace="5" src="final_prob7_05.png" alt=""> <img vspace="5" hspace="5" src="final_prob7_06.png" alt=""> <img vspace="5" hspace="5" src="final_prob7_07.png" alt=""> <img vspace="5" hspace="5" src="final_prob7_08.png" alt=""> <h2 id="5">Question ii</h2><pre class="codeinput"><span class="comment">% ii. Why do clusters of particles sometimes persist in incorrect locations on the</span>
+<span class="comment">% map?</span>
+<span class="comment">%   A: The clusters of particles sometimes persist because when the weights</span>
+<span class="comment">%   get updated, drawing from the probability distribution function does</span>
+<span class="comment">%   not always immediately cancel the incorrect particles.</span>
+<span class="comment">%   A: log-likelihood local minima pockets . The particles are stuck in</span>
+<span class="comment">%   local extrema. The more nonlinearities in the dynamics, the more local</span>
+<span class="comment">%   minima and maxima that exist in the probability distribution function.</span>
+
+disp(<span class="string">'Question ii: '</span>)
+disp(<span class="string">'Why do clusters of particles sometimes persist in incorrect locations on the map?'</span>)
+
+fprintf(<span class="string">'\n'</span>)
+disp(<span class="string">'Answer:'</span>)
+disp(<span class="string">'Log-likelihood local minima pockets; the particles are stuck in local extrema.'</span>)
+disp(<span class="string">'The more nonlinearities in the dynamics, the more local extrema that exist in the probability distribution.'</span>)
+
+fprintf(<span class="string">'\n'</span>)
+
+<span class="comment">% iii. Why would it be difficult to implement this filter as an extended Kalman</span>
+<span class="comment">% Filter?</span>
+<span class="comment">%   A: The nonlinearities would lead the EKF to become degenerate.</span>
+<span class="comment">%   A: Nonlinearities would lead to degeneracy in the EKF.</span>
+<span class="comment">% The UKF does not require computing Jacobians, can be used with</span>
+<span class="comment">% discontinuous transformation, and is, most importantly, more accurate</span>
+<span class="comment">% than EKF for highly nonlinear transformations. The probability</span>
+<span class="comment">% distribution function is not Gaussian, which makes the EKF unsuitable as</span>
+<span class="comment">% the EKF relies on linearizing conditioning on Gaussian distributions.</span>
+<span class="comment">% Particle filter is better.</span>
+</pre><pre class="codeoutput">Question ii: 
+Why do clusters of particles sometimes persist in incorrect locations on the map?
+
+Answer:
+Log-likelihood local minima pockets; the particles are stuck in local extrema.
+The more nonlinearities in the dynamics, the more local extrema that exist in the probability distribution.
+
+</pre><h2 id="6">Question iii</h2><pre class="codeinput">disp(<span class="string">'Question iii:'</span>)
+disp(<span class="string">'Why would it be difficult to implement this filter as an extended Kalman filter?'</span>)
+
+fprintf(<span class="string">'\n'</span>)
+disp(<span class="string">'Answer:'</span>)
+disp(<span class="string">'The robot "initially has no idea where he is." '</span>)
+disp(<span class="string">'If the initial state estimate is wrong (or the dynamics or not modeled correctly), the EKF may diverge owing to its linearization.'</span>)
+disp(<span class="string">'The EKF also relies on computing jacobians which are difficult while linearizing conditioned on Gaussian distributions. '</span>)
+disp(<span class="string">'It is more difficult to approximate a nonlinear function or transformation than it is to approximate a probability distribution.'</span>)
+</pre><pre class="codeoutput">Question iii:
+Why would it be difficult to implement this filter as an extended Kalman filter?
+
+Answer:
+The robot "initially has no idea where he is." 
+If the initial state estimate is wrong (or the dynamics or not modeled correctly), the EKF may diverge owing to its linearization.
+The EKF also relies on computing jacobians which are difficult while linearizing conditioned on Gaussian distributions. 
+It is more difficult to approximate a nonlinear function or transformation than it is to approximate a probability distribution.
+</pre><h2 id="7">subfunctions</h2><pre class="codeinput"><span class="keyword">function</span> [ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx)
+
+    <span class="comment">% draw initial particles from initial uniform probability density,</span>
+    <span class="comment">% initialize weights equally</span>
+    r0     = unifrnd(minx, maxx, [Ns, 2]);
+    theta0 = rand(Ns, 1) * 2*pi;
+    w_k0   = ones(Ns, 1) / Ns;
+
+    <span class="comment">% PARTICLE FILTER</span>
+    XX_k  = [ r0, theta0 ];
+    w_k   = w_k0;
+    x_hat = [];
+    P     = [];
+
+    <span class="comment">% measurement index</span>
+    <span class="keyword">for</span> k = 1 : length(encoder)
+
+        <span class="comment">% particle filter</span>
+        [x_khat, P_k, XX_k, w_k] = particle_filter(k, w_k, Q, R, Ns, XX_k, beacons, encoder, sonar, nx);
+
+        <span class="comment">% save outputs</span>
+        x_hat    = [x_hat; x_khat];
+        P(:,:,k) = P_k;
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat)
+
+    fname = sprintf(<span class="string">'Robot Particle Filtering: Ns = %d'</span>, Ns);
+    pos   = [ 800 200 800 600 ];
+    hf_map = figure(<span class="string">'name'</span>, fname, <span class="string">'position'</span>, pos);
+        sgtitle(fname)
+        hold <span class="string">on</span>;
+        xlim([minx - 1, maxx + 2])
+        ylim([miny - 1, maxy + 2])
+        xlabel(<span class="string">'X (m)'</span>); ylabel(<span class="string">'Y (m)'</span>)
+        scatter(XX_k(:,1), XX_k(:,2), 4, <span class="string">'g'</span>);
+        scatter(x_truth(1:end,1), x_truth(1:end,2), 12, <span class="string">'b'</span>, <span class="string">'filled'</span>);
+        scatter(x_hat(:,1), x_hat(:,2) , 12, <span class="string">'r'</span>, <span class="string">'filled'</span>);
+
+        legend(<span class="string">'particles'</span>, <span class="string">'truth'</span>, <span class="string">'est'</span>, <span class="string">'location'</span>, <span class="string">'southeast'</span>)
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_state(t, P, x_truth, x_hat, Ns)
+
+<span class="comment">% extract std devs</span>
+x_sigma = sqrt(squeeze(P(1,1,:)));
+y_sigma = sqrt(squeeze(P(2,2,:)));
+theta_sigma = sqrt(squeeze(P(3,3,:)));
+
+fname = sprintf(<span class="string">'Robot Particle Filtering: Truth vs. Estimate for Ns = %d'</span>, Ns);
+n = 3; p = 1;
+pos = [100 100 800 800];
+figure(<span class="string">'name'</span>, fname, <span class="string">'position'</span>, pos)
+hold <span class="string">on</span>; grid <span class="string">on</span>;
+
+    <span class="comment">% x compare</span>
+    subplot(n,p,1)
+    hold <span class="string">on</span>;
+        plot_lines(1, t, x_truth, x_hat, x_sigma)
+        title(<span class="string">'X Compare'</span>)
+        legend(<span class="string">'truth'</span>, <span class="string">'est'</span>, <span class="string">'est +/- \sigma'</span>, <span class="string">'location'</span>, <span class="string">'southeast'</span>)
+        ylabel(<span class="string">'X (m)'</span>)
+
+    <span class="comment">% x diff compare</span>
+    subplot(n,p,2)
+    hold <span class="string">on</span>;
+        plot_lines(2, t, x_truth, x_hat, x_sigma)
+        title(<span class="string">'Y Compare'</span>)
+        ylabel(<span class="string">'Y (m)'</span>)
+
+    <span class="comment">% y compare</span>
+    subplot(n,p,3)
+    hold <span class="string">on</span>;
+        plot_lines(3, t, x_truth, x_hat, x_sigma)
+        title(<span class="string">'\Theta Compare'</span>)
+        xlabel(<span class="string">'Time (s)'</span>)
+        ylabel(<span class="string">'rad'</span>)
+
+    sgtitle(fname)
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_lines(i, t, x_truth, x_hat, x_sigma)
+
+    plot(t, x_truth(:,i), <span class="string">'b'</span>, <span class="string">'linewidth'</span>, 2);
+    plot(t, x_hat(:,i), <span class="string">'r--'</span>, <span class="string">'linewidth'</span>, 2);
+    plot(t, x_hat(:,i) + x_sigma, <span class="string">'r--'</span>);
+    plot(t, x_hat(:,i) - x_sigma, <span class="string">'r--'</span>);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX_k, beacons, encoder, sonar, nx)
+
+    <span class="comment">% extract coder command</span>
+    uk = encoder(k).u;      uk = uk';
+    vk = covdraw(Q, Ns);    vk = vk';
+
+    <span class="comment">% propagate state</span>
+    XX_kp1 = robot_dyn(uk, vk, Q, Ns, XX_k);
+
+    <span class="comment">% measurement model</span>
+    Z_mdl = Z_mdl_fn(XX_kp1, beacons, Ns);
+
+    <span class="comment">% Calculate innovation</span>
+    z_meas = sonar(k).z';
+    nu_k   = Z_mdl - z_meas;
+
+    <span class="comment">% update weights</span>
+    w_kp1 = update_weights(Ns, nu_k, R, w_k);
+
+    <span class="comment">% evaluate effective # of particles</span>
+    w_sq_sum = sum(w_kp1.^2);
+    Ns_hat = 1 / w_sq_sum;
+
+    <span class="comment">% resample if necessary</span>
+    <span class="keyword">if</span> Ns_hat &lt; Ns / 2
+        [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns);
+    <span class="keyword">end</span>
+
+    <span class="comment">% Weighted state and covariance</span>
+    x_khatp1 = sum(w_kp1 .* XX_kp1);
+    xtilde   = (XX_kp1 - x_khatp1)';
+    P_kp1    = (w_kp1' .* xtilde) * xtilde';
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> w_kp1 = update_weights(Ns, nu_k, R, w_k)
+
+    <span class="comment">% Recalculate weights</span>
+    w_kp1    = zeros(Ns, 1);
+    w_kp1_ln = zeros(Ns, 1);
+    <span class="keyword">for</span> i = 1:Ns
+
+        <span class="comment">% current innovation</span>
+        nu_ki = nu_k(i,:)';
+
+        <span class="comment">% pdf</span>
+        p_ki = exp( -1/2 * nu_ki' * R^-1 * nu_ki );
+
+        <span class="comment">% log of recalculated weight</span>
+        w_kp1_ln(i) = log(p_ki) + log(w_k(i));
+
+    <span class="keyword">end</span>
+
+    <span class="comment">% Update according to log likelihood</span>
+    w_kp1 = exp( w_kp1_ln - max(w_kp1_ln) );
+
+    <span class="comment">% Normalize weights</span>
+    w_kp1 = w_kp1 ./ sum(w_kp1);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> XX_kp1 = robot_dyn(uk, vk, Q, Ns, XX_k)
+
+    <span class="comment">% add noise to distance and angle cmds</span>
+    uk = uk + vk;
+
+    <span class="comment">% determine xa and xb change</span>
+    ds_k     = uk(:,1);     <span class="comment">% distance delta</span>
+    dtheta_k = uk(:,2);     <span class="comment">% angle delta</span>
+    theta_k  = XX_k(:,3);   <span class="comment">% OG angle</span>
+
+    dxa_k = ds_k .* cos(theta_k + dtheta_k);
+    dxb_k = ds_k .* sin(theta_k + dtheta_k);
+
+    <span class="comment">% propagate dynamics</span>
+    x_k   = XX_k(:,1:2);
+    x_kp1 = x_k + [dxa_k, dxb_k];
+    theta_kp1 = theta_k + dtheta_k ;
+
+    <span class="comment">% propagated state</span>
+    XX_kp1 = [x_kp1, theta_kp1];
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> Z_mdl_min3 = Z_mdl_fn(XX_kp1, beacons, Ns)
+
+    <span class="comment">% for beacon index</span>
+    <span class="keyword">for</span> i = 1:5
+        dxa = XX_kp1(:,1) - beacons(i,1);
+        dxb = XX_kp1(:,2) - beacons(i,2);
+        Z_mdl_all(:,i) = sqrt(dxa.^2 + dxb.^2);
+    <span class="keyword">end</span>
+
+    <span class="comment">% Create measurement model with min 3 ranges</span>
+    Z_mdl_min3 = zeros(Ns, 3);
+    <span class="keyword">for</span> i = 1:Ns
+        min3 = sort(Z_mdl_all(i,:));
+        min3 = min3(1:3);
+        Z_mdl_min3(i,:) = min3;
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns)
+
+    <span class="comment">% Cumulative distribution function</span>
+    XX_kp1_new = XX_kp1;
+    w_kp1_cdf = cumsum(w_kp1);
+
+    <span class="comment">% for each particle</span>
+    <span class="keyword">for</span> pi = 1:Ns
+
+        <span class="comment">% choose random number [0,1]</span>
+        n_rand = rand;
+
+        <span class="comment">% loop stops right before n_rand exceeds w_kp1_cdf threshold</span>
+        wi = 1;
+        <span class="keyword">while</span> n_rand &gt; w_kp1_cdf(wi) &amp;&amp; wi &lt; Ns
+            wi = wi + 1;
+        <span class="keyword">end</span>
+        XX_kp1_new(pi,:) = XX_kp1(wi,:);
+
+    <span class="keyword">end</span>
+
+    XX_kp1 = XX_kp1_new;
+    w_kp1  = ones(Ns,1) / Ns;
+
+    <span class="comment">% Normalize weights</span>
+    w_kp1 = w_kp1 ./ sum(w_kp1);
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% SPF 4: PARTICLE FILTER 
+
+clear 
+% clc 
+
+load problem4data.mat 
+load problem4truth.mat 
+
+rng(1)
+
+% noise 
+Q = diag( [ 0.1, 5*pi/180 ] )^2;    % robot wheel encoders  
+R = diag( [ 1 1 1 ] )^2;            % robot sonar 
+
+% grab truth states 
+x_truth = [];  t = []; 
+for i = 1:length(robot)
+    x_truth = [ x_truth; robot(i).x' ]; 
+    t       = [ t; robot(i).t ]; 
+end 
+
+% state size 
+nx = 3; 
+
+%% PARTICLE FILTER 
+
+% # particles 
+Ns = 1000;
+
+% particle filter 
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx); 
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat); 
+    
+%% PART B     
+% b. Compare your state estimate to the true state, stored in problem4truth.mat. 
+plot_state(t, P, x_truth, x_hat, Ns); 
+
+%% Question i 
+
+% In particular, consider the following points:
+% i. Does your state estimate time history change much if you run the filter more
+% than once? Why might that be good or bad? Hint: try running the filter a few
+% times with only 100 particles.
+%   A: The state estimate time history usually does not change much, which
+%   is good. Running the filter with 100 particles makes the estimate
+%   time history change more, using fewer particles make the estimate time 
+%   history change less. This good because this ensures that the particle 
+%   filter does not converge on an incorrect initial guess. 
+
+%   A: A consequence of the particle filter is that fewer particles leads
+%   to degeneracy of the filter. Fewer particles will result in particles
+%   in wrong locations having higher probabilities, which will lead to
+%   clusters of particles persisting in incorrect locations. 
+
+disp('Question i:') 
+disp('Does your state estimate time history change much if you run the filter more than once?')
+disp('Why might that be good or bad? Hint: try running the filter a few times with only 100 particles.')
+
+fprintf('\n')
+
+disp('Answer:') 
+disp('The state estimate history changes slightly but not much with 1000 particles.')
+disp('This is good because this means that the particle filter would not converge (for long) on an incorrect initial guess.') 
+disp('However, when there are too few particles the state estimate time history changes more drastically.')
+disp('See the following plots using N = 100 particles in the filter. ')
+disp('For the rng(0) results, the theta state estimate is completely off. ')
+disp('For the rng(1) results, the particle filter takes a while to converge on the neighborhood of the truth state.') 
+disp('For the rng(2) results, the results look closer to the 1000 particles result,') 
+disp('but this demonstration shows that using fewer particles leads to degernacy in the filter.')
+disp('Fewer particles result in particles in wrong locations having higher probabilities, ') 
+disp('which will lead to particles persisting in incorrect locations.') 
+
+% # particles 
+Ns = 100;
+
+rng_seed = 0; rng(rng_seed); 
+
+% particle filter 
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx); 
+plot_state(t, P, x_truth, x_hat, Ns)
+sgtitle(sprintf('State time history with Ns = %d, rng = %d', Ns, rng_seed)); 
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat); 
+sgtitle(sprintf('Particles plot with Ns = %d, rng = %d', Ns, rng_seed)); 
+
+rng_seed = 1; rng(rng_seed); 
+
+% particle filter 
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx); 
+plot_state(t, P, x_truth, x_hat, Ns)
+sgtitle(sprintf('State time history with Ns = %d, rng = %d', Ns, rng_seed)); 
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat); 
+sgtitle(sprintf('Particles plot with Ns = %d, rng = %d', Ns, rng_seed)); 
+
+rng_seed = 2; rng(rng_seed); 
+
+% particle filter 
+[ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx); 
+plot_state(t, P, x_truth, x_hat, Ns)
+sgtitle(sprintf('State time history with Ns = %d, rng = %d', Ns, rng_seed)); 
+plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat); 
+sgtitle(sprintf('Particles plot with Ns = %d, rng = %d', Ns, rng_seed)); 
+
+%% Question ii 
+
+% ii. Why do clusters of particles sometimes persist in incorrect locations on the
+% map?
+%   A: The clusters of particles sometimes persist because when the weights
+%   get updated, drawing from the probability distribution function does
+%   not always immediately cancel the incorrect particles. 
+%   A: log-likelihood local minima pockets . The particles are stuck in
+%   local extrema. The more nonlinearities in the dynamics, the more local
+%   minima and maxima that exist in the probability distribution function. 
+
+disp('Question ii: ') 
+disp('Why do clusters of particles sometimes persist in incorrect locations on the map?') 
+
+fprintf('\n') 
+disp('Answer:') 
+disp('Log-likelihood local minima pockets; the particles are stuck in local extrema.') 
+disp('The more nonlinearities in the dynamics, the more local extrema that exist in the probability distribution.') 
+
+fprintf('\n') 
+
+% iii. Why would it be difficult to implement this filter as an extended Kalman
+% Filter?
+%   A: The nonlinearities would lead the EKF to become degenerate. 
+%   A: Nonlinearities would lead to degeneracy in the EKF. 
+% The UKF does not require computing Jacobians, can be used with 
+% discontinuous transformation, and is, most importantly, more accurate 
+% than EKF for highly nonlinear transformations. The probability
+% distribution function is not Gaussian, which makes the EKF unsuitable as 
+% the EKF relies on linearizing conditioning on Gaussian distributions. 
+% Particle filter is better. 
+
+%% Question iii 
+
+disp('Question iii:') 
+disp('Why would it be difficult to implement this filter as an extended Kalman filter?') 
+
+fprintf('\n')
+disp('Answer:') 
+disp('The robot "initially has no idea where he is." ')
+disp('If the initial state estimate is wrong (or the dynamics or not modeled correctly), the EKF may diverge owing to its linearization.') 
+disp('The EKF also relies on computing jacobians which are difficult while linearizing conditioned on Gaussian distributions. ') 
+disp('It is more difficult to approximate a nonlinear function or transformation than it is to approximate a probability distribution.')
+    
+
+%% subfunctions 
+
+function [ x_hat, P, XX_k ] = pf_wrap(Ns, minx, maxx, Q, R, beacons, encoder, sonar, nx)
+
+    % draw initial particles from initial uniform probability density,
+    % initialize weights equally 
+    r0     = unifrnd(minx, maxx, [Ns, 2]); 
+    theta0 = rand(Ns, 1) * 2*pi; 
+    w_k0   = ones(Ns, 1) / Ns; 
+
+    % PARTICLE FILTER 
+    XX_k  = [ r0, theta0 ]; 
+    w_k   = w_k0; 
+    x_hat = []; 
+    P     = []; 
+
+    % measurement index 
+    for k = 1 : length(encoder) 
+
+        % particle filter 
+        [x_khat, P_k, XX_k, w_k] = particle_filter(k, w_k, Q, R, Ns, XX_k, beacons, encoder, sonar, nx); 
+
+        % save outputs 
+        x_hat    = [x_hat; x_khat]; 
+        P(:,:,k) = P_k; 
+
+    end
+
+end 
+
+function plot_particles(Ns, minx, maxx, miny, maxy, XX_k, x_truth, x_hat)
+
+    fname = sprintf('Robot Particle Filtering: Ns = %d', Ns); 
+    pos   = [ 800 200 800 600 ]; 
+    hf_map = figure('name', fname, 'position', pos); 
+        sgtitle(fname) 
+        hold on; 
+        xlim([minx - 1, maxx + 2]) 
+        ylim([miny - 1, maxy + 2])
+        xlabel('X (m)'); ylabel('Y (m)') 
+        scatter(XX_k(:,1), XX_k(:,2), 4, 'g'); 
+        scatter(x_truth(1:end,1), x_truth(1:end,2), 12, 'b', 'filled');
+        scatter(x_hat(:,1), x_hat(:,2) , 12, 'r', 'filled'); 
+
+        legend('particles', 'truth', 'est', 'location', 'southeast') 
+
+end 
+
+function plot_state(t, P, x_truth, x_hat, Ns)
+
+% extract std devs 
+x_sigma = sqrt(squeeze(P(1,1,:))); 
+y_sigma = sqrt(squeeze(P(2,2,:))); 
+theta_sigma = sqrt(squeeze(P(3,3,:))); 
+
+fname = sprintf('Robot Particle Filtering: Truth vs. Estimate for Ns = %d', Ns);
+n = 3; p = 1; 
+pos = [100 100 800 800]; 
+figure('name', fname, 'position', pos) 
+hold on; grid on; 
+
+    % x compare 
+    subplot(n,p,1) 
+    hold on; 
+        plot_lines(1, t, x_truth, x_hat, x_sigma)
+        title('X Compare') 
+        legend('truth', 'est', 'est +/- \sigma', 'location', 'southeast')  
+        ylabel('X (m)') 
+
+    % x diff compare 
+    subplot(n,p,2) 
+    hold on; 
+        plot_lines(2, t, x_truth, x_hat, x_sigma)
+        title('Y Compare')  
+        ylabel('Y (m)') 
+    
+    % y compare 
+    subplot(n,p,3)
+    hold on; 
+        plot_lines(3, t, x_truth, x_hat, x_sigma)
+        title('\Theta Compare') 
+        xlabel('Time (s)') 
+        ylabel('rad') 
+        
+    sgtitle(fname)
+
+end 
+
+function plot_lines(i, t, x_truth, x_hat, x_sigma)
+
+    plot(t, x_truth(:,i), 'b', 'linewidth', 2); 
+    plot(t, x_hat(:,i), 'rREPLACE_WITH_DASH_DASH', 'linewidth', 2); 
+    plot(t, x_hat(:,i) + x_sigma, 'rREPLACE_WITH_DASH_DASH'); 
+    plot(t, x_hat(:,i) - x_sigma, 'rREPLACE_WITH_DASH_DASH'); 
+
+end 
+
+function [x_khatp1, P_kp1, XX_kp1, w_kp1] = particle_filter(k, w_k, Q, R, Ns, XX_k, beacons, encoder, sonar, nx) 
+
+    % extract coder command 
+    uk = encoder(k).u;      uk = uk'; 
+    vk = covdraw(Q, Ns);    vk = vk'; 
+    
+    % propagate state 
+    XX_kp1 = robot_dyn(uk, vk, Q, Ns, XX_k); 
+    
+    % measurement model 
+    Z_mdl = Z_mdl_fn(XX_kp1, beacons, Ns); 
+
+    % Calculate innovation 
+    z_meas = sonar(k).z'; 
+    nu_k   = Z_mdl - z_meas; 
+    
+    % update weights 
+    w_kp1 = update_weights(Ns, nu_k, R, w_k); 
+
+    % evaluate effective # of particles 
+    w_sq_sum = sum(w_kp1.^2); 
+    Ns_hat = 1 / w_sq_sum; 
+
+    % resample if necessary 
+    if Ns_hat < Ns / 2
+        [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns); 
+    end 
+
+    % Weighted state and covariance 
+    x_khatp1 = sum(w_kp1 .* XX_kp1); 
+    xtilde   = (XX_kp1 - x_khatp1)'; 
+    P_kp1    = (w_kp1' .* xtilde) * xtilde'; 
+    
+end 
+
+function w_kp1 = update_weights(Ns, nu_k, R, w_k)
+
+    % Recalculate weights 
+    w_kp1    = zeros(Ns, 1); 
+    w_kp1_ln = zeros(Ns, 1); 
+    for i = 1:Ns 
+        
+        % current innovation 
+        nu_ki = nu_k(i,:)'; 
+
+        % pdf 
+        p_ki = exp( -1/2 * nu_ki' * R^-1 * nu_ki ); 
+        
+        % log of recalculated weight 
+        w_kp1_ln(i) = log(p_ki) + log(w_k(i)); 
+
+    end 
+    
+    % Update according to log likelihood 
+    w_kp1 = exp( w_kp1_ln - max(w_kp1_ln) ); 
+
+    % Normalize weights 
+    w_kp1 = w_kp1 ./ sum(w_kp1); 
+
+end 
+
+function XX_kp1 = robot_dyn(uk, vk, Q, Ns, XX_k)
+
+    % add noise to distance and angle cmds 
+    uk = uk + vk; 
+
+    % determine xa and xb change 
+    ds_k     = uk(:,1);     % distance delta 
+    dtheta_k = uk(:,2);     % angle delta 
+    theta_k  = XX_k(:,3);   % OG angle 
+
+    dxa_k = ds_k .* cos(theta_k + dtheta_k); 
+    dxb_k = ds_k .* sin(theta_k + dtheta_k); 
+
+    % propagate dynamics 
+    x_k   = XX_k(:,1:2); 
+    x_kp1 = x_k + [dxa_k, dxb_k]; 
+    theta_kp1 = theta_k + dtheta_k ; 
+
+    % propagated state 
+    XX_kp1 = [x_kp1, theta_kp1]; 
+
+end 
+
+function Z_mdl_min3 = Z_mdl_fn(XX_kp1, beacons, Ns)
+
+    % for beacon index 
+    for i = 1:5
+        dxa = XX_kp1(:,1) - beacons(i,1); 
+        dxb = XX_kp1(:,2) - beacons(i,2); 
+        Z_mdl_all(:,i) = sqrt(dxa.^2 + dxb.^2); 
+    end 
+
+    % Create measurement model with min 3 ranges 
+    Z_mdl_min3 = zeros(Ns, 3); 
+    for i = 1:Ns 
+        min3 = sort(Z_mdl_all(i,:)); 
+        min3 = min3(1:3); 
+        Z_mdl_min3(i,:) = min3; 
+    end 
+
+end 
+
+function [XX_kp1, w_kp1] = resample(XX_kp1, w_kp1, Ns)
+
+    % Cumulative distribution function 
+    XX_kp1_new = XX_kp1; 
+    w_kp1_cdf = cumsum(w_kp1); 
+
+    % for each particle 
+    for pi = 1:Ns 
+
+        % choose random number [0,1]
+        n_rand = rand;  
+
+        % loop stops right before n_rand exceeds w_kp1_cdf threshold 
+        wi = 1; 
+        while n_rand > w_kp1_cdf(wi) && wi < Ns 
+            wi = wi + 1; 
+        end 
+        XX_kp1_new(pi,:) = XX_kp1(wi,:); 
+
+    end 
+
+    XX_kp1 = XX_kp1_new; 
+    w_kp1  = ones(Ns,1) / Ns; 
+
+    % Normalize weights 
+    w_kp1 = w_kp1 ./ sum(w_kp1); 
+
+end 
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

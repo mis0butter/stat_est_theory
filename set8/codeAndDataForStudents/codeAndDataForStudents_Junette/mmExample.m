@@ -54,25 +54,55 @@ for j=1:nmod
 
 end
  
-%% ----- Truth model
+%----- Truth model
+% switchHist gives the model switching time history and switchIndex gives
+% the indices at and after which each model obtains.  For the static case,
+% switchHist is either 1, 2, or 3, and switchIndex = 1;
+% switchHist = [3];
+% switchIndex = [1];
+
+switchHist = [1 3 2 3 3];
+% switchHist = [1 1 1 1 1]; 
+% switchHist = [1 3 2 1 3]; 
+% switchHist = [1 2 1 2 3]; 
+switchIndex = [1, 201, 401, 601, 801]; 
 
 Qk = 0.001*diag([0.1 1]); Rq = chol(Qk);
-% vtruekhist = (Rq'*randn(nx,Nsim))';
+vtruekhist = (Rq'*randn(nx,Nsim))';
 Rkp1 = 0.1; Rr = chol(Rkp1);
+wtruekhist = (Rr'*randn(nz,Nsim))';
+utruekhist = 2*randn(Nsim,nu);
 Hkp1 = [1 0];
 x1 = [0;0.1];
 
-load mmExampleModeSwitchingData.mat
-ztrue_hist = ztruekhist; 
-xtrue_hist = xtruekhist; 
+%----- Generate truth-model states and measurements
+xk = x1;
+ii = 1;
+for k=1:Nsim-1
+  if k==switchIndex(ii)
+    Fk = F_M(:,:,switchHist(ii));
+    Gk = G_M(:,:,switchHist(ii));
+    if ii<length(switchHist)
+      ii = ii+1;
+    end
+  end
+  kp1 = k + 1;
+  uk = utruekhist(k,:)';
+  vk = vtruekhist(k,:)';
+  wkp1 = wtruekhist(kp1,:)';
+  xkp1 = Fk*xk + Gk*uk + vk;
+  zkp1 = Hkp1*xkp1 + wkp1;
+  xtrue_hist(k,:) = xk';
+  ztrue_hist(kp1,:) = zkp1';
+  xk = xkp1;
+end
 
-
-%% ----- Run the Multiple-model filter
+%----- Run the Multiple-model filter
 % Set up initial states and covariances
 P1 = 10*eye(nx);
 
-N_mu = 300; 
-mu_lb_vec = linspace(1e-5, 1e-1, N_mu)'; 
+N_mu = 100; 
+mu_lb_vec = linspace(1e-10, 1e-2, N_mu)'; 
 
 % N_mu = 1; 
 % mu_lb_vec = 1e-5; 
@@ -86,9 +116,9 @@ r2 = chi2inv( 1 - a/2, (Nsim-2) * nx) / (Nsim-2);
 
 err_nu_mean_arr = []; 
 
-for j = 1 : N_mu 
+for i = 1 : N_mu 
     
-    mu_lb = mu_lb_vec(j); 
+    mu_lb = mu_lb_vec(i); 
     
     % MM filter 
     [ xhat_hist, P_hist, mu_hist ] = MM_filter( P1, nx, x1, nmod, Nsim, ... 
@@ -166,9 +196,9 @@ end
 function [ xhat_hist, P_hist, mu_hist ] = MM_filter( P1, nx, x1, nmod, Nsim, ... 
     ztrue_hist, utruekhist, F_M, G_M, Qk, Hkp1, Rkp1, mu_lowerbound) 
 
-%     xhat1 = x1 + (chol(P1))'*randn(nx,1);
-    xhat1 = x1 + chol(P1) * [ 1.30562310353041
-         0.983969531303835 ]; 
+    xhat1 = x1 + (chol(P1))'*randn(nx,1);
+    % xhat1 = x1 + chol(P1) * [ 1.30562310353041
+        %  0.983969531303835 ]; 
     for j=1:nmod
       P_Mhist(1,:,:,j) = P1;
       % Initialize the mode probabilities as equally probable

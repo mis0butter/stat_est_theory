@@ -33,6 +33,7 @@ nz = 3;
 nv = 6; 
 
 % load LIDAR data 
+% load problem3data.mat 
 load problem3dataMod.mat 
 N = length(lidar); 
 
@@ -40,11 +41,11 @@ N = length(lidar);
 x_hat_arr = []; 
 % P_cell = ; 
 
-% create plot 
-fname = 'Car Plot'; 
-h = figure('name', fname); 
-    xlim([0 100]); ylim([-50 50]); 
-    plotcar(x_hat, '-', h, 0)
+% % create plot 
+% fname = 'Car Plot'; 
+% h = figure('name', fname); 
+%     xlim([0 100]); ylim([-50 50]); 
+%     plotcar(x_hat, '-', h, 0)
 
 %% UNSCENTED KALMAN FILTER 
 
@@ -117,7 +118,7 @@ x_hat_arr = [x_hat_arr; x_hat'];
 P_arr(:,:,j) = P; 
 
 % update plot 
-plotcar(x_hat, '-', h, lidar(j).t)
+% plotcar(x_hat, '-', h, lidar(j).t)
 
 end 
 
@@ -130,6 +131,15 @@ end
 %       t - vehicle heading (rad.)
 %       l - vehicle length (m)
 %       w - vehicle width (m)
+
+h = figure; 
+xlim([0 100]); ylim([-50 50]); 
+xlabel('x (m)') 
+ylabel('y (m' ) 
+for i = 1:length(x_hat_arr) 
+    hold on; 
+    plotcar(x_hat_arr(i,:)', '-', h, lidar(i).t); 
+end 
 
 load problem3truth.mat
 for i = 1:length(car)
@@ -179,17 +189,53 @@ end
 
 % i. What effects, if any, do the values of a, b, and k have on the final
 % state estimate? 
-%   A: The spread of the sigma points around the mean state value is controlled by two parameters α and κ. A third parameter, β, impacts the weights of the transformed points during state and measurement covariance calculations.
-% α — Determines the spread of the sigma points around the mean state value. It is usually a small positive value. The spread of sigma points is proportional to α. Smaller values correspond to sigma points closer to the mean state.
-% κ — A second scaling parameter that is usually set to 0. Smaller values correspond to sigma points closer to the mean state. The spread is proportional to the square-root of κ.
-% β — Incorporates prior knowledge of the distribution of the state. For Gaussian distributions, β = 2 is optimal.
+%   A: The spread of the sigma points around the mean state value is controlled 
+% by two parameters α and κ. A third parameter, β, impacts the weights of the 
+% transformed points during state and measurement covariance calculations.
+% α — Determines the spread of the sigma points around the mean state value. 
+% It is usually a small positive value. The spread of sigma points is proportional to α. 
+% Smaller values correspond to sigma points closer to the mean state.
+% κ — A second scaling parameter that is usually set to 0. Smaller values 
+% correspond to sigma points closer to the mean state. The spread is proportional 
+% to the square-root of κ.
+% β — Incorporates prior knowledge of the distribution of the state. For 
+% Gaussian distributions, β = 2 is optimal.
 
+disp('Part b questions'); 
+
+fprintf('\n')
+
+disp('Question i: ')
+disp('What effects, if any, do the values of a, b, and k have on the final state estimate? '); 
+
+fprintf('\n')
+
+disp('Answer:') 
+disp('Alpha and kappa control the spread of the sigma points around the mean state value.') 
+disp('The spread of sigma points is proportional to alpha. A larger alpha means a larger spread of sigma points.')
+disp('Kappa is a scaling parameter usually set to 0. A larger kappa also means a larger spread of sigma points.') 
+disp('The square root of kappa is proportional to the spread.') 
+disp('Beta impacts the weights of the transformed points during state and measurement calculations.')
+disp('Beta incorporates a priori knowlege of the state distribution; beta = 2 is optimal for Gaussian distributions.') 
+
+fprintf('\n')
 % ii. What do you notice about the state estimates, in particular length
 % and width, as the target car performs its different maneuvers? 
 %   A: The length and width vary slightly in estimate due to the
 %   orientation of the car relative to the LIDAR sensors. There are times
 %   while the car is turning where the LIDAR is only able to sense
 %   certain parameters past an inflection point of the car's motion. 
+
+disp('Question ii')
+disp('What do you notice about the state estimates, in particular length and width, as the target car performs its different maneuvers? '); 
+
+fprintf('\n')
+
+disp('Answer:')
+disp('The length and width vary in estimate due to the orientation of the car relative to the LIDAR sensors.') 
+disp('The LIDAR is only able to see certain parts of the car past an inflection point of the motion of the car.') 
+
+fprintf('\n')
 
 % iii. Why would it be difficult to implement this as an extended Kalman
 % filter? 
@@ -198,12 +244,33 @@ end
 % discontinuous transformation, and is, most importantly, more accurate 
 % than EKF for highly nonlinear transformations.
 
+disp('Question iii') 
+disp('Why would it be difficult to implement this as an extended Kalman filter? ') 
+
+fprintf('\n')
+
+disp('Answer:') 
+disp('The EKF linearizes a nonlinear function about a single point. ')
+disp('As can be seen from the state time histories plots, the truth states have high nonlinearities.') 
+disp('Computing the Jacobian would be difficult, and linearization would still be less accurate than the unscented transform.') 
+
+fprintf('\n')
+
 % iv. Why did we choose to use the bearing-bearing-range measurement instead
 % of some other measurement vector? 
 %   A: Using only bearing data would make the state weakly observable (weak 
 %   notion of location). Two bearing measurements and distance (range) are 
 %   the minimal set required for determining the length, width, location, 
 %   and orientation of the car. 
+
+disp('Question iv') 
+disp('Why did we choose to use the bearing-bearing-range measurement instead of some other measurement vector? ') 
+
+fprintf('\n')
+disp('Answer:') 
+disp('Two bearing measurements and a range measurement are the minimal set required for determing the state.') 
+disp('At least two bearing measurements are required for determining the length and width of the car.') 
+disp('Using only bearing data would make the state weakly observable with an inaccurate notion of location.') 
 
 %% subfunctions 
 
